@@ -398,13 +398,14 @@ public class LauncherMain {
 				settings.getClientId());
 		Installer installer = new Installer(startupParameters, mirrorStore,
 				directories, modpackInstaller, launcher, settings, iconMapper);
-		
-		//DownloadLikes downloader = new DownloadLikes();
+
+		DownloadLikes downloader = new DownloadLikes(resources);
+
 		
 		final LauncherFrame frame = new LauncherFrame(resources, skinRepo,
 				userModel, settings, iconRepo, logoRepo, backgroundRepo,
 				installer, avatarRepo, platform, directories, packStore,
-				startupParameters, javaVersions, javaVersionFile, buildNumber, null);
+				startupParameters, javaVersions, javaVersionFile, buildNumber, downloader);
 		userModel.addAuthListener(frame);
 
 		ActionListener listener = new ActionListener() {
