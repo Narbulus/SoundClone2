@@ -322,7 +322,7 @@ public class SoundCloneGUI {
 			String curUser = downloader.getCurrentUser();
 			if ( curUser == null || (curUser != null && !downloader.getCurrentUser().equals(select)) ) {
 				lockControls();
-				downloader.updateUser(select.replace(".", "-"));
+				//downloader.updateUser(select.replace(".", "-"));
 				downloadPath.setText(downloader.getDownloadPath());
 			}
 		}
