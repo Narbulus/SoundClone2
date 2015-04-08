@@ -44,7 +44,7 @@ import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.launch.Installer;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
-import net.technicpack.launcher.ui.components.ModpackOptionsDialog;
+import net.technicpack.launcher.songs.SongsInfoPanel;
 import net.technicpack.launcher.ui.components.OptionsDialog;
 import net.technicpack.launcher.ui.controls.HeaderTab;
 import net.technicpack.launcher.ui.controls.UserWidget;
@@ -101,7 +101,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     public static final Color COLOR_FOOTER = new Color(27, 32, 36);
     public static final Color COLOR_SERVER = new Color(91, 192, 222);
     
-    public static final String TAB_SONGS = "dicks";
+    public static final String TAB_SONGS = "songs";
 
     private ResourceLoader resources;
     private final UserModel<MojangUser> userModel;
@@ -119,8 +119,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private final JavaVersionRepository javaVersions;
     private final FileJavaSource fileJavaSource;
     private final IBuildNumber buildNumber;
-
-    private ModpackOptionsDialog modpackOptionsDialog = null;
 
     private HeaderTab songsTab;
 
@@ -360,8 +358,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         infoSwap.add(modpackHost, "modpacks");
         centralPanel.add(infoSwap, BorderLayout.CENTER);
         
-        JPanel songsPanel = new JPanel();
-        infoSwap.add(songsPanel, "songs");
+        JPanel songsPanel = new SongsInfoPanel(resources);
+        infoSwap.add(songsPanel, TAB_SONGS);
 
         footer = new TintablePanel();
         footer.setTintColor(COLOR_CENTRAL_BACK);
@@ -414,6 +412,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         footer.add(buildCtrl);
 
         this.add(footer, BorderLayout.PAGE_END);
+        
+        selectTab(TAB_SONGS);
     }
 
     @Override
