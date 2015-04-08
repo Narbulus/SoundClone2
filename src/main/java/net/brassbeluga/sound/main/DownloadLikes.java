@@ -26,6 +26,7 @@ import net.brassbeluga.sound.gson.TrackInfo;
 import net.brassbeluga.sound.gson.TrackStreams;
 import net.brassbeluga.sound.gson.UserInfo;
 import net.technicpack.launcher.ui.components.songs.SongsInfoPanel;
+import net.technicpack.launcher.ui.components.songs.TracksListPanel;
 import net.technicpack.ui.lang.ResourceLoader;
 
 import com.google.gson.Gson;
@@ -116,7 +117,7 @@ public class DownloadLikes {
 	 * @throws JsonSyntaxException 
 	 * @return Returns a new status for the program
 	 */
-	public void updateUser(final String user, final SongsInfoPanel panel) throws JsonSyntaxException, Exception {
+	public void updateUser(final String user, final SongsInfoPanel panel, final TracksListPanel trackPanel) throws JsonSyntaxException, Exception {
 		for (Configuration c : configs) {
 			if (c.getUsername().equals(user))
 				currentConfig = c;
@@ -165,7 +166,6 @@ public class DownloadLikes {
 		        }
 		        
 		        panel.changeIcon(image);
-		        panel.repaint();
 				
 				Type listType = new TypeToken<ArrayList<TrackInfo>>() {
 				}.getType();
@@ -193,9 +193,9 @@ public class DownloadLikes {
 				for (TrackInfo t : likes) {
 					int seconds = t.getDuration() / 1000;
 					int minutes = seconds / 60;
-					Object[] row = new Object[] { t.getTitle(), minutes + ":" + seconds % 60, t.getDownload() };
-					
+					//Object[] row = new Object[] { t.getTitle(), minutes + ":" + seconds % 60, t.getDownload() };
 				}
+				trackPanel.updateTracks(likes);
 				threadRunning = false;
 			}
 		

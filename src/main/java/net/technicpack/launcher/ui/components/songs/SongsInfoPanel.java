@@ -2,22 +2,22 @@ package net.technicpack.launcher.ui.components.songs;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.IOException;
+import java.net.URL;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+import javax.swing.SwingWorker;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -25,11 +25,10 @@ import javax.swing.text.DocumentFilter;
 
 import com.google.gson.JsonSyntaxException;
 
-import net.brassbeluga.sound.main.DownloadLikes;
+import net.brassbeluga.sound.gson.TrackInfo;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.controls.WatermarkTextField;
-import net.technicpack.ui.controls.borders.RoundBorder;
 import net.technicpack.ui.lang.ResourceLoader;
 
 public class SongsInfoPanel extends TintablePanel {
@@ -39,17 +38,19 @@ public class SongsInfoPanel extends TintablePanel {
 	private JPanel trackInfo;
 	private JTextField usernameField;
 	private JButton userIcon;
+	private JLabel trackName;
+	private JButton trackArt;
 
-	private DownloadLikes downloader;
+	private LauncherFrame parent;
 
 	public static final int SONGS_INFO_WIDTH = 400;
-	public static final int SONGS_INFO_HEIGHT = 180;
+	public static final int SONGS_INFO_HEIGHT = 140;
 	private static final int MAX_SEARCH_STRING = 90;
 
-	public SongsInfoPanel(ResourceLoader resources, DownloadLikes downloader) {
+	public SongsInfoPanel(ResourceLoader resources, LauncherFrame parent) {
 
 		this.resources = resources;
-		this.downloader = downloader;
+		this.parent = parent;
 
 		initComponents();
 	}
@@ -72,9 +73,12 @@ public class SongsInfoPanel extends TintablePanel {
 		userInfo.setBackground(LauncherFrame.COLOR_BLUE_DARKER);
 
 		usernameField = new WatermarkTextField("username",
-				LauncherFrame.COLOR_BLUE_DARKER);
-		usernameField.setBorder(null);
-		usernameField.setPreferredSize(new Dimension(150, 30));
+				LauncherFrame.COLOR_WHITE_TEXT);
+		usernameField.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
+		usernameField.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 16));
+		usernameField.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+		usernameField.setBackground(LauncherFrame.COLOR_BUTTON_BLUE);
+		usernameField.setPreferredSize(new Dimension(200, 40));
 		((AbstractDocument) usernameField.getDocument())
 				.setDocumentFilter(new DocumentFilter() {
 					@Override
@@ -115,10 +119,11 @@ public class SongsInfoPanel extends TintablePanel {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER)
 					detectNameChanges();
 			}
+
 			@Override
 			public void keyReleased(KeyEvent e) {
 			}
-			
+
 		});
 
 		ImageIcon userDefaultImg = resources.getIcon("default_user.png");
@@ -127,7 +132,7 @@ public class SongsInfoPanel extends TintablePanel {
 		userIcon.setFocusPainted(false);
 
 		JPanel usernameContainer = new JPanel();
-		usernameContainer.setBorder(BorderFactory.createEmptyBorder(60, 0, 50,
+		usernameContainer.setBorder(BorderFactory.createEmptyBorder(40, 0, 50,
 				0));
 		usernameContainer.add(usernameField);
 		usernameContainer.setOpaque(false);
@@ -135,31 +140,56 @@ public class SongsInfoPanel extends TintablePanel {
 		userInfo.add(usernameContainer);
 
 		trackInfo.setLayout(new BoxLayout(trackInfo, BoxLayout.Y_AXIS));
-		trackInfo.add(Box.createVerticalStrut(SONGS_INFO_HEIGHT));
+		//trackInfo.add(Box.createVerticalStrut(SONGS_INFO_HEIGHT));
+		trackInfo.setBackground(LauncherFrame.COLOR_BLUE);
+		trackInfo.setBorder(BorderFactory.createEmptyBorder(15, 15, 30, 15));
+		trackName = new JLabel("Name of track");
+		trackName.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+		trackName.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 18));
+		trackName.setAlignmentX(CENTER_ALIGNMENT);
+		trackInfo.add(trackName);
+		trackInfo.add(Box.createVerticalGlue());
+		trackArt = new JButton(resources.getIcon("default_track.png"));
+		trackArt.setAlignmentX(CENTER_ALIGNMENT);
+		trackArt.setContentAreaFilled(false);
+		trackArt.setFocusPainted(false);
+		trackInfo.add(trackArt);
+	}
+
+	public void updateTrack(final TrackInfo track) {
+		trackName.setText(track.getTitle());
+		SwingWorker<String, String> worker = new SwingWorker<String, String>() {
+
+			@Override
+			protected String doInBackground() {
+				Image image = null;
+		        try {
+		            URL url = new URL(track.getArtworkURL().replace("-large", "-t300x300"));
+		            image = ImageIO.read(url);
+		        } catch (IOException e) {
+		        	e.printStackTrace();
+		        }
+		        trackArt.setIcon(new ImageIcon(image));
+		        return "";
+			}
+			
+			@Override
+			protected void done() {
+				revalidate();
+				repaint();
+			}
+		};
+		worker.execute();
 	}
 
 	public void changeIcon(final Image icon) {
-				ImageIcon imgIcon = new ImageIcon(icon);
-				userIcon.setIcon(imgIcon);
-				revalidate();
-				repaint();
+		ImageIcon imgIcon = new ImageIcon(icon);
+		userIcon.setIcon(imgIcon);
+		revalidate();
+		repaint();
 	}
 
 	protected void detectNameChanges() {
-		if (downloader != null && !downloader.isThreadRunning()) {
-			String select = usernameField.getText();
-			String curUser = downloader.getCurrentUser();
-			if (curUser == null
-					|| (curUser != null && !downloader.getCurrentUser().equals(
-							select))) {
-				try {
-					downloader.updateUser(select.replace(".", "-"), this);
-				} catch (JsonSyntaxException e) {
-					e.printStackTrace();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
+		parent.onUserChanged(usernameField.getText());
 	}
 }

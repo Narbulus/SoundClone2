@@ -39,6 +39,9 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
+import com.google.gson.JsonSyntaxException;
+
+import net.brassbeluga.sound.gson.TrackInfo;
 import net.brassbeluga.sound.main.DownloadLikes;
 import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.launcher.launch.Installer;
@@ -140,6 +143,9 @@ public class LauncherFrame extends DraggableFrame implements
 	private RoundedButton playButton;
 	private TintablePanel centralPanel;
 	private TintablePanel footer;
+	
+	private TracksListPanel tracksPanel;
+	private SongsInfoPanel songsInfoPanel;
 	
 	private DownloadLikes downloader;
 
@@ -270,7 +276,7 @@ public class LauncherFrame extends DraggableFrame implements
 		header.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 10));
 		this.add(header, BorderLayout.PAGE_START);
 
-		ImageIcon headerIcon = resources.getIcon("platform_icon_title.png");
+		ImageIcon headerIcon = resources.getIcon("soundcloud_logo.png");
 		JButton headerLabel = new JButton(headerIcon);
 		headerLabel.setBorder(BorderFactory.createEmptyBorder(5, 8, 5, 0));
 		headerLabel.setContentAreaFilled(false);
@@ -389,8 +395,8 @@ public class LauncherFrame extends DraggableFrame implements
 		centralPanel.add(infoSwap, BorderLayout.CENTER);
 
 		JPanel songsHost = new JPanel();
-		JPanel tracksPanel = new TracksListPanel(resources);
-		JPanel songsInfoPanel = new SongsInfoPanel(resources, downloader);
+		tracksPanel = new TracksListPanel(resources, this);
+		songsInfoPanel = new SongsInfoPanel(resources, this);
 		infoSwap.add(songsHost, TAB_SONGS);
 
 		songsHost.setLayout(new BorderLayout());
@@ -457,6 +463,28 @@ public class LauncherFrame extends DraggableFrame implements
 		this.add(footer, BorderLayout.PAGE_END);
 
 		selectTab(TAB_SONGS);
+	}
+	
+	public void onUserChanged(String user) {
+		if (downloader != null && !downloader.isThreadRunning()) {
+			String select = user;
+			String curUser = downloader.getCurrentUser();
+			if (curUser == null
+					|| (curUser != null && !downloader.getCurrentUser().equals(
+							select))) {
+				try {
+					downloader.updateUser(select.replace(".", "-"), songsInfoPanel, tracksPanel);
+				} catch (JsonSyntaxException e) {
+					e.printStackTrace();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	public void selectTrack(TrackInfo track) {
+		songsInfoPanel.updateTrack(track);
 	}
 
 	@Override
