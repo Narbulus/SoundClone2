@@ -370,7 +370,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         songsHost.add(tracksPanel, BorderLayout.CENTER);
         songsHost.add(songsInfoPanel, BorderLayout.WEST);
         
-        
 
         footer = new TintablePanel();
         footer.setTintColor(COLOR_CENTRAL_BACK);
@@ -441,7 +440,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         //Clear references to existing controls
 
         initComponents();
-        //userChanged(userModel.getCurrentUser());
 
         if (currentTabName != null)
             selectTab(currentTabName);
