@@ -355,8 +355,13 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         infoSwap.add(modpackHost, "modpacks");
         centralPanel.add(infoSwap, BorderLayout.CENTER);
         
+        JPanel songsHost = new JPanel();
+        infoSwap.add(songsHost, TAB_SONGS);
+        
         JPanel songsPanel = new SongsInfoPanel(resources);
-        infoSwap.add(songsPanel, TAB_SONGS);
+        songsHost.setLayout(new BorderLayout());
+        songsHost.add(songsPanel, BorderLayout.CENTER);
+        
 
         footer = new TintablePanel();
         footer.setTintColor(COLOR_CENTRAL_BACK);
