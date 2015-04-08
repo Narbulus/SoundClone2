@@ -430,7 +430,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         //Clear references to existing controls
 
         initComponents();
-        userChanged(userModel.getCurrentUser());
 
         if (currentTabName != null)
             selectTab(currentTabName);
