@@ -88,8 +88,10 @@ public class LauncherFrame extends DraggableFrame implements
 	public static final Color COLOR_CHARCOAL = new Color(31, 31, 31);
 	public static final Color COLOR_BANNER = new Color(0, 0, 0, 160);
 	public static final Color COLOR_PANEL = new Color(36, 38, 39);
-	public static final Color COLOR_SCROLL_TRACK = new Color(18, 18, 18);
-	public static final Color COLOR_SCROLL_THUMB = new Color(53, 53, 53);
+	
+	public static final Color COLOR_SCROLL_TRACK = new Color(16, 108, 163);
+	public static final Color COLOR_SCROLL_THUMB = new Color(51, 204, 255);
+	
 	public static final Color COLOR_SELECTOR_BACK = new Color(22, 26, 29);
 	public static final Color COLOR_SELECTOR_OPTION = new Color(38, 46, 53);
 	public static final Color COLOR_FEED_BACK = new Color(22, 26, 29, 200);
@@ -105,7 +107,7 @@ public class LauncherFrame extends DraggableFrame implements
 
 	// ///////////////////////
 	public static final Color COLOR_SONGS_INFO = new Color(170, 0, 0);
-	public static final Color COLOR_TRACKS_LIST = new Color(255, 255, 255);
+	public static final Color COLOR_TRACKS_LIST = new Color(0, 0, 102);
 	// //////////////////////
 
 	public static final String TAB_SONGS = "songs";
