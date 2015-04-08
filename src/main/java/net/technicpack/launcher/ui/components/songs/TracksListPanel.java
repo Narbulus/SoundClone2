@@ -57,15 +57,15 @@ public class TracksListPanel extends TintablePanel {
         
         int r = 12;
         int g =	94;
-        int b = 100;
+        int b = 143;
         for (int i = 2; i < 50; i++) {
         	JLabel label = new JLabel();	
         	
-        	b += 1;
         	label.setText("Track " + (i - 1));
-        	label.setBorder(new LineBorder(new Color(0,0,0)));
+        	label.setBorder(new LineBorder(new Color(0,0,0, 50)));
         	label.setOpaque(true);
         	label.setBackground(new Color(r, g, b));
+        	label.setPreferredSize(new Dimension(label.getPreferredSize().width, 40));
             trackList.add(label, new GridBagConstraints(0, i, 1, 1, 1.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0,0));
             
         }

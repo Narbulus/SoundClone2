@@ -178,7 +178,7 @@ public class LauncherFrame extends DraggableFrame implements
 		this.javaVersions = javaVersions;
 		this.buildNumber = buildNumber;
 		
-		//this.downloader = downloader;
+		this.downloader = downloader;
 
 		// Handles rebuilding the frame, so use it to build the frame in the
 		// first place
