@@ -32,6 +32,7 @@ public class SongsInfoPanel extends TintablePanel {
 	private JPanel userInfo;
 	private JPanel trackInfo;
 	private JTextField usernameField;
+	private JButton userIcon;
 	
 	private DownloadLikes downloader;
 
@@ -116,7 +117,7 @@ public class SongsInfoPanel extends TintablePanel {
 				});
 
 		ImageIcon userDefaultImg = resources.getIcon("default_user.png");
-		JButton userIcon = new JButton(userDefaultImg);
+		userIcon = new JButton(userDefaultImg);
 		userIcon.setContentAreaFilled(false);
 		userIcon.setFocusPainted(false);
 
@@ -133,12 +134,18 @@ public class SongsInfoPanel extends TintablePanel {
 
 	}
 
-	protected void detectNameChanges() throws JsonSyntaxException, Exception {
+	protected void detectNameChanges() {
 		if (downloader != null && !downloader.isThreadRunning()) {
 			String select = usernameField.getText();
 			String curUser = downloader.getCurrentUser();
 			if ( curUser == null || (curUser != null && !downloader.getCurrentUser().equals(select)) ) {
-				downloader.updateUser(select.replace(".", "-"));
+				try {
+					downloader.updateUser(select.replace(".", "-"), this);
+				} catch (JsonSyntaxException e) {
+					e.printStackTrace();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}

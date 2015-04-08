@@ -1,5 +1,6 @@
 package net.brassbeluga.sound.main;
 
+import java.awt.Image;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -8,12 +9,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 
+import javax.imageio.ImageIO;
 import javax.swing.SwingWorker;
 import javax.swing.text.BadLocationException;
 
@@ -22,6 +25,7 @@ import net.brassbeluga.sound.gson.RedirectResponse;
 import net.brassbeluga.sound.gson.TrackInfo;
 import net.brassbeluga.sound.gson.TrackStreams;
 import net.brassbeluga.sound.gson.UserInfo;
+import net.technicpack.launcher.ui.components.songs.SongsInfoPanel;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -111,7 +115,7 @@ public class DownloadLikes {
 	 * @throws JsonSyntaxException 
 	 * @return Returns a new status for the program
 	 */
-	public void updateUser(final String user) throws JsonSyntaxException, Exception {
+	public void updateUser(final String user, SongsInfoPanel panel) throws JsonSyntaxException, Exception {
 		for (Configuration c : configs) {
 			if (c.getUsername().equals(user))
 				currentConfig = c;
@@ -150,6 +154,14 @@ public class DownloadLikes {
 				RedirectResponse response = new Gson().fromJson(redirect, RedirectResponse.class);
 				UserInfo info = new Gson().fromJson(load.getResponse(response.getLocation()), UserInfo.class);
 				
+				Image image = null;
+		        try {
+		            URL url = new URL(info.getAvatarURL());
+		            image = ImageIO.read(url);
+		        } catch (IOException e) {
+		        	e.printStackTrace();
+		        }
+				
 				Type listType = new TypeToken<ArrayList<TrackInfo>>() {
 				}.getType();
 				
@@ -173,14 +185,11 @@ public class DownloadLikes {
 			
 			@Override
 			protected void done() {
-				//gui.updateStatus(get());
-				//gui.unlockControls();
-				//gui.resetTable();
 				for (TrackInfo t : likes) {
 					int seconds = t.getDuration() / 1000;
 					int minutes = seconds / 60;
 					Object[] row = new Object[] { t.getTitle(), minutes + ":" + seconds % 60, t.getDownload() };
-					//gui.addTableRow(row);
+					
 				}
 				threadRunning = false;
 			}
