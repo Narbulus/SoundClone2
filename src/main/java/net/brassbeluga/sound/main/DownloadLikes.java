@@ -26,6 +26,7 @@ import net.brassbeluga.sound.gson.TrackInfo;
 import net.brassbeluga.sound.gson.TrackStreams;
 import net.brassbeluga.sound.gson.UserInfo;
 import net.technicpack.launcher.ui.components.songs.SongsInfoPanel;
+import net.technicpack.ui.lang.ResourceLoader;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -46,7 +47,7 @@ public class DownloadLikes {
 	private String tempDir;
 	private String defaultDownload;
 	
-	public DownloadLikes() throws Exception {
+	public DownloadLikes(ResourceLoader resources) throws Exception {
 		// Create download locations if nonexistant
 		String workingDirectory;
 		String OS = (System.getProperty("os.name")).toUpperCase();
@@ -66,7 +67,7 @@ public class DownloadLikes {
 		defaultDownload = System.getProperty("user.home");
 		
 		threadRunning = false;
-		BufferedReader reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/resources/config")));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(resources.getResourceAsStream("/config")));
 		File oldConfig = new File(tempDir + "/config");
 		Scanner config;
 		if (oldConfig.exists())
@@ -89,7 +90,7 @@ public class DownloadLikes {
 		config.close();
 
 		// Load the template id3 tag from resource file
-		InputStream is = getClass().getResourceAsStream("/resources/tagdata");
+		InputStream is = resources.getResourceAsStream("/tagdata");
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
 		int nRead;
@@ -115,7 +116,7 @@ public class DownloadLikes {
 	 * @throws JsonSyntaxException 
 	 * @return Returns a new status for the program
 	 */
-	public void updateUser(final String user, SongsInfoPanel panel) throws JsonSyntaxException, Exception {
+	public void updateUser(final String user, final SongsInfoPanel panel) throws JsonSyntaxException, Exception {
 		for (Configuration c : configs) {
 			if (c.getUsername().equals(user))
 				currentConfig = c;
@@ -154,6 +155,7 @@ public class DownloadLikes {
 				RedirectResponse response = new Gson().fromJson(redirect, RedirectResponse.class);
 				UserInfo info = new Gson().fromJson(load.getResponse(response.getLocation()), UserInfo.class);
 				
+				System.out.println(info.getAvatarURL());
 				Image image = null;
 		        try {
 		            URL url = new URL(info.getAvatarURL());
@@ -161,6 +163,9 @@ public class DownloadLikes {
 		        } catch (IOException e) {
 		        	e.printStackTrace();
 		        }
+		        
+		        panel.changeIcon(image);
+		        panel.repaint();
 				
 				Type listType = new TypeToken<ArrayList<TrackInfo>>() {
 				}.getType();

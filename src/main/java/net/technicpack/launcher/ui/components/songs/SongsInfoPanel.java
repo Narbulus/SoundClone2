@@ -2,6 +2,12 @@ package net.technicpack.launcher.ui.components.songs;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -33,7 +39,7 @@ public class SongsInfoPanel extends TintablePanel {
 	private JPanel trackInfo;
 	private JTextField usernameField;
 	private JButton userIcon;
-	
+
 	private DownloadLikes downloader;
 
 	public static final int SONGS_INFO_WIDTH = 400;
@@ -98,23 +104,22 @@ public class SongsInfoPanel extends TintablePanel {
 						fb.replace(offset, length, text, attrs);
 					}
 				});
-		usernameField.getDocument().addDocumentListener(
-				new DocumentListener() {
-					@Override
-					public void insertUpdate(DocumentEvent e) {
-						detectNameChanges();
-					}
+		usernameField.addKeyListener(new KeyListener() {
 
-					@Override
-					public void removeUpdate(DocumentEvent e) {
-						detectNameChanges();
-					}
+			@Override
+			public void keyTyped(KeyEvent e) {
+			}
 
-					@Override
-					public void changedUpdate(DocumentEvent e) {
-						detectNameChanges();
-					}
-				});
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER)
+					detectNameChanges();
+			}
+			@Override
+			public void keyReleased(KeyEvent e) {
+			}
+			
+		});
 
 		ImageIcon userDefaultImg = resources.getIcon("default_user.png");
 		userIcon = new JButton(userDefaultImg);
@@ -131,14 +136,22 @@ public class SongsInfoPanel extends TintablePanel {
 
 		trackInfo.setLayout(new BoxLayout(trackInfo, BoxLayout.Y_AXIS));
 		trackInfo.add(Box.createVerticalStrut(SONGS_INFO_HEIGHT));
+	}
 
+	public void changeIcon(final Image icon) {
+				ImageIcon imgIcon = new ImageIcon(icon);
+				userIcon.setIcon(imgIcon);
+				revalidate();
+				repaint();
 	}
 
 	protected void detectNameChanges() {
 		if (downloader != null && !downloader.isThreadRunning()) {
 			String select = usernameField.getText();
 			String curUser = downloader.getCurrentUser();
-			if ( curUser == null || (curUser != null && !downloader.getCurrentUser().equals(select)) ) {
+			if (curUser == null
+					|| (curUser != null && !downloader.getCurrentUser().equals(
+							select))) {
 				try {
 					downloader.updateUser(select.replace(".", "-"), this);
 				} catch (JsonSyntaxException e) {
