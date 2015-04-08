@@ -39,6 +39,7 @@ import java.util.logging.Logger;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 
+import net.brassbeluga.sound.main.DownloadLikes;
 import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.autoupdate.Relauncher;
 import net.technicpack.autoupdate.http.HttpUpdateStream;
@@ -109,238 +110,309 @@ import com.beust.jcommander.JCommander;
 
 public class LauncherMain {
 
-    public static ConsoleFrame consoleFrame;
+	public static ConsoleFrame consoleFrame;
 
-    public static Locale[] supportedLanguages = new Locale[] {
-            Locale.ENGLISH,
-            new Locale("pt","BR"),
-            new Locale("pt","PT"),
-            new Locale("cs"),
-            Locale.GERMAN,
-            Locale.FRENCH,
-            Locale.ITALIAN,
-            new Locale("hu"),
-            new Locale("pl"),
-            Locale.CHINA,
-            Locale.TAIWAN
-    };
+	public static Locale[] supportedLanguages = new Locale[] { Locale.ENGLISH,
+			new Locale("pt", "BR"), new Locale("pt", "PT"), new Locale("cs"),
+			Locale.GERMAN, Locale.FRENCH, Locale.ITALIAN, new Locale("hu"),
+			new Locale("pl"), Locale.CHINA, Locale.TAIWAN };
 
-    public static void main(String[] args) {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception ex) {
-            Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
-        }
+	public static void main(String[] args) throws Exception {
 
-        ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception ex) {
+			Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
+		}
 
-        StartupParameters params = new StartupParameters(args);
-        try {
-            new JCommander(params, args);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+		ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
 
-        TechnicSettings settings = null;
+		StartupParameters params = new StartupParameters(args);
+		try {
+			new JCommander(params, args);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 
-        try {
-            settings = SettingsFactory.buildSettingsObject(Relauncher.getRunningPath(LauncherMain.class), params.isMover());
-        } catch (UnsupportedEncodingException ex) {
-            ex.printStackTrace();
-        }
+		TechnicSettings settings = null;
 
-        if (settings == null) {
-            ResourceLoader installerResources = new ResourceLoader(null, "net","technicpack","launcher","resources");
-            installerResources.setSupportedLanguages(supportedLanguages);
-            installerResources.setLocale(ResourceLoader.DEFAULT_LOCALE);
-            InstallerFrame dialog = new InstallerFrame(installerResources, params);
-            dialog.setVisible(true);
-            return;
-        }
+		try {
+			settings = SettingsFactory.buildSettingsObject(
+					Relauncher.getRunningPath(LauncherMain.class),
+					params.isMover());
+		} catch (UnsupportedEncodingException ex) {
+			ex.printStackTrace();
+		}
 
-        LauncherDirectories directories = new TechnicLauncherDirectories(settings.getTechnicRoot());
-        ResourceLoader resources = new ResourceLoader(directories, "net","technicpack","launcher","resources");
-        resources.setSupportedLanguages(supportedLanguages);
-        resources.setLocale(settings.getLanguageCode());
+		if (settings == null) {
+			ResourceLoader installerResources = new ResourceLoader(null, "net",
+					"technicpack", "launcher", "resources");
+			installerResources.setSupportedLanguages(supportedLanguages);
+			installerResources.setLocale(ResourceLoader.DEFAULT_LOCALE);
+			InstallerFrame dialog = new InstallerFrame(installerResources,
+					params);
+			dialog.setVisible(true);
+			return;
+		}
 
-        IBuildNumber buildNumber = null;
+		LauncherDirectories directories = new TechnicLauncherDirectories(
+				settings.getTechnicRoot());
+		ResourceLoader resources = new ResourceLoader(directories, "net",
+				"technicpack", "launcher", "resources");
+		resources.setSupportedLanguages(supportedLanguages);
+		resources.setLocale(settings.getLanguageCode());
 
-        if (params.getBuildNumber() != null && !params.getBuildNumber().isEmpty())
-            buildNumber = new CommandLineBuildNumber(params);
-        else
-            buildNumber = new VersionFileBuildNumber(resources);
+		IBuildNumber buildNumber = null;
 
-        setupLogging(directories, resources, buildNumber);
+		if (params.getBuildNumber() != null
+				&& !params.getBuildNumber().isEmpty())
+			buildNumber = new CommandLineBuildNumber(params);
+		else
+			buildNumber = new VersionFileBuildNumber(resources);
 
-        String launcherBuild = buildNumber.getBuildNumber();
-        int build = -1;
+		setupLogging(directories, resources, buildNumber);
 
-        try {
-            build = Integer.parseInt((new VersionFileBuildNumber(resources)).getBuildNumber());
-        } catch (NumberFormatException ex) {
-            //This is probably a debug build or something, build number is invalid
-        }
+		String launcherBuild = buildNumber.getBuildNumber();
+		int build = -1;
 
-        Relauncher launcher = new TechnicRelauncher(new HttpUpdateStream("http://api.technicpack.net/launcher/"), settings.getBuildStream()+"4", build, directories, resources, params);
+		try {
+			build = Integer.parseInt((new VersionFileBuildNumber(resources))
+					.getBuildNumber());
+		} catch (NumberFormatException ex) {
+			// This is probably a debug build or something, build number is
+			// invalid
+		}
 
-        try {
-            if (launcher.runAutoUpdater())
-                startLauncher(settings, params, directories, resources, buildNumber);
-        } catch (InterruptedException e) {
-            //Canceled by user
-        } catch (DownloadException e) {
-            //JOptionPane.showMessageDialog(null, resources.getString("launcher.updateerror.download", pack.getDisplayName(), e.getMessage()), resources.getString("launcher.installerror.title"), JOptionPane.WARNING_MESSAGE);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+		Relauncher launcher = new TechnicRelauncher(new HttpUpdateStream(
+				"http://api.technicpack.net/launcher/"),
+				settings.getBuildStream() + "4", build, directories, resources,
+				params);
 
-    private static void setupLogging(LauncherDirectories directories, ResourceLoader resources, IBuildNumber buildNumber) {
-        System.out.println("Setting up logging");
-        final Logger logger = Utils.getLogger();
-        File logDirectory = new File(directories.getLauncherDirectory(), "logs");
-        if (!logDirectory.exists()) {
-            logDirectory.mkdir();
-        }
-        File logs = new File(logDirectory, "techniclauncher_%D.log");
-        RotatingFileHandler fileHandler = new RotatingFileHandler(logs.getPath());
+		try {
+			if (launcher.runAutoUpdater())
+				startLauncher(settings, params, directories, resources,
+						buildNumber);
+		} catch (InterruptedException e) {
+			// Canceled by user
+		} catch (DownloadException e) {
+			// JOptionPane.showMessageDialog(null,
+			// resources.getString("launcher.updateerror.download",
+			// pack.getDisplayName(), e.getMessage()),
+			// resources.getString("launcher.installerror.title"),
+			// JOptionPane.WARNING_MESSAGE);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
-        fileHandler.setFormatter(new BuildLogFormatter(buildNumber.getBuildNumber()));
+	private static void setupLogging(LauncherDirectories directories,
+			ResourceLoader resources, IBuildNumber buildNumber) {
+		System.out.println("Setting up logging");
+		final Logger logger = Utils.getLogger();
+		File logDirectory = new File(directories.getLauncherDirectory(), "logs");
+		if (!logDirectory.exists()) {
+			logDirectory.mkdir();
+		}
+		File logs = new File(logDirectory, "techniclauncher_%D.log");
+		RotatingFileHandler fileHandler = new RotatingFileHandler(
+				logs.getPath());
 
-        for (Handler h : logger.getHandlers()) {
-            logger.removeHandler(h);
-        }
-        logger.addHandler(fileHandler);
-        logger.setUseParentHandlers(false);
+		fileHandler.setFormatter(new BuildLogFormatter(buildNumber
+				.getBuildNumber()));
 
-        LauncherMain.consoleFrame = new ConsoleFrame(2500, resources.getImage("icon.png"));
-        Console console = new Console(LauncherMain.consoleFrame, buildNumber.getBuildNumber());
+		for (Handler h : logger.getHandlers()) {
+			logger.removeHandler(h);
+		}
+		logger.addHandler(fileHandler);
+		logger.setUseParentHandlers(false);
 
-        logger.addHandler(new ConsoleHandler(console));
+		LauncherMain.consoleFrame = new ConsoleFrame(2500,
+				resources.getImage("icon.png"));
+		Console console = new Console(LauncherMain.consoleFrame,
+				buildNumber.getBuildNumber());
 
-        System.setOut(new PrintStream(new LoggerOutputStream(console, Level.INFO, logger), true));
-        System.setErr(new PrintStream(new LoggerOutputStream(console, Level.SEVERE, logger), true));
+		logger.addHandler(new ConsoleHandler(console));
 
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread t, Throwable e) {
-                e.printStackTrace();
-                logger.log(Level.SEVERE, "Unhandled Exception in " + t, e);
+		System.setOut(new PrintStream(new LoggerOutputStream(console,
+				Level.INFO, logger), true));
+		System.setErr(new PrintStream(new LoggerOutputStream(console,
+				Level.SEVERE, logger), true));
 
-//                if (errorDialog == null) {
-//                    LauncherFrame frame = null;
-//
-//                    try {
-//                        frame = Launcher.getFrame();
-//                    } catch (Exception ex) {
-//                        //This can happen if we have a very early crash- before Launcher initializes
-//                    }
-//
-//                    errorDialog = new ErrorDialog(frame, e);
-//                    errorDialog.setVisible(true);
-//                }
-            }
-        });
-    }
+		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+			@Override
+			public void uncaughtException(Thread t, Throwable e) {
+				e.printStackTrace();
+				logger.log(Level.SEVERE, "Unhandled Exception in " + t, e);
 
-    private static void startLauncher(final TechnicSettings settings, StartupParameters startupParameters, LauncherDirectories directories, ResourceLoader resources, IBuildNumber buildNumber) {
-        UIManager.put( "ComboBox.disabledBackground", LauncherFrame.COLOR_FORMELEMENT_INTERNAL );
-        UIManager.put( "ComboBox.disabledForeground", LauncherFrame.COLOR_GREY_TEXT );
-        System.setProperty("xr.load.xml-reader",  "org.ccil.cowan.tagsoup.Parser");
+				// if (errorDialog == null) {
+				// LauncherFrame frame = null;
+				//
+				// try {
+				// frame = Launcher.getFrame();
+				// } catch (Exception ex) {
+				// //This can happen if we have a very early crash- before
+				// Launcher initializes
+				// }
+				//
+				// errorDialog = new ErrorDialog(frame, e);
+				// errorDialog.setVisible(true);
+				// }
+			}
+		});
+	}
 
-        Utils.getLogger().info("OS: "+System.getProperty("os.name").toLowerCase(Locale.ENGLISH));
-        Utils.getLogger().info("Identified as "+ OperatingSystem.getOperatingSystem().getName());
+	private static void startLauncher(final TechnicSettings settings,
+			StartupParameters startupParameters,
+			LauncherDirectories directories, ResourceLoader resources,
+			IBuildNumber buildNumber) throws Exception {
+		UIManager.put("ComboBox.disabledBackground",
+				LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
+		UIManager.put("ComboBox.disabledForeground",
+				LauncherFrame.COLOR_GREY_TEXT);
+		System.setProperty("xr.load.xml-reader",
+				"org.ccil.cowan.tagsoup.Parser");
 
-        final SplashScreen splash = new SplashScreen(resources.getImage("launch_splash.png"), 0);
-        Color bg = LauncherFrame.COLOR_FORMELEMENT_INTERNAL;
-        splash.getContentPane().setBackground(new Color (bg.getRed(),bg.getGreen(),bg.getBlue(),255));
-        splash.pack();
-        splash.setLocationRelativeTo(null);
-        splash.setVisible(true);
+		Utils.getLogger().info(
+				"OS: "
+						+ System.getProperty("os.name").toLowerCase(
+								Locale.ENGLISH));
+		Utils.getLogger().info(
+				"Identified as "
+						+ OperatingSystem.getOperatingSystem().getName());
 
-        boolean loadedAether = false;
+		final SplashScreen splash = new SplashScreen(
+				resources.getImage("launch_splash.png"), 0);
+		Color bg = LauncherFrame.COLOR_FORMELEMENT_INTERNAL;
+		splash.getContentPane().setBackground(
+				new Color(bg.getRed(), bg.getGreen(), bg.getBlue(), 255));
+		splash.pack();
+		splash.setLocationRelativeTo(null);
+		splash.setVisible(true);
 
-        try {
-            if (Class.forName("org.apache.maven.repository.internal.MavenRepositorySystemUtils", false, ClassLoader.getSystemClassLoader()) != null) {
-                loadedAether = true;
-            }
-        } catch (ClassNotFoundException ex) {
-            //Aether is not loaded
-        }
+		boolean loadedAether = false;
 
-        if (!loadedAether) {
-            File launcherAssets = new File(directories.getAssetsDirectory(), "launcher");
+		try {
+			if (Class
+					.forName(
+							"org.apache.maven.repository.internal.MavenRepositorySystemUtils",
+							false, ClassLoader.getSystemClassLoader()) != null) {
+				loadedAether = true;
+			}
+		} catch (ClassNotFoundException ex) {
+			// Aether is not loaded
+		}
 
-            File aether = new File(launcherAssets, "aether-dep.jar");
+		if (!loadedAether) {
+			File launcherAssets = new File(directories.getAssetsDirectory(),
+					"launcher");
 
-            try {
-                Method m = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-                m.setAccessible(true);
-                m.invoke(ClassLoader.getSystemClassLoader(), aether.toURI().toURL());
-            } catch (NoSuchMethodException ex) {
-                ex.printStackTrace();
-            } catch (InvocationTargetException ex) {
-                ex.printStackTrace();
-            } catch (IllegalAccessException ex) {
-                ex.printStackTrace();
-            } catch (MalformedURLException ex) {
-                ex.printStackTrace();
-            }
-        }
+			File aether = new File(launcherAssets, "aether-dep.jar");
 
-        JavaVersionRepository javaVersions = new JavaVersionRepository();
-        (new InstalledJavaSource()).enumerateVersions(javaVersions);
-        FileJavaSource javaVersionFile = FileJavaSource.load(new File(settings.getTechnicRoot(), "javaVersions.json"));
-        javaVersionFile.enumerateVersions(javaVersions);
-        javaVersions.selectVersion(settings.getJavaVersion(), settings.getJavaBitness());
+			try {
+				Method m = URLClassLoader.class.getDeclaredMethod("addURL",
+						URL.class);
+				m.setAccessible(true);
+				m.invoke(ClassLoader.getSystemClassLoader(), aether.toURI()
+						.toURL());
+			} catch (NoSuchMethodException ex) {
+				ex.printStackTrace();
+			} catch (InvocationTargetException ex) {
+				ex.printStackTrace();
+			} catch (IllegalAccessException ex) {
+				ex.printStackTrace();
+			} catch (MalformedURLException ex) {
+				ex.printStackTrace();
+			}
+		}
 
-        IUserStore<MojangUser> users = TechnicUserStore.load(new File(directories.getLauncherDirectory(),"users.json"));
-        UserModel userModel = new UserModel(users, new AuthenticationService());
+		JavaVersionRepository javaVersions = new JavaVersionRepository();
+		(new InstalledJavaSource()).enumerateVersions(javaVersions);
+		FileJavaSource javaVersionFile = FileJavaSource.load(new File(settings
+				.getTechnicRoot(), "javaVersions.json"));
+		javaVersionFile.enumerateVersions(javaVersions);
+		javaVersions.selectVersion(settings.getJavaVersion(),
+				settings.getJavaBitness());
 
-        MirrorStore mirrorStore = new MirrorStore(userModel);
-        mirrorStore.addSecureMirror("mirror.technicpack.net", new JsonWebSecureMirror("http://mirror.technicpack.net/", "mirror.technicpack.net"));
+		IUserStore<MojangUser> users = TechnicUserStore.load(new File(
+				directories.getLauncherDirectory(), "users.json"));
+		UserModel userModel = new UserModel(users, new AuthenticationService());
 
-        IModpackResourceType iconType = new IconResourceType();
-        IModpackResourceType logoType = new LogoResourceType();
-        IModpackResourceType backgroundType = new BackgroundResourceType();
+		MirrorStore mirrorStore = new MirrorStore(userModel);
+		mirrorStore.addSecureMirror("mirror.technicpack.net",
+				new JsonWebSecureMirror("http://mirror.technicpack.net/",
+						"mirror.technicpack.net"));
 
-        PackResourceMapper iconMapper = new PackResourceMapper(directories, resources.getImage("icon.png"), iconType);
-        ImageRepository<ModpackModel> iconRepo = new ImageRepository<ModpackModel>(iconMapper, new PackImageStore(iconType, mirrorStore, userModel));
-        ImageRepository<ModpackModel> logoRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, resources.getImage("modpack/ModImageFiller.png"), logoType), new PackImageStore(logoType, mirrorStore, userModel));
-        ImageRepository<ModpackModel> backgroundRepo = new ImageRepository<ModpackModel>(new PackResourceMapper(directories, null, backgroundType), new PackImageStore(backgroundType, mirrorStore, userModel));
+		IModpackResourceType iconType = new IconResourceType();
+		IModpackResourceType logoType = new LogoResourceType();
+		IModpackResourceType backgroundType = new BackgroundResourceType();
 
-        ImageRepository<IUserType> skinRepo = new ImageRepository<IUserType>(new TechnicFaceMapper(directories, resources), new CrafatarFaceImageStore("http://crafatar.com/", mirrorStore));
+		PackResourceMapper iconMapper = new PackResourceMapper(directories,
+				resources.getImage("icon.png"), iconType);
+		ImageRepository<ModpackModel> iconRepo = new ImageRepository<ModpackModel>(
+				iconMapper,
+				new PackImageStore(iconType, mirrorStore, userModel));
+		ImageRepository<ModpackModel> logoRepo = new ImageRepository<ModpackModel>(
+				new PackResourceMapper(directories,
+						resources.getImage("modpack/ModImageFiller.png"),
+						logoType), new PackImageStore(logoType, mirrorStore,
+						userModel));
+		ImageRepository<ModpackModel> backgroundRepo = new ImageRepository<ModpackModel>(
+				new PackResourceMapper(directories, null, backgroundType),
+				new PackImageStore(backgroundType, mirrorStore, userModel));
 
-        ImageRepository<AuthorshipInfo> avatarRepo = new ImageRepository<AuthorshipInfo>(new TechnicAvatarMapper(directories, resources), new WebAvatarImageStore(mirrorStore));
+		ImageRepository<IUserType> skinRepo = new ImageRepository<IUserType>(
+				new TechnicFaceMapper(directories, resources),
+				new CrafatarFaceImageStore("http://crafatar.com/", mirrorStore));
 
-        HttpSolderApi httpSolder = new HttpSolderApi(settings.getClientId(), userModel);
-        ISolderApi solder = new CachedSolderApi(directories, httpSolder, 60 * 60);
-        HttpPlatformApi httpPlatform = new HttpPlatformApi("http://api.technicpack.net/", mirrorStore, buildNumber.getBuildNumber());
+		ImageRepository<AuthorshipInfo> avatarRepo = new ImageRepository<AuthorshipInfo>(
+				new TechnicAvatarMapper(directories, resources),
+				new WebAvatarImageStore(mirrorStore));
 
-        IPlatformApi platform = new ModpackCachePlatformApi(httpPlatform, 60 * 60, directories);
-        IPlatformSearchApi platformSearch = new HttpPlatformSearchApi("http://api.technicpack.net/", buildNumber.getBuildNumber());
+		HttpSolderApi httpSolder = new HttpSolderApi(settings.getClientId(),
+				userModel);
+		ISolderApi solder = new CachedSolderApi(directories, httpSolder,
+				60 * 60);
+		HttpPlatformApi httpPlatform = new HttpPlatformApi(
+				"http://api.technicpack.net/", mirrorStore,
+				buildNumber.getBuildNumber());
 
-        IInstalledPackRepository packStore = TechnicInstalledPackStore.load(new File(directories.getLauncherDirectory(), "installedPacks"));
-        IAuthoritativePackSource packInfoRepository = new PlatformPackInfoRepository(platform, solder);
+		IPlatformApi platform = new ModpackCachePlatformApi(httpPlatform,
+				60 * 60, directories);
+		IPlatformSearchApi platformSearch = new HttpPlatformSearchApi(
+				"http://api.technicpack.net/", buildNumber.getBuildNumber());
 
-        ArrayList<IMigrator> migrators = new ArrayList<IMigrator>(1);
-        migrators.add(new InitialV3Migrator(platform));
-        SettingsFactory.migrateSettings(settings, packStore, directories, users, migrators);
+		IInstalledPackRepository packStore = TechnicInstalledPackStore
+				.load(new File(directories.getLauncherDirectory(),
+						"installedPacks"));
+		IAuthoritativePackSource packInfoRepository = new PlatformPackInfoRepository(
+				platform, solder);
 
-        MinecraftLauncher launcher = new MinecraftLauncher(platform, directories, userModel, settings.getClientId(), javaVersions);
-        ModpackInstaller modpackInstaller = new ModpackInstaller(platform, settings.getClientId());
-        Installer installer = new Installer(startupParameters, mirrorStore, directories, modpackInstaller, launcher, settings, iconMapper);
+		ArrayList<IMigrator> migrators = new ArrayList<IMigrator>(1);
+		migrators.add(new InitialV3Migrator(platform));
+		SettingsFactory.migrateSettings(settings, packStore, directories,
+				users, migrators);
 
-        final LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, iconRepo, logoRepo, backgroundRepo, installer, avatarRepo, platform, directories, packStore, startupParameters, javaVersions, javaVersionFile, buildNumber);
-        userModel.addAuthListener(frame);
+		MinecraftLauncher launcher = new MinecraftLauncher(platform,
+				directories, userModel, settings.getClientId(), javaVersions);
+		ModpackInstaller modpackInstaller = new ModpackInstaller(platform,
+				settings.getClientId());
+		Installer installer = new Installer(startupParameters, mirrorStore,
+				directories, modpackInstaller, launcher, settings, iconMapper);
+		DownloadLikes downloader = new DownloadLikes();
+		
+		final LauncherFrame frame = new LauncherFrame(resources, skinRepo,
+				userModel, settings, iconRepo, logoRepo, backgroundRepo,
+				installer, avatarRepo, platform, directories, packStore,
+				startupParameters, javaVersions, javaVersionFile, buildNumber, downloader);
+		userModel.addAuthListener(frame);
 
-        ActionListener listener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                splash.dispose();
-                if (settings.getLaunchToModpacks())
-                    frame.selectTab("modpacks");
-            }
-        };
-    }
+		ActionListener listener = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				splash.dispose();
+				if (settings.getLaunchToModpacks())
+					frame.selectTab("modpacks");
+			}
+		};
+	}
 }
