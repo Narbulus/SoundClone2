@@ -58,7 +58,6 @@ import net.technicpack.launcher.settings.migration.IMigrator;
 import net.technicpack.launcher.settings.migration.InitialV3Migrator;
 import net.technicpack.launcher.ui.InstallerFrame;
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.auth.UserModel;

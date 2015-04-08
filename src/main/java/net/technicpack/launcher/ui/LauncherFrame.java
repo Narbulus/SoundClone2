@@ -44,8 +44,9 @@ import net.technicpack.launcher.LauncherMain;
 import net.technicpack.launcher.launch.Installer;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
-import net.technicpack.launcher.songs.SongsInfoPanel;
 import net.technicpack.launcher.ui.components.OptionsDialog;
+import net.technicpack.launcher.ui.components.songs.SongsInfoPanel;
+import net.technicpack.launcher.ui.components.songs.TracksListPanel;
 import net.technicpack.launcher.ui.controls.HeaderTab;
 import net.technicpack.launcher.ui.controls.UserWidget;
 import net.technicpack.launchercore.auth.IAuthListener;
@@ -100,6 +101,11 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     public static final Color COLOR_GREY_TEXT = new Color(86, 98, 110);
     public static final Color COLOR_FOOTER = new Color(27, 32, 36);
     public static final Color COLOR_SERVER = new Color(91, 192, 222);
+    
+    /////////////////////////
+    public static final Color COLOR_SONGS_INFO = new Color(170, 0, 0);
+    public static final Color COLOR_TRACKS_LIST = new Color(255, 255, 255);
+    ////////////////////////
     
     public static final String TAB_SONGS = "songs";
 
@@ -355,8 +361,16 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         infoSwap.add(modpackHost, "modpacks");
         centralPanel.add(infoSwap, BorderLayout.CENTER);
         
-        JPanel songsPanel = new SongsInfoPanel(resources);
-        infoSwap.add(songsPanel, TAB_SONGS);
+        JPanel songsHost = new JPanel();
+        JPanel tracksPanel = new TracksListPanel(resources);
+        JPanel songsInfoPanel = new SongsInfoPanel(resources);
+        infoSwap.add(songsHost, TAB_SONGS);
+        
+        songsHost.setLayout(new BorderLayout());
+        songsHost.add(tracksPanel, BorderLayout.CENTER);
+        songsHost.add(songsInfoPanel, BorderLayout.WEST);
+        
+        
 
         footer = new TintablePanel();
         footer.setTintColor(COLOR_CENTRAL_BACK);
