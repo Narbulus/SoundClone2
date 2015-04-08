@@ -58,7 +58,6 @@ import net.technicpack.launcher.settings.migration.IMigrator;
 import net.technicpack.launcher.settings.migration.InitialV3Migrator;
 import net.technicpack.launcher.ui.InstallerFrame;
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launcher.ui.LoginFrame;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.auth.IUserType;
@@ -344,17 +343,5 @@ public class LauncherMain {
                     frame.selectTab("modpacks");
             }
         };
-
-        LoginFrame login = new LoginFrame(resources, settings, userModel, skinRepo);
-        userModel.addAuthListener(login);
-        userModel.addAuthListener(new IAuthListener() {
-            @Override
-            public void userChanged(Object user) {
-                if (user == null)
-                    splash.dispose();
-            }
-        });
-
-        userModel.initAuth();
     }
 }
