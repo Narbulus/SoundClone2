@@ -160,13 +160,10 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         relocalize(resources);
 
         selectTab("discover");
+   
+        // Show yee self
+        this.setVisible(true);
 
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                LauncherMain.consoleFrame.setVisible(settings.getShowConsole());
-            }
-        });
 
         setLocationRelativeTo(null);
     }
@@ -430,7 +427,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         //Clear references to existing controls
 
         initComponents();
-        userChanged(userModel.getCurrentUser());
+        //userChanged(userModel.getCurrentUser());
 
         if (currentTabName != null)
             selectTab(currentTabName);

@@ -344,17 +344,5 @@ public class LauncherMain {
                     frame.selectTab("modpacks");
             }
         };
-
-        LoginFrame login = new LoginFrame(resources, settings, userModel, skinRepo);
-        userModel.addAuthListener(login);
-        userModel.addAuthListener(new IAuthListener() {
-            @Override
-            public void userChanged(Object user) {
-                if (user == null)
-                    splash.dispose();
-            }
-        });
-
-        userModel.initAuth();
     }
 }
