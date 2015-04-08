@@ -28,6 +28,7 @@ import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Random;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -38,8 +39,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
-
-import com.google.gson.JsonSyntaxException;
 
 import net.brassbeluga.sound.gson.TrackInfo;
 import net.brassbeluga.sound.main.DownloadLikes;
@@ -72,6 +71,8 @@ import net.technicpack.ui.lang.IRelocalizableResource;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.DesktopUtils;
 
+import com.google.gson.JsonSyntaxException;
+
 public class LauncherFrame extends DraggableFrame implements
 		IRelocalizableResource, IAuthListener<MojangUser> {
 
@@ -91,10 +92,10 @@ public class LauncherFrame extends DraggableFrame implements
 	public static final Color COLOR_CHARCOAL = new Color(31, 31, 31);
 	public static final Color COLOR_BANNER = new Color(0, 0, 0, 160);
 	public static final Color COLOR_PANEL = new Color(36, 38, 39);
-	
+
 	public static final Color COLOR_SCROLL_TRACK = new Color(16, 108, 163);
 	public static final Color COLOR_SCROLL_THUMB = new Color(51, 204, 255);
-	
+
 	public static final Color COLOR_SELECTOR_BACK = new Color(22, 26, 29);
 	public static final Color COLOR_SELECTOR_OPTION = new Color(38, 46, 53);
 	public static final Color COLOR_FEED_BACK = new Color(22, 26, 29, 200);
@@ -114,6 +115,7 @@ public class LauncherFrame extends DraggableFrame implements
 	// //////////////////////
 
 	public static final String TAB_SONGS = "songs";
+	public static final String TAB_DOWNLOAD = "download";
 
 	private ResourceLoader resources;
 	private final UserModel<MojangUser> userModel;
@@ -133,6 +135,7 @@ public class LauncherFrame extends DraggableFrame implements
 	private final IBuildNumber buildNumber;
 
 	private HeaderTab songsTab;
+	private HeaderTab downloadTab;
 
 	private CardLayout infoLayout;
 	private JPanel infoSwap;
@@ -143,10 +146,10 @@ public class LauncherFrame extends DraggableFrame implements
 	private RoundedButton playButton;
 	private TintablePanel centralPanel;
 	private TintablePanel footer;
-	
+
 	private TracksListPanel tracksPanel;
 	private SongsInfoPanel songsInfoPanel;
-	
+
 	private DownloadLikes downloader;
 
 	private String currentTabName;
@@ -164,7 +167,8 @@ public class LauncherFrame extends DraggableFrame implements
 			final IInstalledPackRepository packRepository,
 			final StartupParameters params,
 			final JavaVersionRepository javaVersions,
-			final FileJavaSource fileJavaSource, final IBuildNumber buildNumber, final DownloadLikes downloader) {
+			final FileJavaSource fileJavaSource,
+			final IBuildNumber buildNumber, final DownloadLikes downloader) {
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -183,14 +187,14 @@ public class LauncherFrame extends DraggableFrame implements
 		this.fileJavaSource = fileJavaSource;
 		this.javaVersions = javaVersions;
 		this.buildNumber = buildNumber;
-		
+
 		this.downloader = downloader;
 
 		// Handles rebuilding the frame, so use it to build the frame in the
 		// first place
 		relocalize(resources);
 
-		selectTab("discover");
+		selectTab(TAB_SONGS);
 
 		// Show yee self
 		this.setVisible(true);
@@ -204,9 +208,12 @@ public class LauncherFrame extends DraggableFrame implements
 
 	public void selectTab(String tabName) {
 		songsTab.setIsActive(false);
+		downloadTab.setIsActive(false);
 
 		if (tabName.equalsIgnoreCase(TAB_SONGS)) {
 			songsTab.setIsActive(true);
+		}else if (tabName.equalsIgnoreCase(TAB_DOWNLOAD)) {
+			downloadTab.setIsActive(true);
 		}
 
 		infoLayout.show(infoSwap, tabName);
@@ -303,6 +310,11 @@ public class LauncherFrame extends DraggableFrame implements
 		songsTab.addActionListener(tabListener);
 		songsTab.setActionCommand(TAB_SONGS);
 		header.add(songsTab);
+		
+		downloadTab = new HeaderTab("DOWNLOAD", resources);
+		downloadTab.addActionListener(tabListener);
+		downloadTab.setActionCommand(TAB_DOWNLOAD);
+		header.add(downloadTab);
 
 		header.add(Box.createHorizontalGlue());
 
@@ -402,6 +414,10 @@ public class LauncherFrame extends DraggableFrame implements
 		songsHost.setLayout(new BorderLayout());
 		songsHost.add(tracksPanel, BorderLayout.CENTER);
 		songsHost.add(songsInfoPanel, BorderLayout.WEST);
+		
+		JPanel downloadHost = new JPanel();
+		downloadHost.setBackground(COLOR_CENTRAL_BACK_OPAQUE);
+		infoSwap.add(downloadHost, TAB_DOWNLOAD);
 
 		footer = new TintablePanel();
 		footer.setTintColor(COLOR_CENTRAL_BACK);
@@ -409,31 +425,6 @@ public class LauncherFrame extends DraggableFrame implements
 		footer.setLayout(new BoxLayout(footer, BoxLayout.LINE_AXIS));
 		footer.setForeground(COLOR_WHITE_TEXT);
 		footer.setBorder(BorderFactory.createEmptyBorder(3, 6, 3, 12));
-
-		userWidget = new UserWidget(resources, skinRepository);
-		userWidget.setMaximumSize(userWidget.getPreferredSize());
-		footer.add(userWidget);
-
-		JLabel dashText = new JLabel("| ");
-		dashText.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-		dashText.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
-		footer.add(dashText);
-
-		JButton logout = new JButton(
-				resources.getString("launcher.user.logout"));
-		logout.setBorder(BorderFactory.createEmptyBorder());
-		logout.setContentAreaFilled(false);
-		logout.setFocusable(false);
-		logout.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-		logout.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		logout.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 15));
-		logout.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				logout();
-			}
-		});
-		footer.add(logout);
 
 		installProgress = new ProgressBar();
 		installProgress.setForeground(Color.white);
@@ -449,22 +440,21 @@ public class LauncherFrame extends DraggableFrame implements
 		installProgressPlaceholder = Box.createHorizontalGlue();
 		footer.add(installProgressPlaceholder);
 
-		JLabel buildCtrl = new JLabel(resources.getString(
-				"launcher.build.text",
-				buildNumber.getBuildNumber(),
-				resources.getString("launcher.build."
-						+ settings.getBuildStream())));
+		String[] names = { "TuneZip", "Zipmeister", "Zip Zop", "SoundZip",
+				"iZip", "ZipCloud", "ZipMan", "Zorp", "Zoop", "Zoodily",
+				"Zippster", "ZippMe", "SipZip", "Music Downloader" };
+		Random r = new Random();
+		JLabel buildCtrl = new JLabel(names[r.nextInt(names.length)]);
 		buildCtrl.setForeground(COLOR_WHITE_TEXT);
-		buildCtrl.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 14));
+		buildCtrl.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 20));
 		buildCtrl.setHorizontalTextPosition(SwingConstants.RIGHT);
 		buildCtrl.setHorizontalAlignment(SwingConstants.RIGHT);
 		footer.add(buildCtrl);
 
 		this.add(footer, BorderLayout.PAGE_END);
 
-		selectTab(TAB_SONGS);
 	}
-	
+
 	public void onUserChanged(String user) {
 		if (downloader != null && !downloader.isThreadRunning()) {
 			String select = user;
@@ -473,7 +463,8 @@ public class LauncherFrame extends DraggableFrame implements
 					|| (curUser != null && !downloader.getCurrentUser().equals(
 							select))) {
 				try {
-					downloader.updateUser(select.replace(".", "-"), songsInfoPanel, tracksPanel);
+					downloader.updateUser(select.replace(".", "-"),
+							songsInfoPanel, tracksPanel);
 				} catch (JsonSyntaxException e) {
 					e.printStackTrace();
 				} catch (Exception e) {
@@ -482,7 +473,7 @@ public class LauncherFrame extends DraggableFrame implements
 			}
 		}
 	}
-	
+
 	public void selectTrack(TrackInfo track) {
 		songsInfoPanel.updateTrack(track);
 	}
