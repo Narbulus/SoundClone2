@@ -90,7 +90,11 @@ public class TracksListPanel extends TintablePanel {
 		int r = 12;
 		int g = 94;
 		int b = 143;
-		int i = 0;
+		
+		GridBagConstraints constraints = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
+				GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
+				new Insets(0, 0, 0, 0), 0, 0);
+		
 		for (TrackInfo t : tracks) {
 			final JButton button = new JButton(t.getTitle());
 			final TrackInfo info = t;
@@ -128,11 +132,16 @@ public class TracksListPanel extends TintablePanel {
 					button.setBackground(LauncherFrame.COLOR_BLUE);
 				}
 			});
-			trackList.add(button, new GridBagConstraints(0, i, 1, 1, 1.0, 1.0,
-					GridBagConstraints.WEST, GridBagConstraints.BOTH,
-					new Insets(0, 0, 0, 0), 0, 0));
-			i++;
+			trackList.add(button, constraints);
+			constraints.gridy++;
 		}
+		
+		trackList.add(Box.createHorizontalStrut(294), constraints);
+        constraints.gridy++;
+
+        constraints.weighty = 1.0;
+        trackList.add(Box.createGlue(), constraints);
+		
 		revalidate();
 		repaint();
 
