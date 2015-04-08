@@ -18,59 +18,55 @@
 
 package net.technicpack.launcher.ui;
 
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.Frame;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
+
 import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.launcher.LauncherMain;
+import net.technicpack.launcher.launch.Installer;
 import net.technicpack.launcher.settings.StartupParameters;
+import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.components.ModpackOptionsDialog;
+import net.technicpack.launcher.ui.components.OptionsDialog;
+import net.technicpack.launcher.ui.controls.HeaderTab;
+import net.technicpack.launcher.ui.controls.UserWidget;
+import net.technicpack.launchercore.auth.IAuthListener;
+import net.technicpack.launchercore.auth.IUserType;
+import net.technicpack.launchercore.auth.UserModel;
+import net.technicpack.launchercore.image.ImageRepository;
 import net.technicpack.launchercore.install.LauncherDirectories;
 import net.technicpack.launchercore.launch.java.JavaVersionRepository;
 import net.technicpack.launchercore.launch.java.source.FileJavaSource;
+import net.technicpack.launchercore.modpacks.ModpackModel;
 import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
-import net.technicpack.platform.io.PlatformPackInfo;
-import net.technicpack.rest.RestObject;
+import net.technicpack.minecraftcore.mojang.auth.MojangUser;
+import net.technicpack.platform.IPlatformApi;
+import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.ui.controls.DraggableFrame;
 import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.TintablePanel;
+import net.technicpack.ui.controls.installation.ProgressBar;
 import net.technicpack.ui.lang.IRelocalizableResource;
 import net.technicpack.ui.lang.ResourceLoader;
-import net.technicpack.launcher.launch.Installer;
-import net.technicpack.launcher.settings.TechnicSettings;
-import net.technicpack.launcher.ui.components.OptionsDialog;
-import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
-import net.technicpack.launcher.ui.components.modpacks.ModpackInfoPanel;
-import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
-import net.technicpack.launcher.ui.components.news.NewsInfoPanel;
-import net.technicpack.launcher.ui.components.news.NewsSelector;
-import net.technicpack.launcher.ui.controls.*;
-import net.technicpack.ui.controls.feeds.CountCircle;
-import net.technicpack.ui.controls.installation.ProgressBar;
-import net.technicpack.launchercore.auth.IAuthListener;
-import net.technicpack.launchercore.auth.IUserType;
-import net.technicpack.minecraftcore.mojang.auth.MojangUser;
-import net.technicpack.launchercore.auth.UserModel;
-import net.technicpack.launchercore.image.ImageRepository;
-import net.technicpack.launchercore.install.Version;
-import net.technicpack.launchercore.modpacks.InstalledPack;
-import net.technicpack.launchercore.modpacks.ModpackModel;
-import net.technicpack.platform.IPlatformApi;
-import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.utilslib.DesktopUtils;
-import net.technicpack.utilslib.Utils;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.event.*;
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
 
 public class LauncherFrame extends DraggableFrame implements IRelocalizableResource, IAuthListener<MojangUser> {
 
@@ -104,10 +100,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     public static final Color COLOR_GREY_TEXT = new Color(86, 98, 110);
     public static final Color COLOR_FOOTER = new Color(27, 32, 36);
     public static final Color COLOR_SERVER = new Color(91, 192, 222);
-
-    public static final String TAB_DISCOVER = "discover";
-    public static final String TAB_MODPACKS = "modpacks";
-    public static final String TAB_NEWS = "news";
+    
     public static final String TAB_SONGS = "dicks";
 
     private ResourceLoader resources;
@@ -129,9 +122,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
     private ModpackOptionsDialog modpackOptionsDialog = null;
 
-    private HeaderTab discoverTab;
-    private HeaderTab modpacksTab;
-    private HeaderTab newsTab;
     private HeaderTab songsTab;
 
     private CardLayout infoLayout;
@@ -141,25 +131,18 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     private ProgressBar installProgress;
     private Component installProgressPlaceholder;
     private RoundedButton playButton;
-    private ModpackSelector modpackSelector;
-    private NewsSelector newsSelector;
     private TintablePanel centralPanel;
     private TintablePanel footer;
 
     private String currentTabName;
 
-    NewsInfoPanel newsInfoPanel;
-    ModpackInfoPanel modpackPanel;
-    DiscoverInfoPanel discoverInfoPanel;
-
-    public LauncherFrame(final ResourceLoader resources, final ImageRepository<IUserType> skinRepository, final UserModel userModel, final TechnicSettings settings, final ModpackSelector modpackSelector, final ImageRepository<ModpackModel> iconRepo, final ImageRepository<ModpackModel> logoRepo, final ImageRepository<ModpackModel> backgroundRepo, final Installer installer, final ImageRepository<AuthorshipInfo> avatarRepo, final IPlatformApi platformApi, final LauncherDirectories directories, final IInstalledPackRepository packRepository, final StartupParameters params, final DiscoverInfoPanel discoverInfoPanel, final JavaVersionRepository javaVersions, final FileJavaSource fileJavaSource, final IBuildNumber buildNumber) {
+    public LauncherFrame(final ResourceLoader resources, final ImageRepository<IUserType> skinRepository, final UserModel userModel, final TechnicSettings settings, final ImageRepository<ModpackModel> iconRepo, final ImageRepository<ModpackModel> logoRepo, final ImageRepository<ModpackModel> backgroundRepo, final Installer installer, final ImageRepository<AuthorshipInfo> avatarRepo, final IPlatformApi platformApi, final LauncherDirectories directories, final IInstalledPackRepository packRepository, final StartupParameters params, final JavaVersionRepository javaVersions, final FileJavaSource fileJavaSource, final IBuildNumber buildNumber) {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         this.userModel = userModel;
         this.skinRepository = skinRepository;
         this.settings = settings;
-        this.modpackSelector = modpackSelector;
         this.iconRepo = iconRepo;
         this.logoRepo = logoRepo;
         this.backgroundRepo = backgroundRepo;
@@ -169,7 +152,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.directories = directories;
         this.packRepo = packRepository;
         this.params = params;
-        this.discoverInfoPanel = discoverInfoPanel;
         this.fileJavaSource = fileJavaSource;
         this.javaVersions = javaVersions;
         this.buildNumber = buildNumber;
@@ -194,19 +176,9 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
     /////////////////////////////////////////////////
 
     public void selectTab(String tabName) {
-        discoverTab.setIsActive(false);
-        modpacksTab.setIsActive(false);
-        newsTab.setIsActive(false);
         songsTab.setIsActive(false);
 
-        if (tabName.equalsIgnoreCase(TAB_DISCOVER))
-            discoverTab.setIsActive(true);
-        else if (tabName.equalsIgnoreCase(TAB_MODPACKS))
-            modpacksTab.setIsActive(true);
-        else if (tabName.equalsIgnoreCase(TAB_NEWS)) {
-            newsTab.setIsActive(true);
-            newsSelector.ping();
-        }else if (tabName.equalsIgnoreCase(TAB_SONGS)) {
+        if (tabName.equalsIgnoreCase(TAB_SONGS)) {
         	songsTab.setIsActive(true);
         }
 
@@ -228,102 +200,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         userModel.setCurrentUser(null);
     }
 
-    protected void launchModpack() {
-        ModpackModel pack = modpackSelector.getSelectedPack();
-        boolean requiresInstall = false;
-
-        if (pack == null || (pack.getInstalledPack() == null && (pack.getPackInfo() == null || !pack.getPackInfo().isComplete())))
-            return;
-
-        if (pack.getInstalledDirectory() == null) {
-            requiresInstall = true;
-            pack.save();
-            modpackSelector.forceRefresh();
-        }
-
-        if (requiresInstall) {
-            try {
-                if (pack.getPackInfo().shouldForceDirectory() && FilenameUtils.directoryContains(directories.getLauncherDirectory().getCanonicalPath(), pack.getInstalledDirectory().getCanonicalPath())) {
-                    JFileChooser chooser = new JFileChooser(directories.getLauncherDirectory());
-                    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                    chooser.setCurrentDirectory(directories.getLauncherDirectory());
-                    int result = chooser.showOpenDialog(this);
-
-                    if (result == JFileChooser.APPROVE_OPTION) {
-                        File file = chooser.getSelectedFile();
-
-                        if (file.list().length > 0) {
-                            JOptionPane.showMessageDialog(this, resources.getString("modpackoptions.move.errortext"), resources.getString("modpackoptions.move.errortitle"), JOptionPane.WARNING_MESSAGE);
-                            return;
-                        } else if (FileUtils.directoryContains(directories.getLauncherDirectory(), file)) {
-                            JOptionPane.showMessageDialog(this, resources.getString("launcher.launch.requiresmove"), resources.getString("launcher.launch.requiretitle"), JOptionPane.WARNING_MESSAGE);
-                            return;
-                        }
-
-                        pack.setInstalledDirectory(file);
-                    }
-                }
-            } catch (IOException ex) {
-                Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
-            }
-        }
-
-        boolean forceInstall = false;
-        Version installedVersion = pack.getInstalledVersion();
-
-        //Force a full install (check cache, redownload, unzip files) if we have no current installation of this modpack
-        if (installedVersion == null) {
-            forceInstall = true;
-            requiresInstall = true;
-        } else if (pack.getBuild() != null && !pack.isLocalOnly()) {
-
-            //Ask the user if they want to update to the newer version if:
-            //1- the pack build is RECOMMENDED & the recommended version is diff from the installed version
-            //2- the pack build is LATEST & the latest version is diff from the installed version
-            //3- the pack build is neither LATEST or RECOMMENDED & the pack build is diff from the installed version
-            boolean requestInstall = false;
-            if (pack.getBuild().equalsIgnoreCase(InstalledPack.RECOMMENDED) && pack.getPackInfo().getRecommended() != null && !pack.getPackInfo().getRecommended().equalsIgnoreCase(installedVersion.getVersion()))
-                requestInstall = true;
-            else if (pack.getBuild().equalsIgnoreCase(InstalledPack.LATEST) && pack.getPackInfo().getLatest() != null && !pack.getPackInfo().getLatest().equalsIgnoreCase(installedVersion.getVersion()))
-                requestInstall = true;
-            else if (!pack.getBuild().equalsIgnoreCase(InstalledPack.RECOMMENDED) && !pack.getBuild().equalsIgnoreCase(InstalledPack.LATEST) && !pack.getBuild().equalsIgnoreCase(installedVersion.getVersion()))
-                requestInstall = true;
-
-            //If the user says yes, update, then force a full install
-            if (requestInstall) {
-    			int result = JOptionPane.showConfirmDialog(this, resources.getString("launcher.install.query"), resources.getString("launcher.install.query.title"), JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-
-    			if (result == JOptionPane.YES_OPTION) {
-    				forceInstall = true;
-    			}
-            }
-        }
-
-        //If we're forcing an install, then derive the installation build from the pack build
-        //otherwise, just use the installed version
-        String installBuild = null;
-        if (forceInstall && !pack.isLocalOnly()) {
-            installBuild = pack.getBuild();
-
-            if (installBuild.equalsIgnoreCase(InstalledPack.RECOMMENDED))
-                installBuild = pack.getPackInfo().getRecommended();
-            else if (installBuild.equalsIgnoreCase(InstalledPack.LATEST))
-                installBuild = pack.getPackInfo().getLatest();
-        } else if (installedVersion != null)
-            installBuild = installedVersion.getVersion();
-
-        if (requiresInstall && installBuild != null && !installBuild.isEmpty()) {
-            installer.justInstall(resources, pack, installBuild, forceInstall, this, installProgress);
-        } else {
-            installer.installAndRun(resources, pack, installBuild, forceInstall, this, installProgress);
-        }
-
-        installProgress.setVisible(true);
-        installProgressPlaceholder.setVisible(false);
-        userChanged(userModel.getCurrentUser());
-        invalidate();
-    }
-
     public void launchCompleted() {
         if (installer.isCurrentlyRunning()) {
             EventQueue.invokeLater(new Runnable() {
@@ -342,26 +218,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         userModel.setCurrentUser(userModel.getCurrentUser());
 
         invalidate();
-    }
-
-    protected void openModpackOptions(ModpackModel model) {
-
-        if (modpackOptionsDialog == null) {
-            centralPanel.setTintActive(true);
-            footer.setTintActive(true);
-            modpackOptionsDialog = new ModpackOptionsDialog(this, directories, model, resources);
-            modpackOptionsDialog.setVisible(true);
-            modpackOptionsDialog = null;
-            centralPanel.setTintActive(false);
-            footer.setTintActive(false);
-            modpackPanel.setModpack(model);
-            modpackSelector.forceRefresh();
-        }
-    }
-
-    protected void refreshModpackOptions(ModpackModel model) {
-        if (modpackOptionsDialog != null)
-            modpackOptionsDialog.refresh(model);
     }
 
     protected void openLauncherOptions() {
@@ -413,36 +269,11 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
                 selectTab(e.getActionCommand());
             }
         };
-
-        discoverTab = new HeaderTab(resources.getString("launcher.title.discover"), resources);
-        header.add(discoverTab);
-        discoverTab.setActionCommand(TAB_DISCOVER);
-        discoverTab.addActionListener(tabListener);
-
-        modpacksTab = new HeaderTab(resources.getString("launcher.title.modpacks"), resources);
-        modpacksTab.setIsActive(true);
-        modpacksTab.setHorizontalTextPosition(SwingConstants.LEADING);
-        modpacksTab.addActionListener(tabListener);
-        modpacksTab.setActionCommand(TAB_MODPACKS);
-        header.add(modpacksTab);
-
-        newsTab = new HeaderTab(resources.getString("launcher.title.news"), resources);
-        newsTab.setLayout(null);
-        newsTab.addActionListener(tabListener);
-        newsTab.setActionCommand(TAB_NEWS);
-        header.add(newsTab);
         
         songsTab = new HeaderTab("SONGS", resources);
         songsTab.addActionListener(tabListener);
         songsTab.setActionCommand(TAB_SONGS);
         header.add(songsTab);
-
-        CountCircle newsCircle = new CountCircle();
-        newsCircle.setBackground(COLOR_RED);
-        newsCircle.setForeground(COLOR_WHITE_TEXT);
-        newsCircle.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 16, Font.BOLD));
-        newsTab.add(newsCircle);
-        newsCircle.setBounds(10,17,25,25);
 
         header.add(Box.createHorizontalGlue());
 
@@ -518,67 +349,19 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         this.add(centralPanel, BorderLayout.CENTER);
         centralPanel.setLayout(new BorderLayout());
 
-        modpackPanel = new ModpackInfoPanel(resources, iconRepo, logoRepo, backgroundRepo, avatarRepo, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                openModpackOptions((ModpackModel)e.getSource());
-            }
-        },
-        new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                refreshModpackOptions((ModpackModel)e.getSource());
-            }
-        }
-        );
-        modpackSelector.setInfoPanel(modpackPanel);
-        modpackSelector.setLauncherFrame(this);
-        playButton = modpackPanel.getPlayButton();
-        playButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (e.getSource() instanceof ModpackModel) {
-                    setupPlayButtonText((ModpackModel) e.getSource(), userModel.getCurrentUser());
-                } else if (installer.isCurrentlyRunning()) {
-                    installer.cancel();
-                    setupPlayButtonText(modpackSelector.getSelectedPack(), userModel.getCurrentUser());
-                } else {
-                    launchModpack();
-                }
-            }
-        });
-
-        modpackPanel.getDeleteButton().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (JOptionPane.showConfirmDialog(LauncherFrame.this, resources.getString("modpackoptions.delete.confirmtext"), resources.getString("modpackoptions.delete.confirmtitle"), JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                    modpackSelector.getSelectedPack().delete();
-                    modpackSelector.forceRefresh();
-                }
-            }
-        });
-
         infoSwap = new JPanel();
         infoLayout = new CardLayout();
         infoSwap.setLayout(infoLayout);
         infoSwap.setOpaque(false);
-        newsInfoPanel = new NewsInfoPanel(resources, avatarRepo);
-        infoSwap.add(discoverInfoPanel,"discover");
 
         JPanel newsHost = new JPanel();
         infoSwap.add(newsHost, "news");
         JPanel modpackHost = new JPanel();
         infoSwap.add(modpackHost, "modpacks");
         centralPanel.add(infoSwap, BorderLayout.CENTER);
-
-        newsSelector = new NewsSelector(resources, newsInfoPanel, platformApi, avatarRepo, newsCircle, settings);
-        newsHost.setLayout(new BorderLayout());
-        newsHost.add(newsInfoPanel, BorderLayout.CENTER);
-        newsHost.add(newsSelector, BorderLayout.WEST);
-
-        modpackHost.setLayout(new BorderLayout());
-        modpackHost.add(modpackPanel, BorderLayout.CENTER);
-        modpackHost.add(modpackSelector, BorderLayout.WEST);
+        
+        JPanel songsPanel = new JPanel();
+        infoSwap.add(songsPanel, "songs");
 
         footer = new TintablePanel();
         footer.setTintColor(COLOR_CENTRAL_BACK);
@@ -668,17 +451,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
         else {
             this.setVisible(true);
             userWidget.setUser(mojangUser);
-
-            if (modpackSelector.getSelectedPack() != null)
-                setupPlayButtonText(modpackSelector.getSelectedPack(), mojangUser);
-
-            modpackSelector.forceRefresh();
-            EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    repaint();
-                }
-            });
         }
     }
 

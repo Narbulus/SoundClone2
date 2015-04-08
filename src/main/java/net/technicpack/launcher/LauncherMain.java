@@ -36,7 +36,6 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.BorderFactory;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 
@@ -60,8 +59,6 @@ import net.technicpack.launcher.settings.migration.InitialV3Migrator;
 import net.technicpack.launcher.ui.InstallerFrame;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launcher.ui.LoginFrame;
-import net.technicpack.launcher.ui.components.discover.DiscoverInfoPanel;
-import net.technicpack.launcher.ui.components.modpacks.ModpackSelector;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.auth.IUserType;
@@ -80,7 +77,6 @@ import net.technicpack.launchercore.logging.RotatingFileHandler;
 import net.technicpack.launchercore.mirror.MirrorStore;
 import net.technicpack.launchercore.mirror.secure.rest.JsonWebSecureMirror;
 import net.technicpack.launchercore.modpacks.ModpackModel;
-import net.technicpack.launchercore.modpacks.PackLoader;
 import net.technicpack.launchercore.modpacks.resources.PackImageStore;
 import net.technicpack.launchercore.modpacks.resources.PackResourceMapper;
 import net.technicpack.launchercore.modpacks.resources.resourcetype.BackgroundResourceType;
@@ -100,7 +96,6 @@ import net.technicpack.platform.http.HttpPlatformApi;
 import net.technicpack.platform.http.HttpPlatformSearchApi;
 import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.solder.ISolderApi;
-import net.technicpack.solder.SolderPackSource;
 import net.technicpack.solder.cache.CachedSolderApi;
 import net.technicpack.solder.http.HttpSolderApi;
 import net.technicpack.ui.components.Console;
@@ -334,20 +329,11 @@ public class LauncherMain {
         migrators.add(new InitialV3Migrator(platform));
         SettingsFactory.migrateSettings(settings, packStore, directories, users, migrators);
 
-        PackLoader packList = new PackLoader(directories, packStore, packInfoRepository);
-        ModpackSelector selector = new ModpackSelector(resources, packList, new SolderPackSource("http://solder.technicpack.net/api/", solder), solder, platform, platformSearch, iconRepo);
-        selector.setBorder(BorderFactory.createEmptyBorder());
-        userModel.addAuthListener(selector);
-
-        resources.registerResource(selector);
-
-        DiscoverInfoPanel discoverInfoPanel = new DiscoverInfoPanel(resources, startupParameters.getDiscoverUrl(), platform, directories, selector);
-
         MinecraftLauncher launcher = new MinecraftLauncher(platform, directories, userModel, settings.getClientId(), javaVersions);
         ModpackInstaller modpackInstaller = new ModpackInstaller(platform, settings.getClientId());
         Installer installer = new Installer(startupParameters, mirrorStore, directories, modpackInstaller, launcher, settings, iconMapper);
 
-        final LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, selector, iconRepo, logoRepo, backgroundRepo, installer, avatarRepo, platform, directories, packStore, startupParameters, discoverInfoPanel, javaVersions, javaVersionFile, buildNumber);
+        final LauncherFrame frame = new LauncherFrame(resources, skinRepo, userModel, settings, iconRepo, logoRepo, backgroundRepo, installer, avatarRepo, platform, directories, packStore, startupParameters, javaVersions, javaVersionFile, buildNumber);
         userModel.addAuthListener(frame);
 
         ActionListener listener = new ActionListener() {
@@ -358,8 +344,6 @@ public class LauncherMain {
                     frame.selectTab("modpacks");
             }
         };
-
-        discoverInfoPanel.setLoadListener(listener);
 
         LoginFrame login = new LoginFrame(resources, settings, userModel, skinRepo);
         userModel.addAuthListener(login);
