@@ -492,9 +492,9 @@ public class LauncherFrame extends DraggableFrame implements
 		downloadPanel.removeTrack(track);
 	}
 	
-	public String downloadButtonPressed() throws JsonSyntaxException, Exception {
+	public String downloadButtonPressed(String path) throws JsonSyntaxException, Exception {
 		if (!downloader.isThreadRunning()) {
-			downloader.downloadTracks("narbulus", "/here", downloadPanel.getTracks(), downloadPanel);
+			downloader.downloadTracks("narbulus", path, downloadPanel.getTracks(), downloadPanel);
 			return "CANCEL";
 		}else{
 			return "START";

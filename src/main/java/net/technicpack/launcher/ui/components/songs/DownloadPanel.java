@@ -18,6 +18,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -26,8 +27,6 @@ import net.brassbeluga.sound.gson.TrackInfo;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 import net.technicpack.ui.lang.ResourceLoader;
-
-import com.google.gson.JsonSyntaxException;
 
 public class DownloadPanel extends JPanel {
 
@@ -40,10 +39,12 @@ public class DownloadPanel extends JPanel {
 	private JLabel trackIcon;
 	private JLabel progress;
 	private JButton button;
+	private JButton browseButton;
 
 	private ArrayList<TrackInfo> tracks;
 
 	private JPanel trackList;
+	private JFileChooser browse;
 
 	private JScrollPane scrollPane;
 
@@ -112,7 +113,7 @@ public class DownloadPanel extends JPanel {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				try {
-					button.setText(parent.downloadButtonPressed());
+					button.setText(parent.downloadButtonPressed(browse.getSelectedFile().getAbsolutePath()));
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
@@ -132,12 +133,51 @@ public class DownloadPanel extends JPanel {
 				button.setBackground(LauncherFrame.COLOR_BLUE);
 			}
 		});
+		
+		browse = new JFileChooser();
+		browse.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		
+		browseButton = new JButton("BROWSE");
+		browseButton.setContentAreaFilled(false);
+		browseButton.setFocusPainted(false);
+		// browseButton.setBorder(new LineBorder(new Color(0, 0, 0, 50)));
+		browseButton.setOpaque(true);
+		browseButton.setBackground(LauncherFrame.COLOR_BLUE);
+		browseButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 34));
+		browseButton.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+		browseButton.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				int returnVale = browse.showOpenDialog(browseButton);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {	
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				browseButton.setBackground(LauncherFrame.COLOR_BUTTON_BLUE);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				browseButton.setBackground(LauncherFrame.COLOR_BLUE);
+			}
+		});
 
 		infoPanel.add(trackIcon);
 		infoPanel.add(Box.createHorizontalGlue());
 		infoPanel.add(progress);
 		infoPanel.add(Box.createHorizontalGlue());
 		infoPanel.add(button);
+		infoPanel.add(Box.createRigidArea(new Dimension(16, 0)));
+		infoPanel.add(browseButton);
 
 		add(infoPanel);
 	}

@@ -212,7 +212,7 @@ public class DownloadLikes {
 	 * @throws Exception 
 	 * @throws JsonSyntaxException 
 	 */
-	public void downloadTracks(String user, String downloadPath, final List<TrackInfo> tracks, final DownloadPanel downloadPanel) throws JsonSyntaxException, Exception {
+	public void downloadTracks(String user, final String downloadPath, final List<TrackInfo> tracks, final DownloadPanel downloadPanel) throws JsonSyntaxException, Exception {
 		// If a new path is specified, clear history on config so new files are downloaded
 		if (user.equals(currentConfig.getUsername()) && !downloadPath.equals(currentConfig.getDownloadPath())) {
 			currentConfig.setDownloadPath(downloadPath);
@@ -231,36 +231,37 @@ public class DownloadLikes {
 				int downloads = 0;
 				System.out.println("Size : " + tracks.size());
 				for (TrackInfo t : tracks) {
+					//downloadPanel.setStatus("Downloading to " + downloadPath);
+					System.out.println("Track " + t.getDownload());
 					System.out.println("Loop " + i);
 					if (threadRunning) {
-						//if (t.getDownload()) {
-							publish(i + "/" + tracks.size() + " - " + t.getTitle());
-							tStream = gson.fromJson(load.getResponse("https://api.soundcloud.com/i1/tracks/" + t.getId() + "/streams?client_id=" + clientID)
-									, TrackStreams.class);
-							String mediaPath = tStream.getHttp_mp3_128_url();
-							if (mediaPath != null) {
-								if (t.getArtworkURL() == null) {
-									// Load uploader profile picture url for track image
-									UserInfo uploader = gson.fromJson(load.getResponse("https://api.soundcloud.com/users/" + t.getUserId() + ".json?client_id=" + clientID )
-											, UserInfo.class);
-									t.setArtworkURL(uploader.getAvatarURL());
-								}
-								if (download.generateMp3(mediaPath, t)) {
-									downloadPanel.setStatus(t.getTitle() + " downloaded successfully");
-									//load.writeToHistory(t.getId());
-									//downloadPanel.removeTrack(t);
-									downloads++;
-								}
+						publish(i + "/" + tracks.size() + " - " + t.getTitle());
+						tStream = gson.fromJson(load.getResponse("https://api.soundcloud.com/i1/tracks/" + t.getId() + "/streams?client_id=" + clientID)
+								, TrackStreams.class);
+						String mediaPath = tStream.getHttp_mp3_128_url();
+						if (mediaPath != null) {
+							if (t.getArtworkURL() == null) {
+								// Load uploader profile picture url for track image
+								UserInfo uploader = gson.fromJson(load.getResponse("https://api.soundcloud.com/users/" + t.getUserId() + ".json?client_id=" + clientID )
+										, UserInfo.class);
+								t.setArtworkURL(uploader.getAvatarURL());
 							}
-						//}
+							System.out.println("Generate mp3");
+							if (download.generateMp3(mediaPath, downloadPath, t)) {
+								downloadPanel.setStatus(t.getTitle() + " downloaded successfully");
+								load.writeToHistory(t.getId());
+								//downloadPanel.removeTrack(t);
+								downloads++;
+							}
+						}
 						i++;
 					}
 				}
 			
-				/* update the current configuration's history
+				// update the current configuration's history
 				load.closeHistory();
 				
-				 write the configurations to file
+				// write the configurations to file
 				PrintStream output = new PrintStream(tempDir + "/config");
 				
 				output.println(clientID);
@@ -272,14 +273,14 @@ public class DownloadLikes {
 				
 				output.flush();
 				output.close();
-				*/
+				
 				return downloads + " songs downloaded successfully!";
 			}
 			
 			@Override
 			protected void done() {
 				downloadPanel.onDownloadFinished();
-				//threadRunning = false;
+				threadRunning = false;
 			}
 			
 			@Override

@@ -58,7 +58,7 @@ public class Mp3Downloader {
 	 * @throws CannotReadException
 	 * @throws CannotWriteException 
 	 */
-	public boolean generateMp3(String mediaPath, TrackInfo track) throws IOException, UnsupportedTagException, InvalidDataException, NotSupportedException {
+	public boolean generateMp3(String mediaPath, String downloadPath, TrackInfo track) throws IOException, UnsupportedTagException, InvalidDataException, NotSupportedException {
 		
 		if (mediaPath != null) {
 			// Download the mp3 file
@@ -74,7 +74,7 @@ public class Mp3Downloader {
 			fuzzTitle = fuzzTitle.replaceAll("[<>?*:|/\\\\]", " ");
 			fuzzTitle = fuzzTitle.replaceAll("\"", "'");
 			String tempPath = tempDir + "/" + fuzzTitle + ".mp3";
-			String finalPath = config.getDownloadPath() + "/" + config.getUsername() + "/" + fuzzTitle + ".mp3";
+			String finalPath = downloadPath + "/" + fuzzTitle + ".mp3";
 			File finalDir = new File(finalPath);
 			finalDir.getParentFile().mkdirs();
 			FileOutputStream fos = null;
