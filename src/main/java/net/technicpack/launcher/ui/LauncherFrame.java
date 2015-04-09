@@ -465,6 +465,7 @@ public class LauncherFrame extends DraggableFrame implements
 				try {
 					downloader.updateUser(select.replace(".", "-"),
 							songsInfoPanel, tracksPanel);
+					tracksPanel.startUpdateTracks();
 				} catch (JsonSyntaxException e) {
 					e.printStackTrace();
 				} catch (Exception e) {

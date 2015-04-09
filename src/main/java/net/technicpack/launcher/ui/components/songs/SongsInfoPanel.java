@@ -39,6 +39,7 @@ public class SongsInfoPanel extends TintablePanel {
 	private JTextField usernameField;
 	private JButton userIcon;
 	private JLabel trackName;
+	private JLabel trackArtist;
 	private JButton trackArt;
 
 	private LauncherFrame parent;
@@ -46,6 +47,7 @@ public class SongsInfoPanel extends TintablePanel {
 	public static final int SONGS_INFO_WIDTH = 400;
 	public static final int SONGS_INFO_HEIGHT = 140;
 	private static final int MAX_SEARCH_STRING = 90;
+	private static final int MAX_TITLE_LENGTH = 42;
 
 	public SongsInfoPanel(ResourceLoader resources, LauncherFrame parent) {
 
@@ -142,22 +144,40 @@ public class SongsInfoPanel extends TintablePanel {
 		trackInfo.setLayout(new BoxLayout(trackInfo, BoxLayout.Y_AXIS));
 		//trackInfo.add(Box.createVerticalStrut(SONGS_INFO_HEIGHT));
 		trackInfo.setBackground(LauncherFrame.COLOR_BLUE);
-		trackInfo.setBorder(BorderFactory.createEmptyBorder(15, 15, 30, 15));
+		trackInfo.setBorder(BorderFactory.createEmptyBorder(25, 15, 30, 15));
 		trackName = new JLabel("Name of track");
 		trackName.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 		trackName.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 18));
 		trackName.setAlignmentX(CENTER_ALIGNMENT);
 		trackInfo.add(trackName);
+		trackArtist = new JLabel("Artist");
+		trackArtist.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+		trackArtist.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 16));
+		trackArtist.setAlignmentX(CENTER_ALIGNMENT);
+		trackInfo.add(Box.createVerticalGlue());
+		trackInfo.add(trackArtist);
 		trackInfo.add(Box.createVerticalGlue());
 		trackArt = new JButton(resources.getIcon("default_track.png"));
 		trackArt.setAlignmentX(CENTER_ALIGNMENT);
 		trackArt.setContentAreaFilled(false);
 		trackArt.setFocusPainted(false);
 		trackInfo.add(trackArt);
+		
 	}
 
 	public void updateTrack(final TrackInfo track) {
-		trackName.setText(track.getTitle());
+		String title = track.getTitle();
+		String[] split = title.split(" - ");
+		if (split.length > 1) {
+			trackArtist.setText(split[0]);
+			title = split[1];
+		}else{
+			trackArtist.setText("");
+			title = split[0];
+		}
+		if (title.length() > MAX_TITLE_LENGTH)
+			title = title.substring(0, MAX_TITLE_LENGTH) + "...";
+		trackName.setText(title);
 		SwingWorker<String, String> worker = new SwingWorker<String, String>() {
 
 			@Override

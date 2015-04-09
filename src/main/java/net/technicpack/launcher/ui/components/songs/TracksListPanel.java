@@ -64,7 +64,7 @@ public class TracksListPanel extends TintablePanel {
 		scrollPane.getViewport().setOpaque(false);
 		scrollPane.getVerticalScrollBar().setUI(
 				new SimpleScrollbarUI(LauncherFrame.COLOR_SCROLL_TRACK,
-						LauncherFrame.COLOR_SCROLL_THUMB));
+						LauncherFrame.COLOR_WHITE_TEXT));
 		scrollPane.getVerticalScrollBar().setPreferredSize(
 				new Dimension(10, 10));
 		scrollPane.getVerticalScrollBar().setUnitIncrement(12);
@@ -77,6 +77,41 @@ public class TracksListPanel extends TintablePanel {
 				1.0, GridBagConstraints.WEST, GridBagConstraints.BOTH,
 				new Insets(0, 0, 0, 0), 0, 0));
 
+	}
+	
+	// Called before tracks are loaded
+	public void startUpdateTracks() {
+		trackList.removeAll();
+		trackList.add(Box.createHorizontalStrut(294), new GridBagConstraints(0,
+				0, 1, 1, 1, 0, GridBagConstraints.WEST,
+				GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+
+		int r = 12;
+		int g = 94;
+		int b = 143;
+		
+		GridBagConstraints constraints = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
+				GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
+				new Insets(0, 0, 0, 0), 0, 0);
+		JButton button = new JButton("Loading user's likes ...");
+		button.setContentAreaFilled(false);
+		button.setFocusPainted(false);
+		button.setBorder(new LineBorder(new Color(0, 0, 0, 50)));
+		button.setOpaque(true);
+		button.setBackground(LauncherFrame.COLOR_BLUE);
+		button.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 16));
+		button.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+		button.setPreferredSize(new Dimension(
+				button.getPreferredSize().width, 40));
+		trackList.add(button, constraints);
+		
+		constraints.gridy++;
+
+        constraints.weighty = 1.0;
+        trackList.add(Box.createGlue(), constraints);
+		
+		revalidate();
+		repaint();
 	}
 
 	public void updateTracks(List<TrackInfo> newTracks) {
