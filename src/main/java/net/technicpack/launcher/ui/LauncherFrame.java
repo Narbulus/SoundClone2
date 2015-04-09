@@ -47,6 +47,7 @@ import net.technicpack.launcher.launch.Installer;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.ui.components.OptionsDialog;
+import net.technicpack.launcher.ui.components.songs.DownloadPanel;
 import net.technicpack.launcher.ui.components.songs.SongsInfoPanel;
 import net.technicpack.launcher.ui.components.songs.TracksListPanel;
 import net.technicpack.launcher.ui.controls.HeaderTab;
@@ -150,6 +151,7 @@ public class LauncherFrame extends DraggableFrame implements
 
 	private TracksListPanel tracksPanel;
 	private SongsInfoPanel songsInfoPanel;
+	private DownloadPanel downloadPanel;
 
 	private DownloadLikes downloader;
 
@@ -418,7 +420,9 @@ public class LauncherFrame extends DraggableFrame implements
 		
 		JPanel downloadHost = new JPanel();
 		downloadHost.setBackground(COLOR_CENTRAL_BACK_OPAQUE);
-		infoSwap.add(downloadHost, TAB_DOWNLOAD);
+		downloadPanel = new DownloadPanel(resources, this);
+		
+		infoSwap.add(downloadPanel, TAB_DOWNLOAD);
 
 		footer = new TintablePanel();
 		footer.setTintColor(COLOR_CENTRAL_BACK);
@@ -478,6 +482,27 @@ public class LauncherFrame extends DraggableFrame implements
 
 	public void selectTrack(TrackInfo track) {
 		songsInfoPanel.updateTrack(track);
+	}
+	
+	public void flagTrackForDownload(TrackInfo track) {
+		downloadPanel.addTrack(track);
+	}
+	
+	public void unFlagTrackForDownload(TrackInfo track) {
+		downloadPanel.removeTrack(track);
+	}
+	
+	public String downloadButtonPressed() throws JsonSyntaxException, Exception {
+		if (!downloader.isThreadRunning()) {
+			downloader.downloadTracks("narbulus", "/here", downloadPanel.getTracks(), downloadPanel);
+			return "CANCEL";
+		}else{
+			return "START";
+		}
+	}
+	
+	public void onDownloadFinished() {
+		downloadPanel.onDownloadFinished();
 	}
 
 	@Override

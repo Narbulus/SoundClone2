@@ -14,17 +14,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.ExecutionException;
 
 import javax.imageio.ImageIO;
 import javax.swing.SwingWorker;
-import javax.swing.text.BadLocationException;
 
 import net.brassbeluga.sound.gson.Configuration;
 import net.brassbeluga.sound.gson.RedirectResponse;
 import net.brassbeluga.sound.gson.TrackInfo;
 import net.brassbeluga.sound.gson.TrackStreams;
 import net.brassbeluga.sound.gson.UserInfo;
+import net.technicpack.launcher.ui.components.songs.DownloadPanel;
 import net.technicpack.launcher.ui.components.songs.SongsInfoPanel;
 import net.technicpack.launcher.ui.components.songs.TracksListPanel;
 import net.technicpack.ui.lang.ResourceLoader;
@@ -213,7 +212,7 @@ public class DownloadLikes {
 	 * @throws Exception 
 	 * @throws JsonSyntaxException 
 	 */
-	public void downloadTracks(String user, String downloadPath) throws JsonSyntaxException, Exception {
+	public void downloadTracks(String user, String downloadPath, final List<TrackInfo> tracks, final DownloadPanel downloadPanel) throws JsonSyntaxException, Exception {
 		// If a new path is specified, clear history on config so new files are downloaded
 		if (user.equals(currentConfig.getUsername()) && !downloadPath.equals(currentConfig.getDownloadPath())) {
 			currentConfig.setDownloadPath(downloadPath);
@@ -230,10 +229,12 @@ public class DownloadLikes {
 				Mp3Downloader download = new Mp3Downloader(template, currentConfig, tempDir);
 				int i = 1;
 				int downloads = 0;
-				for (TrackInfo t : likes) {
+				System.out.println("Size : " + tracks.size());
+				for (TrackInfo t : tracks) {
+					System.out.println("Loop " + i);
 					if (threadRunning) {
-						if (t.getDownload()) {
-							publish(i + "/" + likes.size() + " - " + t.getTitle());
+						//if (t.getDownload()) {
+							publish(i + "/" + tracks.size() + " - " + t.getTitle());
 							tStream = gson.fromJson(load.getResponse("https://api.soundcloud.com/i1/tracks/" + t.getId() + "/streams?client_id=" + clientID)
 									, TrackStreams.class);
 							String mediaPath = tStream.getHttp_mp3_128_url();
@@ -245,19 +246,21 @@ public class DownloadLikes {
 									t.setArtworkURL(uploader.getAvatarURL());
 								}
 								if (download.generateMp3(mediaPath, t)) {
-									load.writeToHistory(t.getId());
+									downloadPanel.setStatus(t.getTitle() + " downloaded successfully");
+									//load.writeToHistory(t.getId());
+									//downloadPanel.removeTrack(t);
 									downloads++;
 								}
 							}
-						}
+						//}
 						i++;
 					}
 				}
 			
-				// update the current configuration's history
+				/* update the current configuration's history
 				load.closeHistory();
 				
-				// write the configurations to file
+				 write the configurations to file
 				PrintStream output = new PrintStream(tempDir + "/config");
 				
 				output.println(clientID);
@@ -269,14 +272,14 @@ public class DownloadLikes {
 				
 				output.flush();
 				output.close();
+				*/
 				return downloads + " songs downloaded successfully!";
 			}
 			
 			@Override
 			protected void done() {
-				//gui.updateStatus(get(), SoundCloneGUI.StatusType.COMPLETE);
-				//gui.unlockControls();
-				threadRunning = false;
+				downloadPanel.onDownloadFinished();
+				//threadRunning = false;
 			}
 			
 			@Override
