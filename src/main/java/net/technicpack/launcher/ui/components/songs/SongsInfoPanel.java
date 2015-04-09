@@ -77,9 +77,11 @@ public class SongsInfoPanel extends TintablePanel {
 		usernameField = new WatermarkTextField("username",
 				LauncherFrame.COLOR_WHITE_TEXT);
 		usernameField.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
-		usernameField.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 16));
+		usernameField.setFont(resources
+				.getFont(ResourceLoader.FONT_RALEWAY, 16));
 		usernameField.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 		usernameField.setBackground(LauncherFrame.COLOR_BUTTON_BLUE);
+		usernameField.setCaretColor(LauncherFrame.COLOR_WHITE_TEXT);
 		usernameField.setPreferredSize(new Dimension(200, 40));
 		((AbstractDocument) usernameField.getDocument())
 				.setDocumentFilter(new DocumentFilter() {
@@ -142,7 +144,7 @@ public class SongsInfoPanel extends TintablePanel {
 		userInfo.add(usernameContainer);
 
 		trackInfo.setLayout(new BoxLayout(trackInfo, BoxLayout.Y_AXIS));
-		//trackInfo.add(Box.createVerticalStrut(SONGS_INFO_HEIGHT));
+		// trackInfo.add(Box.createVerticalStrut(SONGS_INFO_HEIGHT));
 		trackInfo.setBackground(LauncherFrame.COLOR_BLUE);
 		trackInfo.setBorder(BorderFactory.createEmptyBorder(25, 15, 30, 15));
 		trackName = new JLabel("Name of track");
@@ -162,7 +164,7 @@ public class SongsInfoPanel extends TintablePanel {
 		trackArt.setContentAreaFilled(false);
 		trackArt.setFocusPainted(false);
 		trackInfo.add(trackArt);
-		
+
 	}
 
 	public void updateTrack(final TrackInfo track) {
@@ -171,7 +173,7 @@ public class SongsInfoPanel extends TintablePanel {
 		if (split.length > 1) {
 			trackArtist.setText(split[0]);
 			title = split[1];
-		}else{
+		} else {
 			trackArtist.setText("");
 			title = split[0];
 		}
@@ -183,16 +185,17 @@ public class SongsInfoPanel extends TintablePanel {
 			@Override
 			protected String doInBackground() {
 				Image image = null;
-		        try {
-		            URL url = new URL(track.getArtworkURL().replace("-large", "-t300x300"));
-		            image = ImageIO.read(url);
-		        } catch (IOException e) {
-		        	e.printStackTrace();
-		        }
-		        trackArt.setIcon(new ImageIcon(image));
-		        return "";
+				try {
+					URL url = new URL(track.getArtworkURL().replace("-large",
+							"-t300x300"));
+					image = ImageIO.read(url);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				trackArt.setIcon(new ImageIcon(image));
+				return "";
 			}
-			
+
 			@Override
 			protected void done() {
 				revalidate();
