@@ -85,6 +85,7 @@ public class LauncherFrame extends DraggableFrame implements
 	public static final Color COLOR_RED = new Color(229, 0, 0);
 	public static final Color COLOR_GREEN = new Color(90, 184, 96);
 	public static final Color COLOR_BLUE = new Color(16, 108, 163);
+	public static final Color COLOR_BLUE_ALT = new Color(15, 100, 150);
 	public static final Color COLOR_BLUE_DARKER = new Color(12, 94, 145);
 	public static final Color COLOR_WHITE_TEXT = new Color(208, 208, 208);
 	public static final Color COLOR_DIM_TEXT = new Color(160, 160, 160);

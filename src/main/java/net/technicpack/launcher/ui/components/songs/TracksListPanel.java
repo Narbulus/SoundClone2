@@ -93,6 +93,7 @@ public class TracksListPanel extends TintablePanel {
 		GridBagConstraints constraints = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
 				GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
 				new Insets(0, 0, 0, 0), 0, 0);
+		
 		JButton button = new JButton("Loading user's likes ...");
 		button.setContentAreaFilled(false);
 		button.setFocusPainted(false);
@@ -103,6 +104,7 @@ public class TracksListPanel extends TintablePanel {
 		button.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 		button.setPreferredSize(new Dimension(
 				button.getPreferredSize().width, 40));
+		
 		trackList.add(button, constraints);
 		
 		constraints.gridy++;
@@ -129,8 +131,9 @@ public class TracksListPanel extends TintablePanel {
 		GridBagConstraints constraints = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
 				GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
 				new Insets(0, 0, 0, 0), 0, 0);
-		
+		int i = 0;
 		for (TrackInfo t : tracks) {
+			/*
 			final JButton button = new JButton(t.getTitle());
 			final TrackInfo info = t;
 			button.setContentAreaFilled(false);
@@ -167,7 +170,12 @@ public class TracksListPanel extends TintablePanel {
 					button.setBackground(LauncherFrame.COLOR_BLUE);
 				}
 			});
-			trackList.add(button, constraints);
+			*/
+			if (i == 0)
+				parent.selectTrack(t);
+			TrackEntry track = new TrackEntry(resources, t, i, parent);
+			trackList.add(track, constraints);
+			i++;
 			constraints.gridy++;
 		}
 		
