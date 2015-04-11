@@ -26,6 +26,8 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Random;
@@ -317,7 +319,7 @@ public class LauncherFrame extends DraggableFrame implements
 				selectTab(e.getActionCommand());
 			}
 		};
-		
+
 
 		songsTab = new HeaderTab("SONGS", resources);
 		songsTab.addActionListener(tabListener);
@@ -333,6 +335,22 @@ public class LauncherFrame extends DraggableFrame implements
 		tabFlashTimer.setActionCommand(DOWNLOAD_TRACK_COMMAND);
 		header.add(downloadTab);
 
+		/*
+		JLabel flag = new JLabel(resources.getIcon("track_idle.png"));
+		flag.setOpaque(true);
+		flag.setVisible(true);
+		flag.set
+		
+		flag.setBounds(50, 50,50, 50);*/
+		
+		FlyerGlassPane fg = new FlyerGlassPane(resources);
+		setGlassPane(fg);
+		fg.setVisible(true);
+		fg.setOpaque(false);
+		
+		
+		
+		
 		header.add(Box.createHorizontalGlue());
 
 		JPanel rightHeaderPanel = new JPanel();
@@ -498,15 +516,19 @@ public class LauncherFrame extends DraggableFrame implements
 		songsInfoPanel.updateTrack(track);
 	}
 	
-	public void flagTrackForDownload(TrackInfo track) {
+	public void flagTrackForDownload(TrackInfo track, Point flagLoc) {
 		downloadPanel.addTrack(track);
+		((FlyerGlassPane) getGlassPane()).setFlyerLocation(flagLoc);
+		
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				repaint();
+			}
+		});
 		
 		((DownloadHeaderTab) downloadTab).incDownloads();
 		beginDownloadTabFlash();
-		
-		//downloadTab.setBackground(new Color(255,255,255));
-		//downloadTab.setOpaque(true);
-
 	}
 	
 	public void unFlagTrackForDownload(TrackInfo track) {
@@ -619,5 +641,18 @@ public class LauncherFrame extends DraggableFrame implements
 					resources.getImage("download_button.png"),
 					LauncherFrame.COLOR_BLUE)));
 		}
+	}
+	
+	public Point getAbsolutePosition(Component component) {
+		int x = 0;
+		int y = 0;
+		do { 
+			x += component.getX();
+			y += component.getY();
+			component = component.getParent();
+		}
+		while (component != this);
+		
+		return new Point(x,y);
 	}
 }

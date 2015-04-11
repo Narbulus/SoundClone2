@@ -18,6 +18,7 @@ import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.ui.lang.ResourceLoader;
 
 public class TrackEntry extends JPanel {
+	public static final int DOWNLOAD_ICON_WIDTH = 120;
 	
 	private TrackInfo info;
 	private boolean downloadFlag;
@@ -93,7 +94,7 @@ public class TrackEntry extends JPanel {
 		flag.setContentAreaFilled(false);
 		flag.setFocusPainted(false);
 		flag.setOpaque(false);
-		flag.setPreferredSize(new Dimension(120, flag.getPreferredSize().height));
+		flag.setPreferredSize(new Dimension(DOWNLOAD_ICON_WIDTH, flag.getPreferredSize().height));
 		flag.setBorder(new MatteBorder(0, 4, 0, 0, altColor));
 		//flag.addActionListener(new DownloadFlyerListener(parent, resources));
 		flag.addMouseListener(new MouseListener() {
@@ -111,7 +112,7 @@ public class TrackEntry extends JPanel {
 				}else{
 					downloadFlag = true;
 					flag.setIcon(resources.getIcon("track_download.png"));
-					parent.flagTrackForDownload(info);
+					parent.flagTrackForDownload(info, parent.getAbsolutePosition(flag));
 				}
 			}
 
