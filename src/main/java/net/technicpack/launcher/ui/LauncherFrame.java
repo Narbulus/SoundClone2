@@ -516,6 +516,7 @@ public class LauncherFrame extends DraggableFrame implements
 	public String downloadButtonPressed(String path) throws JsonSyntaxException, Exception {
 		if (!downloader.isThreadRunning()) {
 			downloader.downloadTracks("narbulus", path, downloadPanel.getTracks(), downloadPanel);
+			downloadPanel.updateInfo();
 			return "CANCEL";
 		}else{
 			return "START";

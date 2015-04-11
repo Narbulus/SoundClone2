@@ -252,7 +252,7 @@ public class DownloadLikes {
 		// gui.updateStatus("Intializing downloads",
 		// SoundCloneGUI.StatusType.PROCESS);
 		// Dispatch worker to download songs in background and update status
-		SwingWorker<String, String> worker = new SwingWorker<String, String>() {
+		SwingWorker<String, TrackInfo> worker = new SwingWorker<String, TrackInfo>() {
 
 			@Override
 			protected String doInBackground() throws Exception {
@@ -264,12 +264,8 @@ public class DownloadLikes {
 				int downloads = 0;
 				System.out.println("Size : " + tracks.size());
 				for (TrackInfo t : tracks) {
-					// downloadPanel.setStatus("Downloading to " +
-					// downloadPath);
-					System.out.println("Track " + t.getDownload());
-					System.out.println("Loop " + i);
 					if (threadRunning) {
-						publish(i + "/" + tracks.size() + " - " + t.getTitle());
+						publish(t);
 						tStream = gson
 								.fromJson(
 										load.getResponse("https://api.soundcloud.com/i1/tracks/"
@@ -411,8 +407,8 @@ public class DownloadLikes {
 			}
 
 			@Override
-			protected void process(List<String> chunks) {
-				String recent = chunks.get(chunks.size() - 1);
+			protected void process(List<TrackInfo> chunks) {
+				downloadPanel.setCurrentTrack(chunks.get(chunks.size() - 1));
 			}
 		};
 
