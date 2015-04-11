@@ -1,5 +1,6 @@
 package net.technicpack.launcher.ui.components.songs;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -7,6 +8,8 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -21,14 +24,16 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
+import javax.swing.UIManager;
 
 import net.brassbeluga.sound.gson.TrackInfo;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 import net.technicpack.ui.lang.ResourceLoader;
 
-public class DownloadPanel extends JPanel {
+public class DownloadPanel extends JPanel implements PropertyChangeListener {
 
 	public static final int DOWNLOAD_HEIGHT = 200;
 
@@ -37,7 +42,7 @@ public class DownloadPanel extends JPanel {
 
 	private JPanel infoPanel;
 	private JLabel trackIcon;
-	private JLabel progress;
+	private JProgressBar progress;
 	private JButton button;
 	private JButton browseButton;
 
@@ -85,18 +90,23 @@ public class DownloadPanel extends JPanel {
 
 		infoPanel = new JPanel();
 		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.X_AXIS));
-		infoPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
+		infoPanel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
 		infoPanel.setPreferredSize(new Dimension(getPreferredSize().width,
 				DOWNLOAD_HEIGHT));
 		infoPanel.setBackground(LauncherFrame.COLOR_BLUE_DARKER);
 
 		trackIcon = new JLabel(resources.getIcon("default_track_small.png"));
 
-		progress = new JLabel("No songs queued for download");
-		progress.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 24));
-		progress.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+		progress = new JProgressBar(0, 100);
+		progress.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 34));
+		progress.setStringPainted(true);
+		progress.setForeground(LauncherFrame.COLOR_GREEN);
+		progress.setBackground(Color.white);
+		progress.setPreferredSize(new Dimension(400, 200));
 
-		button = new JButton("START");
+		button = new JButton("CANCEL");
+		button.setPreferredSize(new Dimension(200, button.getPreferredSize().height));
+		button.setText("START");
 		button.setContentAreaFilled(false);
 		button.setFocusPainted(false);
 		// button.setBorder(new LineBorder(new Color(0, 0, 0, 50)));
@@ -113,7 +123,10 @@ public class DownloadPanel extends JPanel {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				try {
-					button.setText(parent.downloadButtonPressed(browse.getSelectedFile().getAbsolutePath()));
+					String path = browse.getCurrentDirectory().getAbsolutePath();
+					if (browse.getSelectedFile() != null)
+						path = browse.getSelectedFile().getAbsolutePath();
+					button.setText(parent.downloadButtonPressed(path));
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
@@ -214,14 +227,6 @@ public class DownloadPanel extends JPanel {
 		        trackIcon.setIcon(new ImageIcon(image));
 			}
 		}
-		
-		if (tracks.size() > 1) {
-			progress.setText(tracks.size() + " tracks teady to download");
-		} else if (tracks.size() == 1) {
-			progress.setText("One track ready to download");
-		}else{
-			progress.setText("No tracks ready to download");
-		}
 
 		GridBagConstraints constraints = new GridBagConstraints(0, 0, 1, 1,
 				1.0, 0.0, GridBagConstraints.WEST,
@@ -246,13 +251,17 @@ public class DownloadPanel extends JPanel {
 		repaint();
 
 	}
-	
-	public void setStatus(String status) {
-		progress.setText(status);
-	}
 
 	public void onDownloadFinished() {
 		button.setText("START");
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		if ("progress" == evt.getPropertyName()) {
+            int progressAmt = (Integer) evt.getNewValue();
+            progress.setValue(progressAmt);
+        } 
 	}
 
 }

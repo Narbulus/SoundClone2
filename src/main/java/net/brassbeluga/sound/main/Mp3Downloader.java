@@ -6,12 +6,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
 import javax.imageio.ImageIO;
+import javax.swing.SwingWorker;
 
 import net.brassbeluga.sound.gson.Configuration;
 import net.brassbeluga.sound.gson.TrackInfo;
@@ -19,7 +21,6 @@ import net.brassbeluga.sound.gson.TrackInfo;
 import com.mpatric.mp3agic.ID3Wrapper;
 import com.mpatric.mp3agic.ID3v1Tag;
 import com.mpatric.mp3agic.ID3v2;
-import com.mpatric.mp3agic.ID3v22Tag;
 import com.mpatric.mp3agic.ID3v23Tag;
 import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
@@ -31,6 +32,8 @@ public class Mp3Downloader {
 	private ID3v2 template;
 	private Configuration config;
 	private String tempDir;
+	
+	private static final long CHUNK_SIZE = 1000;
 
 	public Mp3Downloader(ID3v2 template, Configuration config, String tempDir) {
 		this.template = template;
@@ -58,17 +61,19 @@ public class Mp3Downloader {
 	 * @throws CannotReadException
 	 * @throws CannotWriteException 
 	 */
-	public boolean generateMp3(String mediaPath, String downloadPath, TrackInfo track) throws IOException, UnsupportedTagException, InvalidDataException, NotSupportedException {
+	public boolean generateMp3(String mediaPath, String downloadPath, TrackInfo track, SwingWorker worker) throws IOException, UnsupportedTagException, InvalidDataException, NotSupportedException {
 		
 		if (mediaPath != null) {
 			// Download the mp3 file
 			URL website = new URL(mediaPath);
+			HttpURLConnection connect = (HttpURLConnection) website.openConnection();
+			connect.setRequestMethod("HEAD");
+			InputStream urlIn = connect.getInputStream();
+			long total = connect.getContentLengthLong();
+			System.out.println(total);
+			
 			ReadableByteChannel rbc = null;
-			try {
-				rbc = Channels.newChannel(website.openStream());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			rbc = Channels.newChannel(urlIn);
 			String title = track.getTitle();
 			String fuzzTitle = track.getTitle();
 			fuzzTitle = fuzzTitle.replaceAll("[<>?*:|/\\\\]", " ");
@@ -83,7 +88,15 @@ public class Mp3Downloader {
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
-			fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+			
+			long pos = 0;
+			long read;
+			do {
+				read = fos.getChannel().transferFrom(rbc, pos, CHUNK_SIZE);
+				pos += read;
+				
+			} while (read > 0);
+			
 			fos.close();
 			
 			File f = new File(tempPath);
