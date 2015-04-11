@@ -230,7 +230,8 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 
 		add(infoPanel);
 		
-		onDownloadFinished();
+		progressInfo.setText("No tracks selected for download");
+		setBrowseInfo();
 	}
 	
 	public void setProgressInfo(String info) {
@@ -265,6 +266,8 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 				downloadIndex++;
 				trackList.getComponent(downloadIndex).setBackground(LauncherFrame.COLOR_GREY_TEXT);
 				updateInfo();
+				parent.onTrackDownloaded();
+				rebuildUI();
 			}
 		}
 	}
@@ -285,11 +288,11 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 		trackList.removeAll();
 		
 		if (tracks.size() > 0) {
-			TrackInfo t = tracks.get(0);
+			TrackInfo t = tracks.get(downloadIndex);
 			if (t.getArtworkURL() != null) {
 				Image image = null;
 		        try {
-		            URL url = new URL(tracks.get(0).getArtworkURL());
+		            URL url = new URL(t.getArtworkURL());
 		            image = ImageIO.read(url);
 		        } catch (IOException e) {
 		        	e.printStackTrace();
@@ -305,6 +308,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 		for (TrackInfo t : tracks) {
 			JLabel label;
 			if (i == downloadIndex) {
+				System.out.println("Load bar on " + i + " & " + t.getTitle());
 				label = trackProgress;
 				trackProgress.setProgress(0);
 				trackProgress.setText(t.getTitle());
@@ -327,6 +331,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 	}
 
 	public void onDownloadFinished() {
+		parent.onTrackDownloaded();
 		downloadIndex = 0;
 		if (tracks.size() > 0)
 			progressInfo.setText(tracks.size() + " tracks successfully downloaded!");
@@ -347,6 +352,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 		if ("progress" == evt.getPropertyName()) {
             int progressAmt = (Integer) evt.getNewValue();
             trackProgress.setProgress(progressAmt);
+            progress.setValue((int) (downloadIndex / (tracks.size() * 1.0) * 100 + (progressAmt / (tracks.size() * 1.0))));
         } 
 	}
 

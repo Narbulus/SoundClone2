@@ -566,6 +566,10 @@ public class LauncherFrame extends DraggableFrame implements
 			}
 		});
 	}
+	
+	public void onTrackDownloaded() {
+		((DownloadHeaderTab)downloadTab).decDownloads();
+	}
 
 	@Override
 	public void userChanged(MojangUser mojangUser) {

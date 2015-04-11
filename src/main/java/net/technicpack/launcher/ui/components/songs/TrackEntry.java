@@ -15,7 +15,6 @@ import javax.swing.border.MatteBorder;
 
 import net.brassbeluga.sound.gson.TrackInfo;
 import net.technicpack.launcher.ui.LauncherFrame;
-import net.technicpack.launcher.ui.listeners.DownloadFlyerListener;
 import net.technicpack.ui.lang.ResourceLoader;
 
 public class TrackEntry extends JPanel {
@@ -96,7 +95,7 @@ public class TrackEntry extends JPanel {
 		flag.setOpaque(false);
 		flag.setPreferredSize(new Dimension(120, flag.getPreferredSize().height));
 		flag.setBorder(new MatteBorder(0, 4, 0, 0, altColor));
-		flag.addActionListener(new DownloadFlyerListener(parent, resources));
+		//flag.addActionListener(new DownloadFlyerListener(parent, resources));
 		flag.addMouseListener(new MouseListener() {
 
 			@Override
