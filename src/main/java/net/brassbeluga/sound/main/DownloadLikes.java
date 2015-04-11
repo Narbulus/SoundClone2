@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.ExecutionException;
 
 import javax.imageio.ImageIO;
 import javax.swing.SwingWorker;
@@ -46,6 +47,8 @@ public class DownloadLikes {
 	private Boolean threadRunning;
 	private String tempDir;
 	private String defaultDownload;
+	
+	private static final int TRACK_INFO_REQUEST_SIZE = 50;
 	
 	public DownloadLikes(ResourceLoader resources) throws Exception {
 		// Create download locations if nonexistant
@@ -138,11 +141,11 @@ public class DownloadLikes {
 		//gui.updateStatus("Loading user's likes");
 		
 		// Dispatch worker to download songs in background and update status
-		SwingWorker<String, String> worker = new SwingWorker<String, String>() {
-
+		SwingWorker<List<TrackInfo>, List<TrackInfo>> worker = new SwingWorker<List<TrackInfo>, List<TrackInfo>>() {
+			
 			@SuppressWarnings("unchecked")
 			@Override
-			protected String doInBackground() throws JsonSyntaxException, Exception {
+			protected List<TrackInfo> doInBackground() throws JsonSyntaxException, Exception {
 				String redirect = "";
 				try {
 					redirect = load.getResponse("http://api.soundcloud.com/resolve.json?url=http://soundcloud.com/" + user
@@ -173,31 +176,26 @@ public class DownloadLikes {
 				
 				likes = new ArrayList<TrackInfo>();
 				
-				for (int i = 0; i < info.getFavoritesCount(); i += 50) {
+				for (int i = 0; i < info.getFavoritesCount(); i += TRACK_INFO_REQUEST_SIZE) {
 					String partLikes = load.getResponse("http://api.soundcloud.com/users/" + info.getId() + "/favorites.json?client_id=" + clientID + "&offset=" + i);
-					likes.addAll((Collection<? extends TrackInfo>) new Gson().fromJson(partLikes, listType));
+					List<TrackInfo> newLikes = new Gson().fromJson(partLikes, listType);
+					likes.addAll(newLikes);
+					System.out.println("Likes size " + likes.size());
+					publish(newLikes);
 				}
 				
-				for (TrackInfo t : likes) {
-					if (load.isInHistory(t.getId()) || t.getDuration() > maxDuration)
-						t.setDownload(false);
-				}
-				
-				int diff = (likes.size() - load.getHistoryLength());
-				if (diff < 0) 
-					diff = 0;
-				return likes.size() + " tracks found!" + "\n" + diff + " new tracks";
+				return likes;
+			}
+
+			@Override
+			protected void done() {
+				trackPanel.onFinishedLoading();
+				threadRunning = false;
 			}
 			
 			@Override
-			protected void done() {
-				for (TrackInfo t : likes) {
-					int seconds = t.getDuration() / 1000;
-					int minutes = seconds / 60;
-					//Object[] row = new Object[] { t.getTitle(), minutes + ":" + seconds % 60, t.getDownload() };
-				}
-				trackPanel.updateTracks(likes);
-				threadRunning = false;
+			protected void process(List<List<TrackInfo>> tracks) {
+				trackPanel.addNewTracks(tracks.get(tracks.size() - 1));
 			}
 		
 		};

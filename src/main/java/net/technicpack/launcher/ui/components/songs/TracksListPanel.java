@@ -12,10 +12,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -34,6 +36,7 @@ public class TracksListPanel extends TintablePanel {
 
 	private ResourceLoader resources;
 	private JPanel trackList;
+	private JLabel loading;
 	private JScrollPane scrollPane;
 	private List<TrackInfo> tracks;
 
@@ -50,10 +53,10 @@ public class TracksListPanel extends TintablePanel {
 	private void initComponents() {
 		tracks = new ArrayList<TrackInfo>();
 		
-		setLayout(new BorderLayout());
+		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
 		trackList = new JPanel();
-		trackList.setLayout(new GridBagLayout());
+		trackList.setLayout(new BoxLayout(trackList, BoxLayout.Y_AXIS));
 		trackList.setBackground(LauncherFrame.COLOR_BLUE_DARKER);
 
 		scrollPane = new JScrollPane(trackList,
@@ -68,125 +71,56 @@ public class TracksListPanel extends TintablePanel {
 		scrollPane.getVerticalScrollBar().setPreferredSize(
 				new Dimension(10, 10));
 		scrollPane.getVerticalScrollBar().setUnitIncrement(12);
+		
+		loading = new JLabel("Loading user's likes...");
+		loading.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 20));
+		loading.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+		loading.setPreferredSize(new Dimension(
+				loading.getPreferredSize().width, 40));
+		loading.setAlignmentX(CENTER_ALIGNMENT);
 
-		add(scrollPane, BorderLayout.CENTER);
-		trackList.add(Box.createHorizontalStrut(294), new GridBagConstraints(0,
-				0, 1, 1, 1, 0, GridBagConstraints.WEST,
-				GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		trackList.add(Box.createGlue(), new GridBagConstraints(0, 1, 1, 1, 1.0,
-				1.0, GridBagConstraints.WEST, GridBagConstraints.BOTH,
-				new Insets(0, 0, 0, 0), 0, 0));
+		add(scrollPane);
 
 	}
 	
 	// Called before tracks are loaded
 	public void startUpdateTracks() {
-		trackList.removeAll();
-		trackList.add(Box.createHorizontalStrut(294), new GridBagConstraints(0,
-				0, 1, 1, 1, 0, GridBagConstraints.WEST,
-				GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-
-		int r = 12;
-		int g = 94;
-		int b = 143;
+		trackList.removeAll();		
 		
-		GridBagConstraints constraints = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
-				GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
-				new Insets(0, 0, 0, 0), 0, 0);
-		
-		JButton button = new JButton("Loading user's likes ...");
-		button.setContentAreaFilled(false);
-		button.setFocusPainted(false);
-		button.setBorder(new LineBorder(new Color(0, 0, 0, 50)));
-		button.setOpaque(true);
-		button.setBackground(LauncherFrame.COLOR_BLUE);
-		button.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 16));
-		button.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-		button.setPreferredSize(new Dimension(
-				button.getPreferredSize().width, 40));
-		
-		trackList.add(button, constraints);
-		
-		constraints.gridy++;
-
-        constraints.weighty = 1.0;
-        trackList.add(Box.createGlue(), constraints);
+		trackList.add(loading);
+        trackList.add(Box.createGlue());
 		
 		revalidate();
 		repaint();
 	}
 
-	public void updateTracks(List<TrackInfo> newTracks) {
-		tracks.clear();
+	public void addNewTracks(List<TrackInfo> newTracks) {
+		if (trackList.getComponentCount() > 0)
+			// Remove glue
+			trackList.remove(trackList.getComponentCount() - 1);
+
 		tracks.addAll(newTracks);
-		trackList.removeAll();
-		trackList.add(Box.createHorizontalStrut(294), new GridBagConstraints(0,
-				0, 1, 1, 1, 0, GridBagConstraints.WEST,
-				GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-
-		int r = 12;
-		int g = 94;
-		int b = 143;
 		
-		GridBagConstraints constraints = new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
-				GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
-				new Insets(0, 0, 0, 0), 0, 0);
-		int i = 0;
-		for (TrackInfo t : tracks) {
-			/*
-			final JButton button = new JButton(t.getTitle());
-			final TrackInfo info = t;
-			button.setContentAreaFilled(false);
-			button.setFocusPainted(false);
-			button.setBorder(new LineBorder(new Color(0, 0, 0, 50)));
-			button.setOpaque(true);
-			button.setBackground(LauncherFrame.COLOR_BLUE);
-			button.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 16));
-			button.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-			button.setPreferredSize(new Dimension(
-					button.getPreferredSize().width, 40));
-			button.addMouseListener(new MouseListener() {
-
-				@Override
-				public void mouseClicked(MouseEvent e) {
-				}
-
-				@Override
-				public void mousePressed(MouseEvent e) {
-					parent.selectTrack(info);
-				}
-
-				@Override
-				public void mouseReleased(MouseEvent e) {	
-				}
-
-				@Override
-				public void mouseEntered(MouseEvent e) {
-					button.setBackground(LauncherFrame.COLOR_BUTTON_BLUE);
-				}
-
-				@Override
-				public void mouseExited(MouseEvent e) {
-					button.setBackground(LauncherFrame.COLOR_BLUE);
-				}
-			});
-			*/
+		int i = tracks.size();
+		for (TrackInfo t : newTracks) {
 			if (i == 0)
 				parent.selectTrack(t);
 			TrackEntry track = new TrackEntry(resources, t, i, parent);
-			trackList.add(track, constraints);
+			trackList.add(track);
 			i++;
-			constraints.gridy++;
 		}
-		
-		trackList.add(Box.createHorizontalStrut(294), constraints);
-        constraints.gridy++;
 
-        constraints.weighty = 1.0;
-        trackList.add(Box.createGlue(), constraints);
+        trackList.add(Box.createGlue());
 		
 		revalidate();
 		repaint();
-
 	}
+	
+	public void onFinishedLoading() {
+		trackList.remove(0);
+		
+		revalidate();
+		repaint();
+	}
+	
 }
