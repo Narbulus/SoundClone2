@@ -164,6 +164,7 @@ public class LauncherFrame extends DraggableFrame implements
 
 	private String currentTabName;
 	private Timer tabFlashTimer;
+	private TabFlashListener tabFlashListener;
 
 	public LauncherFrame(final ResourceLoader resources,
 			final ImageRepository<IUserType> skinRepository,
@@ -325,10 +326,9 @@ public class LauncherFrame extends DraggableFrame implements
 		downloadTab = new DownloadHeaderTab("DOWNLOAD", resources);
 		downloadTab.addActionListener(tabListener);
 		downloadTab.setActionCommand(TAB_DOWNLOAD);
-		//downloadTab.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		ActionListener tabFlasher = new TabFlashListener(COLOR_BLUE, downloadTab, this);
-		downloadTab.addActionListener(tabFlasher);
-		tabFlashTimer = new Timer(TAB_FLAST_INTERVAL, tabFlasher);
+		tabFlashListener = new TabFlashListener(COLOR_BLUE, downloadTab, this);
+		downloadTab.addActionListener(tabFlashListener);
+		tabFlashTimer = new Timer(TAB_FLAST_INTERVAL, tabFlashListener);
 		tabFlashTimer.setActionCommand(DOWNLOAD_TRACK_COMMAND);
 		header.add(downloadTab);
 
@@ -500,6 +500,7 @@ public class LauncherFrame extends DraggableFrame implements
 	public void flagTrackForDownload(TrackInfo track) {
 		downloadPanel.addTrack(track);
 		
+		((DownloadHeaderTab) downloadTab).incDownloads();
 		beginDownloadTabFlash();
 		
 		//downloadTab.setBackground(new Color(255,255,255));
@@ -509,6 +510,7 @@ public class LauncherFrame extends DraggableFrame implements
 	
 	public void unFlagTrackForDownload(TrackInfo track) {
 		downloadPanel.removeTrack(track);
+		((DownloadHeaderTab) downloadTab).decDownloads();
 	}
 	
 	public String downloadButtonPressed(String path) throws JsonSyntaxException, Exception {
@@ -526,6 +528,7 @@ public class LauncherFrame extends DraggableFrame implements
 	
 	public void beginDownloadTabFlash() {
 		downloadTab.setOpaque(true);
+		tabFlashListener.reset();
 		tabFlashTimer.start();
 	}
 	

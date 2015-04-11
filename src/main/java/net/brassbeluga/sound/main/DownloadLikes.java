@@ -195,7 +195,7 @@ public class DownloadLikes {
 				Type listType = new TypeToken<ArrayList<TrackInfo>>() {
 				}.getType();
 
-				likes = new ArrayList<TrackInfo>();
+				likes = new ArrayList<>();
 
 				for (int i = 0; i < info.getFavoritesCount(); i += TRACK_INFO_REQUEST_SIZE) {
 					String partLikes = load
