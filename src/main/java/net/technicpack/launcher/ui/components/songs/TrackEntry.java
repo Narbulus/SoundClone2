@@ -82,6 +82,7 @@ public class TrackEntry extends JPanel {
 		setBackground(backColor);
 		
 		
+		
 		title = new JLabel(info.getTitle());
 		title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 16));
 		title.setForeground(LauncherFrame.COLOR_WHITE_TEXT);

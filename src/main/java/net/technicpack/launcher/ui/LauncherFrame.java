@@ -38,6 +38,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 import javax.swing.WindowConstants;
 
 import net.brassbeluga.sound.gson.TrackInfo;
@@ -50,8 +51,10 @@ import net.technicpack.launcher.ui.components.OptionsDialog;
 import net.technicpack.launcher.ui.components.songs.DownloadPanel;
 import net.technicpack.launcher.ui.components.songs.SongsInfoPanel;
 import net.technicpack.launcher.ui.components.songs.TracksListPanel;
+import net.technicpack.launcher.ui.controls.DownloadHeaderTab;
 import net.technicpack.launcher.ui.controls.HeaderTab;
 import net.technicpack.launcher.ui.controls.UserWidget;
+import net.technicpack.launcher.ui.listeners.TabFlashListener;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.auth.UserModel;
@@ -115,9 +118,13 @@ public class LauncherFrame extends DraggableFrame implements
 	public static final Color COLOR_SONGS_INFO = new Color(170, 0, 0);
 	public static final Color COLOR_TRACKS_LIST = new Color(0, 0, 102);
 	// //////////////////////
+	
+	public static final int TAB_FLASH_TIME = 200;
+	public static final int TAB_FLAST_INTERVAL = 20;
 
 	public static final String TAB_SONGS = "songs";
 	public static final String TAB_DOWNLOAD = "download";
+	public static final String DOWNLOAD_TRACK_COMMAND = "download_track";
 
 	private ResourceLoader resources;
 	private final UserModel<MojangUser> userModel;
@@ -156,6 +163,7 @@ public class LauncherFrame extends DraggableFrame implements
 	private DownloadLikes downloader;
 
 	private String currentTabName;
+	private Timer tabFlashTimer;
 
 	public LauncherFrame(final ResourceLoader resources,
 			final ImageRepository<IUserType> skinRepository,
@@ -314,9 +322,14 @@ public class LauncherFrame extends DraggableFrame implements
 		songsTab.setActionCommand(TAB_SONGS);
 		header.add(songsTab);
 		
-		downloadTab = new HeaderTab("DOWNLOAD", resources);
+		downloadTab = new DownloadHeaderTab("DOWNLOAD", resources);
 		downloadTab.addActionListener(tabListener);
 		downloadTab.setActionCommand(TAB_DOWNLOAD);
+		//downloadTab.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+		ActionListener tabFlasher = new TabFlashListener(COLOR_BLUE, downloadTab, this);
+		downloadTab.addActionListener(tabFlasher);
+		tabFlashTimer = new Timer(TAB_FLAST_INTERVAL, tabFlasher);
+		tabFlashTimer.setActionCommand(DOWNLOAD_TRACK_COMMAND);
 		header.add(downloadTab);
 
 		header.add(Box.createHorizontalGlue());
@@ -486,6 +499,12 @@ public class LauncherFrame extends DraggableFrame implements
 	
 	public void flagTrackForDownload(TrackInfo track) {
 		downloadPanel.addTrack(track);
+		
+		beginDownloadTabFlash();
+		
+		//downloadTab.setBackground(new Color(255,255,255));
+		//downloadTab.setOpaque(true);
+
 	}
 	
 	public void unFlagTrackForDownload(TrackInfo track) {
@@ -503,6 +522,17 @@ public class LauncherFrame extends DraggableFrame implements
 	
 	public void onDownloadFinished() {
 		downloadPanel.onDownloadFinished();
+	}
+	
+	public void beginDownloadTabFlash() {
+		downloadTab.setOpaque(true);
+		tabFlashTimer.start();
+	}
+	
+	public void endDownloadTabFlash() {
+		downloadTab.setOpaque(false);
+		downloadTab.setBackground(COLOR_BLUE_DARKER);
+		tabFlashTimer.stop();
 	}
 
 	@Override
