@@ -222,7 +222,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 		infoPanel.add(browseButton);
 		
 		trackProgress = new LabelProgressBar(0, 100, 400);
-		trackProgress.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 22));
+		trackProgress.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
 		trackProgress.setLoadColor(LauncherFrame.COLOR_GREEN);
 		trackProgress.setBackground(LauncherFrame.COLOR_GREY_TEXT);
 		trackProgress.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
@@ -321,6 +321,8 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 			i++;
 			constraints.gridy++;
 		}
+		
+		trackProgress.scrollRectToVisible(trackProgress.bounds());
 
 		constraints.weighty = 1.0;
 		trackList.add(Box.createGlue(), constraints);
