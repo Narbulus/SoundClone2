@@ -1,5 +1,6 @@
 package net.technicpack.launcher.ui.components.songs;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -27,6 +28,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.UIManager;
+import javax.swing.plaf.ProgressBarUI;
 
 import net.brassbeluga.sound.gson.TrackInfo;
 import net.technicpack.launcher.ui.LauncherFrame;
@@ -45,6 +47,10 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 	private JProgressBar progress;
 	private JButton button;
 	private JButton browseButton;
+	private JLabel progressInfo;
+	private JLabel overallInfo;
+	
+	private int downloadIndex;
 
 	private ArrayList<TrackInfo> tracks;
 
@@ -57,6 +63,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 
 		this.resources = resources;
 		this.parent = parent;
+		downloadIndex = 0;
 
 		initComponents();
 	}
@@ -102,7 +109,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 		progress.setStringPainted(true);
 		progress.setForeground(LauncherFrame.COLOR_GREEN);
 		progress.setBackground(Color.white);
-		progress.setPreferredSize(new Dimension(400, 200));
+		progress.setPreferredSize(new Dimension(400, 26));
 
 		button = new JButton("CANCEL");
 		button.setPreferredSize(new Dimension(200, button.getPreferredSize().height));
@@ -167,6 +174,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				int returnVale = browse.showOpenDialog(browseButton);
+				setBrowseInfo();
 			}
 
 			@Override
@@ -183,16 +191,47 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 				browseButton.setBackground(LauncherFrame.COLOR_BLUE);
 			}
 		});
+		
+		progressInfo = new JLabel();
+		progressInfo.setAlignmentX(CENTER_ALIGNMENT);
+		progressInfo.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 22));
+		progressInfo.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+		
+		overallInfo = new JLabel();
+		overallInfo.setAlignmentX(CENTER_ALIGNMENT);
+		overallInfo.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 22));
+		overallInfo.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+		Dimension d = overallInfo.getPreferredSize();
+		overallInfo.setPreferredSize(new Dimension(220, d.height));
+		
+		JPanel loadInfo = new JPanel();
+		loadInfo.setOpaque(false);
+		loadInfo.setLayout(new BoxLayout(loadInfo, BoxLayout.Y_AXIS));
+		loadInfo.add(progressInfo);
+		loadInfo.add(Box.createRigidArea(new Dimension(0, 16)));
+		loadInfo.add(progress);
+		loadInfo.add(Box.createRigidArea(new Dimension(0, 16)));
+		loadInfo.add(overallInfo);
 
 		infoPanel.add(trackIcon);
 		infoPanel.add(Box.createHorizontalGlue());
-		infoPanel.add(progress);
+		infoPanel.add(loadInfo);
 		infoPanel.add(Box.createHorizontalGlue());
 		infoPanel.add(button);
 		infoPanel.add(Box.createRigidArea(new Dimension(16, 0)));
 		infoPanel.add(browseButton);
 
 		add(infoPanel);
+		
+		onDownloadFinished();
+	}
+	
+	public void setProgressInfo(String info) {
+		progressInfo.setText(info);
+	}
+	
+	public void setOverallInfo(String info) {
+		overallInfo.setText(info);
 	}
 	
 	public List<TrackInfo> getTracks() {
@@ -204,11 +243,34 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 			tracks.add(track);
 			rebuildUI();
 		}
+		progressInfo.setText(tracks.size() + " tracks ready to download");
 	}
 
 	public void removeTrack(TrackInfo track) {
 		if (tracks.remove(track))
 			rebuildUI();
+		progressInfo.setText(tracks.size() + " tracks ready to download");
+	}
+	
+	public void setCurrentTrack(TrackInfo track) {
+		if (tracks.size() > 0) {
+			if (track.getId() != tracks.get(downloadIndex).getId()) {
+				downloadIndex++;
+				updateInfo();
+			}
+		}
+	}
+	
+	private void setBrowseInfo() {
+		String downloadPath = browse.getCurrentDirectory().getAbsolutePath();
+		if (browse.getSelectedFile() != null)
+			downloadPath = browse.getSelectedFile().getAbsolutePath();
+		overallInfo.setText(downloadPath);
+	}
+	
+	public void updateInfo() {
+		overallInfo.setText(tracks.get(downloadIndex).getTitle());
+		progressInfo.setText("Downloading track " + (downloadIndex + 1) + " of " + tracks.size());
 	}
 
 	private void rebuildUI() {
@@ -253,7 +315,19 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 	}
 
 	public void onDownloadFinished() {
+		downloadIndex = 0;
+		if (tracks.size() > 0)
+			progressInfo.setText(tracks.size() + " tracks successfully downloaded!");
+		else
+			progressInfo.setText("No tracks selected for download");
+		setBrowseInfo();
+			
 		button.setText("START");
+		tracks.clear();
+		trackList.removeAll();
+		
+		revalidate();
+		repaint();
 	}
 
 	@Override
