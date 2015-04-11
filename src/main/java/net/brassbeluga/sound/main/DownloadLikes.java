@@ -77,7 +77,7 @@ public class DownloadLikes {
 		clientID = config.nextLine();
 		maxDuration = Integer.parseInt(config.nextLine());
 		
-		configs = new ArrayList<>();
+		configs = new ArrayList<Configuration>();
 		currentConfig = null;
 		
 // Nothing
@@ -171,7 +171,7 @@ public class DownloadLikes {
 				Type listType = new TypeToken<ArrayList<TrackInfo>>() {
 				}.getType();
 				
-				likes = new ArrayList<>();
+				likes = new ArrayList<TrackInfo>();
 				
 				for (int i = 0; i < info.getFavoritesCount(); i += 50) {
 					String partLikes = load.getResponse("http://api.soundcloud.com/users/" + info.getId() + "/favorites.json?client_id=" + clientID + "&offset=" + i);
