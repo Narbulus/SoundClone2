@@ -59,7 +59,7 @@ public class DownloadLikes {
 	private String defaultDownload;
 
 	private static final int TRACK_INFO_REQUEST_SIZE = 50;
-	protected static final long CHUNK_SIZE = 100;
+	protected static final long CHUNK_SIZE = 1000;
 
 	public DownloadLikes(ResourceLoader resources) throws Exception {
 		// Create download locations if nonexistant
