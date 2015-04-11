@@ -1,6 +1,5 @@
 package net.technicpack.launcher.ui.components.songs;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -24,11 +23,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
-import javax.swing.UIManager;
-import javax.swing.plaf.ProgressBarUI;
 
 import net.brassbeluga.sound.gson.TrackInfo;
 import net.technicpack.launcher.ui.LauncherFrame;
@@ -49,6 +47,8 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 	private JButton browseButton;
 	private JLabel progressInfo;
 	private JLabel overallInfo;
+	
+	private LabelProgressBar trackProgress;
 	
 	private int downloadIndex;
 
@@ -220,6 +220,13 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 		infoPanel.add(button);
 		infoPanel.add(Box.createRigidArea(new Dimension(16, 0)));
 		infoPanel.add(browseButton);
+		
+		trackProgress = new LabelProgressBar(0, 100, 400);
+		trackProgress.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 22));
+		trackProgress.setLoadColor(LauncherFrame.COLOR_GREEN);
+		trackProgress.setBackground(LauncherFrame.COLOR_GREY_TEXT);
+		trackProgress.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+		trackProgress.setOpaque(false);
 
 		add(infoPanel);
 		
@@ -256,6 +263,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 		if (tracks.size() > 0) {
 			if (track.getId() != tracks.get(downloadIndex).getId()) {
 				downloadIndex++;
+				trackList.getComponent(downloadIndex).setBackground(LauncherFrame.COLOR_GREY_TEXT);
 				updateInfo();
 			}
 		}
@@ -295,12 +303,16 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 				GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0);
 		int i = 0;
 		for (TrackInfo t : tracks) {
-			JLabel label = new JLabel(t.getTitle());
-			if (i == 0)
-				label.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 24));
-			else
+			JLabel label;
+			if (i == downloadIndex) {
+				label = trackProgress;
+				trackProgress.setProgress(0);
+				trackProgress.setText(t.getTitle());
+			}else{
+				label = new JLabel(t.getTitle());
 				label.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 16));
-			label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+				label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+			}
 			trackList.add(label, constraints);
 			i++;
 			constraints.gridy++;
@@ -334,7 +346,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 	public void propertyChange(PropertyChangeEvent evt) {
 		if ("progress" == evt.getPropertyName()) {
             int progressAmt = (Integer) evt.getNewValue();
-            progress.setValue(progressAmt);
+            trackProgress.setProgress(progressAmt);
         } 
 	}
 
