@@ -80,6 +80,8 @@ public class DownloadLikes {
 		configs = new ArrayList<>();
 		currentConfig = null;
 		
+// Nothing
+		
 		// Load past configurations from config file's json
 		while (config.hasNext()) {
 			String nextConfig = config.nextLine();
