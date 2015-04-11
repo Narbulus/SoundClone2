@@ -1,6 +1,7 @@
 package net.technicpack.launcher.ui.controls;
 
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.RenderingHints;
@@ -25,11 +26,15 @@ public class DownloadHeaderTab extends HeaderTab {
 	
 	public void incDownloads() {
 		downloadsQueued++;
+		setIsActive(true);
 	}
 	
 	public void decDownloads() {
 		downloadsQueued--;
+		setIsActive(true);
 	}
+	
+	
 	
 	@Override
 	protected void paintComponent(Graphics g) {
