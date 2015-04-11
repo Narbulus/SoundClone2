@@ -308,7 +308,7 @@ public class LauncherFrame extends DraggableFrame implements
 			}
 		});
 		header.add(headerLabel);
-
+		
 		header.add(Box.createRigidArea(new Dimension(6, 0)));
 
 		ActionListener tabListener = new ActionListener() {
@@ -317,6 +317,7 @@ public class LauncherFrame extends DraggableFrame implements
 				selectTab(e.getActionCommand());
 			}
 		};
+		
 
 		songsTab = new HeaderTab("SONGS", resources);
 		songsTab.addActionListener(tabListener);
