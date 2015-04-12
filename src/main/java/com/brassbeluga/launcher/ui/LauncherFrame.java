@@ -522,6 +522,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 			downloadPanel.updateInfo();
 			return "CANCEL";
 		}else{
+			if (downloader.isThreadRunning())
+				downloader.stopThread();
 			return "START";
 		}
 	}

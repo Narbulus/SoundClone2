@@ -346,8 +346,8 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 	public void onDownloadFinished() {
 		parent.onTrackDownloaded();
 		downloadIndex = 0;
-		if (tracks.size() > 0)
-			progressInfo.setText(tracks.size() + " tracks successfully downloaded!");
+		if (downloadIndex > 0)
+			progressInfo.setText((downloadIndex + 1) + " tracks successfully downloaded!");
 		else
 			progressInfo.setText("No tracks selected for download");
 		setBrowseInfo();
