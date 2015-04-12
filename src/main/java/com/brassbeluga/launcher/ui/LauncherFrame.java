@@ -43,29 +43,13 @@ import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
 
-import net.technicpack.autoupdate.IBuildNumber;
-import net.technicpack.launchercore.auth.IUserType;
-import net.technicpack.launchercore.auth.UserModel;
-import net.technicpack.launchercore.image.ImageRepository;
-import net.technicpack.launchercore.install.LauncherDirectories;
-import net.technicpack.launchercore.launch.java.JavaVersionRepository;
-import net.technicpack.launchercore.launch.java.source.FileJavaSource;
-import net.technicpack.launchercore.modpacks.ModpackModel;
-import net.technicpack.launchercore.modpacks.sources.IInstalledPackRepository;
-import net.technicpack.minecraftcore.mojang.auth.MojangUser;
-import net.technicpack.platform.IPlatformApi;
-import net.technicpack.platform.io.AuthorshipInfo;
 import net.technicpack.ui.controls.DraggableFrame;
-import net.technicpack.ui.controls.RoundedButton;
 import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.controls.installation.ProgressBar;
 import net.technicpack.ui.lang.IRelocalizableResource;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.DesktopUtils;
 
-import com.brassbeluga.launcher.launch.Installer;
-import com.brassbeluga.launcher.settings.StartupParameters;
-import com.brassbeluga.launcher.settings.TechnicSettings;
 import com.brassbeluga.launcher.ui.components.songs.DownloadPanel;
 import com.brassbeluga.launcher.ui.components.songs.SongsInfoPanel;
 import com.brassbeluga.launcher.ui.components.songs.TracksListPanel;
@@ -77,7 +61,7 @@ import com.brassbeluga.sound.main.DownloadLikes;
 import com.google.gson.JsonSyntaxException;
 
 public class LauncherFrame extends DraggableFrame implements IRelocalizableResource{
-
+	private static final long serialVersionUID = -5667136239041080648L;
 	private static final int FRAME_WIDTH = 1194;
 	private static final int FRAME_HEIGHT = 718;
 
@@ -106,16 +90,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 	public static final String DOWNLOAD_TRACK_COMMAND = "download_track";
 
 	private ResourceLoader resources;
-	private final ImageRepository<IUserType> skinRepository;
-	private final TechnicSettings settings;
-	private final Installer installer;
-	private final IPlatformApi platformApi;
-	private final LauncherDirectories directories;
-	private final IInstalledPackRepository packRepo;
-	private final StartupParameters params;
-	private final JavaVersionRepository javaVersions;
-	private final FileJavaSource fileJavaSource;
-	private final IBuildNumber buildNumber;
 
 	private HeaderTab songsTab;
 	private HeaderTab downloadTab;
@@ -125,7 +99,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
 	private ProgressBar installProgress;
 	private Component installProgressPlaceholder;
-	private RoundedButton playButton;
 	private TintablePanel centralPanel;
 	private TintablePanel footer;
 
@@ -139,42 +112,21 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 	private Timer tabFlashTimer;
 	private TabFlashListener tabFlashListener;
 
-	public LauncherFrame(final ResourceLoader resources,
-			final ImageRepository<IUserType> skinRepository,
-		    final TechnicSettings settings,
-			final Installer installer,
-			final IPlatformApi platformApi,
-			final LauncherDirectories directories,
-			final IInstalledPackRepository packRepository,
-			final StartupParameters params,
-			final JavaVersionRepository javaVersions,
-			final FileJavaSource fileJavaSource,
-			final IBuildNumber buildNumber, final DownloadLikes downloader) {
+	public LauncherFrame(final ResourceLoader resources,final DownloadLikes downloader) {
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		
-		this.skinRepository = skinRepository;
-		this.settings = settings;
-		this.installer = installer;
-		this.platformApi = platformApi;
-		this.directories = directories;
-		this.packRepo = packRepository;
-		this.params = params;
-		this.fileJavaSource = fileJavaSource;
-		this.javaVersions = javaVersions;
-		this.buildNumber = buildNumber;
-
 		this.downloader = downloader;
 
 		// Handles rebuilding the frame, so use it to build the frame in the
 		// first place
 		relocalize(resources);
 
+		// Initially SONGS tab is selected
 		selectTab(TAB_SONGS);
 
 		// Show yee self
 		this.setVisible(true);
-
 		setLocationRelativeTo(null);
 	}
 
@@ -205,22 +157,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 		this.setState(Frame.ICONIFIED);
 	}
 
-	public void launchCompleted() {
-		if (installer.isCurrentlyRunning()) {
-			EventQueue.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					launchCompleted();
-				}
-			});
-			return;
-		}
-
-		installProgress.setVisible(false);
-		installProgressPlaceholder.setVisible(true);
-
-		invalidate();
-	}
 
 	// ///////////////////////////////////////////////
 	// End Action responses

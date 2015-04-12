@@ -379,17 +379,6 @@ public class LauncherMain {
 		DownloadLikes downloader = new DownloadLikes(resources);
 
 		
-		final LauncherFrame frame = new LauncherFrame(resources, skinRepo,
-				settings, installer, platform, directories, packStore,
-				startupParameters, javaVersions, javaVersionFile, buildNumber, downloader);
-
-		ActionListener listener = new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				splash.dispose();
-				if (settings.getLaunchToModpacks())
-					frame.selectTab("modpacks");
-			}
-		};
+		final LauncherFrame frame = new LauncherFrame(resources, downloader);
 	}
 }
