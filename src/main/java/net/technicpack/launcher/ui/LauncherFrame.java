@@ -53,7 +53,6 @@ import net.technicpack.launcher.ui.components.songs.SongsInfoPanel;
 import net.technicpack.launcher.ui.components.songs.TracksListPanel;
 import net.technicpack.launcher.ui.controls.DownloadHeaderTab;
 import net.technicpack.launcher.ui.controls.HeaderTab;
-import net.technicpack.launcher.ui.controls.UserWidget;
 import net.technicpack.launcher.ui.listeners.TabFlashListener;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserType;
@@ -77,8 +76,7 @@ import net.technicpack.utilslib.DesktopUtils;
 
 import com.google.gson.JsonSyntaxException;
 
-public class LauncherFrame extends DraggableFrame implements
-		IRelocalizableResource, IAuthListener<MojangUser> {
+public class LauncherFrame extends DraggableFrame implements IRelocalizableResource{
 
 	private static final int FRAME_WIDTH = 1194;
 	private static final int FRAME_HEIGHT = 718;
@@ -146,7 +144,6 @@ public class LauncherFrame extends DraggableFrame implements
 	private CardLayout infoLayout;
 	private JPanel infoSwap;
 
-	private UserWidget userWidget;
 	private ProgressBar installProgress;
 	private Component installProgressPlaceholder;
 	private RoundedButton playButton;
@@ -585,16 +582,6 @@ public class LauncherFrame extends DraggableFrame implements
 	
 	public void onTrackDownloaded() {
 		((DownloadHeaderTab)downloadTab).decDownloads();
-	}
-
-	@Override
-	public void userChanged(MojangUser mojangUser) {
-		if (mojangUser == null)
-			this.setVisible(false);
-		else {
-			this.setVisible(true);
-			userWidget.setUser(mojangUser);
-		}
 	}
 
 	public void setupPlayButtonText(ModpackModel modpack, MojangUser user) {

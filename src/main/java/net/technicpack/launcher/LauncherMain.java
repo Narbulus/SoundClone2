@@ -386,7 +386,6 @@ public class LauncherMain {
 				userModel, settings, iconRepo, logoRepo, backgroundRepo,
 				installer, avatarRepo, platform, directories, packStore,
 				startupParameters, javaVersions, javaVersionFile, buildNumber, downloader);
-		userModel.addAuthListener(frame);
 
 		ActionListener listener = new ActionListener() {
 			@Override
