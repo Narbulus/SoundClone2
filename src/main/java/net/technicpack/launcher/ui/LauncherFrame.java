@@ -56,6 +56,7 @@ import net.technicpack.launcher.ui.components.songs.TracksListPanel;
 import net.technicpack.launcher.ui.controls.DownloadHeaderTab;
 import net.technicpack.launcher.ui.controls.HeaderTab;
 import net.technicpack.launcher.ui.controls.UserWidget;
+import net.technicpack.launcher.ui.listeners.DownloadFlyer;
 import net.technicpack.launcher.ui.listeners.TabFlashListener;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserType;
@@ -343,10 +344,13 @@ public class LauncherFrame extends DraggableFrame implements
 		
 		flag.setBounds(50, 50,50, 50);*/
 		
-		FlyerGlassPane fg = new FlyerGlassPane(resources);
+		FlyerGlassPane fg = new FlyerGlassPane(resources, this);
 		setGlassPane(fg);
+		
 		fg.setVisible(true);
 		fg.setOpaque(false);
+		
+		new Timer(DownloadFlyer.FLIGHT_INTERVAL, (ActionListener) fg).start();
 		
 		
 		
@@ -518,17 +522,9 @@ public class LauncherFrame extends DraggableFrame implements
 	
 	public void flagTrackForDownload(TrackInfo track, Point flagLoc) {
 		downloadPanel.addTrack(track);
-		((FlyerGlassPane) getGlassPane()).setFlyerLocation(flagLoc);
 		
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				repaint();
-			}
-		});
-		
-		((DownloadHeaderTab) downloadTab).incDownloads();
-		beginDownloadTabFlash();
+		FlyerGlassPane flyerPane = ((FlyerGlassPane) getGlassPane());
+		flyerPane.addFlyer(new DownloadFlyer(flagLoc));
 	}
 	
 	public void unFlagTrackForDownload(TrackInfo track) {
@@ -548,6 +544,11 @@ public class LauncherFrame extends DraggableFrame implements
 	
 	public void onDownloadFinished() {
 		downloadPanel.onDownloadFinished();
+	}
+	
+	public void onFlyerArrival() {
+		((DownloadHeaderTab) downloadTab).incDownloads();
+		beginDownloadTabFlash();	
 	}
 	
 	public void beginDownloadTabFlash() {
