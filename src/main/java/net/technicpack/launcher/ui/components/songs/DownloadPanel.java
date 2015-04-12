@@ -2,10 +2,7 @@ package net.technicpack.launcher.ui.components.songs;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Image;
-import java.awt.Insets;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
@@ -23,10 +20,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
+import javax.swing.border.Border;
 
 import net.brassbeluga.sound.gson.TrackInfo;
 import net.technicpack.launcher.ui.LauncherFrame;
@@ -45,6 +42,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 	private JProgressBar progress;
 	private JButton button;
 	private JButton browseButton;
+	private Border trackBorder;
 	private JLabel progressInfo;
 	private JLabel overallInfo;
 	
@@ -71,10 +69,11 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 	private void initComponents() {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
+		trackBorder = BorderFactory.createEmptyBorder(4, 8, 4, 8);
 
 		tracks = new ArrayList<TrackInfo>();
 		trackList = new JPanel();
-		trackList.setLayout(new GridBagLayout());
+		trackList.setLayout(new BoxLayout(trackList, BoxLayout.Y_AXIS));
 		trackList.setBackground(LauncherFrame.COLOR_CHARCOAL);
 
 		scrollPane = new JScrollPane(trackList,
@@ -91,9 +90,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 		scrollPane.getVerticalScrollBar().setUnitIncrement(12);
 		add(scrollPane);
 
-		trackList.add(Box.createGlue(), new GridBagConstraints(0, 1, 1, 1, 1.0,
-				1.0, GridBagConstraints.WEST, GridBagConstraints.BOTH,
-				new Insets(0, 0, 0, 0), 0, 0));
+		trackList.add(Box.createGlue());
 
 		infoPanel = new JPanel();
 		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.X_AXIS));
@@ -173,7 +170,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				int returnVale = browse.showOpenDialog(browseButton);
+				browse.showOpenDialog(browseButton);
 				setBrowseInfo();
 			}
 
@@ -222,10 +219,11 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 		infoPanel.add(browseButton);
 		
 		trackProgress = new LabelProgressBar(0, 100, 400);
-		trackProgress.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 22));
+		trackProgress.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
 		trackProgress.setLoadColor(LauncherFrame.COLOR_GREEN);
 		trackProgress.setBackground(LauncherFrame.COLOR_GREY_TEXT);
 		trackProgress.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+		trackProgress.setBorder(trackBorder);
 		trackProgress.setOpaque(false);
 
 		add(infoPanel);
@@ -301,9 +299,6 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 			}
 		}
 
-		GridBagConstraints constraints = new GridBagConstraints(0, 0, 1, 1,
-				1.0, 0.0, GridBagConstraints.WEST,
-				GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0);
 		int i = 0;
 		for (TrackInfo t : tracks) {
 			JLabel label;
@@ -314,16 +309,20 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 				trackProgress.setText(t.getTitle());
 			}else{
 				label = new JLabel(t.getTitle());
+				label.setBorder(trackBorder);
 				label.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 16));
-				label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+				if (i > downloadIndex)
+					label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+				else
+					label.setForeground(LauncherFrame.COLOR_GREY_TEXT);
 			}
-			trackList.add(label, constraints);
+			trackList.add(label);
 			i++;
-			constraints.gridy++;
 		}
+		
+		trackProgress.scrollRectToVisible(trackProgress.getBounds());
 
-		constraints.weighty = 1.0;
-		trackList.add(Box.createGlue(), constraints);
+		trackList.add(Box.createGlue());
 
 		revalidate();
 		repaint();
@@ -342,6 +341,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 		button.setText("START");
 		tracks.clear();
 		trackList.removeAll();
+		progress.setValue(0);
 		
 		revalidate();
 		repaint();

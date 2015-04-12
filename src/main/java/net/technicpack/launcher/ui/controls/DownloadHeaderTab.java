@@ -44,7 +44,7 @@ public class DownloadHeaderTab extends HeaderTab {
 			Graphics2D g2d = (Graphics2D) g;
 			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			Color old = g2d.getColor();
-			g2d.setColor(LauncherFrame.COLOR_CHARCOAL);
+			g2d.setColor(LauncherFrame.COLOR_RED.darker());
 			g2d.fillOval(D_COUNTER_MARGIN, this.getSize().height - D_COUNTER_MARGIN - D_COUNTER_SIZE, 
 					D_COUNTER_SIZE, D_COUNTER_SIZE);
 	

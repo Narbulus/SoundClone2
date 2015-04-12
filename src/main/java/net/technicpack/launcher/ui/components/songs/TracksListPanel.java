@@ -103,7 +103,7 @@ public class TracksListPanel extends TintablePanel {
 		
 		int i = tracks.size();
 		for (TrackInfo t : newTracks) {
-			if (i == 0)
+			if (i == newTracks.size())
 				parent.selectTrack(t);
 			TrackEntry track = new TrackEntry(resources, t, i, parent);
 			trackList.add(track);

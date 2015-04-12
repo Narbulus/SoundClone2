@@ -86,9 +86,6 @@ public class LauncherFrame extends DraggableFrame implements
 	private static final int FRAME_WIDTH = 1194;
 	private static final int FRAME_HEIGHT = 718;
 
-	private static final int SIDEKICK_WIDTH = 300;
-	private static final int SIDEKICK_HEIGHT = 250;
-
 	public static final Color COLOR_RED = new Color(229, 0, 0);
 	public static final Color COLOR_GREEN = new Color(90, 184, 96);
 	public static final Color COLOR_BLUE = new Color(16, 108, 163);
