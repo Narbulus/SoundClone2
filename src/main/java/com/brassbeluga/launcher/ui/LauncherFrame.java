@@ -29,6 +29,7 @@ import java.awt.Frame;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 import java.util.Random;
 
 import javax.swing.BorderFactory;
@@ -43,7 +44,6 @@ import javax.swing.Timer;
 import javax.swing.WindowConstants;
 
 import net.technicpack.autoupdate.IBuildNumber;
-import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserType;
 import net.technicpack.launchercore.auth.UserModel;
 import net.technicpack.launchercore.image.ImageRepository;
@@ -511,7 +511,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 	
 	public void flagTrackForDownload(TrackInfo track) {
 		downloadPanel.addTrack(track);
-		
+		System.out.println("Flag");
 		((DownloadHeaderTab) downloadTab).incDownloads();
 		beginDownloadTabFlash();
 	}
@@ -519,6 +519,18 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 	public void unFlagTrackForDownload(TrackInfo track) {
 		downloadPanel.removeTrack(track);
 		((DownloadHeaderTab) downloadTab).decDownloads();
+		endDownloadTabFlash();
+	}
+	
+	public void flagAllForDownload(List<TrackInfo> tracks) {
+		((DownloadHeaderTab) downloadTab).setDownloads(tracks.size());
+		downloadPanel.addAllTracks(tracks);
+		beginDownloadTabFlash();
+	}
+	
+	public void unflagAllForDownload() {
+		((DownloadHeaderTab) downloadTab).setDownloads(0);
+		downloadPanel.removeAllTracks();
 		endDownloadTabFlash();
 	}
 	

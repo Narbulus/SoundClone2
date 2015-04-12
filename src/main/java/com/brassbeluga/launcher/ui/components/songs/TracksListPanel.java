@@ -1,18 +1,9 @@
 package com.brassbeluga.launcher.ui.components.songs;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -22,15 +13,13 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
-
-import com.brassbeluga.launcher.ui.LauncherFrame;
-import com.brassbeluga.sound.gson.TrackInfo;
 
 import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 import net.technicpack.ui.lang.ResourceLoader;
+
+import com.brassbeluga.launcher.ui.LauncherFrame;
+import com.brassbeluga.sound.gson.TrackInfo;
 
 @SuppressWarnings("serial")
 public class TracksListPanel extends TintablePanel {
@@ -102,7 +91,9 @@ public class TracksListPanel extends TintablePanel {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				
+				for (TrackEntry t : entries)
+					t.setDownloadFlag(true);
+				parent.flagAllForDownload(tracks);
 			}
 
 			@Override
@@ -134,7 +125,9 @@ public class TracksListPanel extends TintablePanel {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				
+				for (TrackEntry t : entries)
+					t.setDownloadFlag(false);
+				parent.unflagAllForDownload();
 			}
 
 			@Override
@@ -163,7 +156,9 @@ public class TracksListPanel extends TintablePanel {
 	
 	// Called before tracks are loaded
 	public void startUpdateTracks() {
-		trackList.removeAll();		
+		trackList.removeAll();	
+		tracks.clear();
+		entries.clear();
 		
 		trackList.add(loading);
         trackList.add(Box.createGlue());
@@ -191,12 +186,14 @@ public class TracksListPanel extends TintablePanel {
 				parent.selectTrack(t);
 			TrackEntry track = new TrackEntry(resources, t, i, parent);
 			trackList.add(track);
+			entries.add(track);
 			i++;
 		}
 
         trackList.add(Box.createGlue());
 		
 		repaint();
+		revalidate();
 	}
 	
 	public void onFinishedLoading() {
