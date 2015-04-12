@@ -341,6 +341,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 		button.setText("START");
 		tracks.clear();
 		trackList.removeAll();
+		progress.setValue(0);
 		
 		revalidate();
 		repaint();
