@@ -25,6 +25,11 @@ public class DownloadHeaderTab extends HeaderTab {
 		downloadsQueued = 0;
 	}
 	
+	public void setDownloads(int n) {
+		downloadsQueued = n;
+		setIsActive(true);
+	}
+	
 	public void incDownloads() {
 		downloadsQueued++;
 		setIsActive(true);

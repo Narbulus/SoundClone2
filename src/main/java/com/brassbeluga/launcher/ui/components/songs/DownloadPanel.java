@@ -252,6 +252,19 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 		}
 		progressInfo.setText(tracks.size() + " tracks ready to download");
 	}
+	
+	public void addAllTracks(List<TrackInfo> newTracks) {
+		tracks.clear();
+		tracks.addAll(newTracks);
+		rebuildUI();
+		progressInfo.setText(tracks.size() + " tracks ready to download");
+	}
+	
+	public void removeAllTracks() {
+		tracks.clear();
+		rebuildUI();
+		progressInfo.setText("No tracks selected for download");
+	}
 
 	public void removeTrack(TrackInfo track) {
 		if (tracks.remove(track))

@@ -52,6 +52,15 @@ public class TrackEntry extends JPanel {
 		initComponents();
 	}
 	
+	public void setDownloadFlag(boolean flagValue) {
+		if (!flagValue) {
+			flag.setIcon(resources.getIcon("track_idle.png"));
+		}else{
+			flag.setIcon(resources.getIcon("track_download.png"));
+		}
+		downloadFlag = flagValue;
+	}
+	
 	public void initComponents() {
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 8));
@@ -103,19 +112,17 @@ public class TrackEntry extends JPanel {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				((TrackEntry)flag.getParent()).setDownloadFlag(!downloadFlag);
+				if (downloadFlag)
+					parent.flagTrackForDownload(info);
+				else
+					parent.unFlagTrackForDownload(info);
+				repaint();
 			}
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				if (downloadFlag) {
-					downloadFlag = false;
-					flag.setIcon(resources.getIcon("track_idle.png"));
-					parent.unFlagTrackForDownload(info);
-				}else{
-					downloadFlag = true;
-					flag.setIcon(resources.getIcon("track_download.png"));
-					parent.flagTrackForDownload(info);
-				}
+				
 			}
 
 			@Override

@@ -215,6 +215,7 @@ public class LauncherMain {
 				resources.getImage("icon.png"));
 		Console console = new Console(LauncherMain.consoleFrame,
 				buildNumber.getBuildNumber());
+		LauncherMain.consoleFrame.setVisible(true);
 
 		logger.addHandler(new ConsoleHandler(console));
 
