@@ -108,9 +108,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 	private ResourceLoader resources;
 	private final ImageRepository<IUserType> skinRepository;
 	private final TechnicSettings settings;
-	private final ImageRepository<ModpackModel> iconRepo;
-	private final ImageRepository<ModpackModel> backgroundRepo;
-	private final ImageRepository<AuthorshipInfo> avatarRepo;
 	private final Installer installer;
 	private final IPlatformApi platformApi;
 	private final LauncherDirectories directories;
@@ -145,10 +142,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 	public LauncherFrame(final ResourceLoader resources,
 			final ImageRepository<IUserType> skinRepository,
 		    final TechnicSettings settings,
-			final ImageRepository<ModpackModel> iconRepo,
-			final ImageRepository<ModpackModel> backgroundRepo,
 			final Installer installer,
-			final ImageRepository<AuthorshipInfo> avatarRepo,
 			final IPlatformApi platformApi,
 			final LauncherDirectories directories,
 			final IInstalledPackRepository packRepository,
@@ -161,10 +155,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 		
 		this.skinRepository = skinRepository;
 		this.settings = settings;
-		this.iconRepo = iconRepo;
-		this.backgroundRepo = backgroundRepo;
 		this.installer = installer;
-		this.avatarRepo = avatarRepo;
 		this.platformApi = platformApi;
 		this.directories = directories;
 		this.packRepo = packRepository;

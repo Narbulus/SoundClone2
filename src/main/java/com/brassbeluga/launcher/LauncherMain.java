@@ -380,8 +380,7 @@ public class LauncherMain {
 
 		
 		final LauncherFrame frame = new LauncherFrame(resources, skinRepo,
-				settings, iconRepo, backgroundRepo,
-				installer, avatarRepo, platform, directories, packStore,
+				settings, installer, platform, directories, packStore,
 				startupParameters, javaVersions, javaVersionFile, buildNumber, downloader);
 
 		ActionListener listener = new ActionListener() {
