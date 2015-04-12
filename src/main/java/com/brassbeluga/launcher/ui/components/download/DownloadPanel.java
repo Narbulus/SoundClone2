@@ -33,6 +33,7 @@ import net.technicpack.ui.lang.ResourceLoader;
 
 public class DownloadPanel extends JPanel implements PropertyChangeListener {
 
+
 	public static final int DOWNLOAD_HEIGHT = 200;
 
 	private ResourceLoader resources;

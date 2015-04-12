@@ -13,6 +13,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.border.MatteBorder;
 
 import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.controls.list.SimpleScrollbarUI;
@@ -48,6 +49,8 @@ public class TracksListPanel extends TintablePanel {
 		
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
+		setBorder(new MatteBorder(5, 5, 5, 5, LauncherFrame.COLOR_BLUE_DARKER));;
+
 		trackList = new JPanel();
 		trackList.setLayout(new BoxLayout(trackList, BoxLayout.Y_AXIS));
 		trackList.setBackground(LauncherFrame.COLOR_BLUE_DARKER);
@@ -74,7 +77,7 @@ public class TracksListPanel extends TintablePanel {
 		
 		trackControls = new JPanel();
 		trackControls.setLayout(new BoxLayout(trackControls, BoxLayout.X_AXIS));
-		trackControls.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+		trackControls.setBorder(new MatteBorder(8, 0, 0, 0, LauncherFrame.COLOR_BLUE_DARKER));
 		trackControls.setBackground(LauncherFrame.COLOR_BLUE);
 		final JButton selectAll = new JButton("Select All");
 		selectAll.setContentAreaFilled(false);
