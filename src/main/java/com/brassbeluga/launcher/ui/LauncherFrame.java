@@ -81,39 +81,23 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 	private static final int FRAME_WIDTH = 1194;
 	private static final int FRAME_HEIGHT = 718;
 
+	/* Different Colors used throughout the ui */
 	public static final Color COLOR_RED = new Color(229, 0, 0);
 	public static final Color COLOR_GREEN = new Color(90, 184, 96);
 	public static final Color COLOR_BLUE = new Color(16, 108, 163);
 	public static final Color COLOR_BLUE_ALT = new Color(15, 100, 150);
 	public static final Color COLOR_BLUE_DARKER = new Color(12, 94, 145);
 	public static final Color COLOR_WHITE_TEXT = new Color(208, 208, 208);
-	public static final Color COLOR_DIM_TEXT = new Color(160, 160, 160);
-	public static final Color COLOR_HEADER_TEXT = new Color(255, 255, 255);
 	public static final Color COLOR_CHARCOAL = new Color(31, 31, 31);
-	public static final Color COLOR_BANNER = new Color(0, 0, 0, 160);
-	public static final Color COLOR_PANEL = new Color(36, 38, 39);
-
 	public static final Color COLOR_SCROLL_TRACK = new Color(16, 108, 163);
-	public static final Color COLOR_SCROLL_THUMB = new Color(51, 204, 255);
-
-	public static final Color COLOR_SELECTOR_BACK = new Color(22, 26, 29);
-	public static final Color COLOR_SELECTOR_OPTION = new Color(38, 46, 53);
-	public static final Color COLOR_FEED_BACK = new Color(22, 26, 29, 200);
-	public static final Color COLOR_CENTRAL_BACK = new Color(25, 30, 34, 160);
 	public static final Color COLOR_CENTRAL_BACK_OPAQUE = new Color(25, 30, 34);
-	public static final Color COLOR_FEEDITEM_BACK = new Color(37, 44, 49);
-	public static final Color COLOR_LIKES_BACK = new Color(20, 65, 97);
 	public static final Color COLOR_BUTTON_BLUE = new Color(43, 128, 195);
-	public static final Color COLOR_FORMELEMENT_INTERNAL = new Color(30, 39, 46);
 	public static final Color COLOR_GREY_TEXT = new Color(86, 98, 110);
 	public static final Color COLOR_FOOTER = new Color(27, 32, 36);
-	public static final Color COLOR_SERVER = new Color(91, 192, 222);
-
-	// ///////////////////////
 	public static final Color COLOR_SONGS_INFO = new Color(170, 0, 0);
 	public static final Color COLOR_TRACKS_LIST = new Color(0, 0, 102);
-	// //////////////////////
 	
+	/* Specifies how long the DOWNLOAD tab should take to flash  */
 	public static final int TAB_FLASH_TIME = 200;
 	public static final int TAB_FLAST_INTERVAL = 20;
 
@@ -419,7 +403,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 		centralPanel = new TintablePanel();
 		centralPanel.setBackground(COLOR_CHARCOAL);
 		centralPanel.setForeground(COLOR_WHITE_TEXT);
-		centralPanel.setTintColor(COLOR_CENTRAL_BACK);
 		this.add(centralPanel, BorderLayout.CENTER);
 		centralPanel.setLayout(new BorderLayout());
 
@@ -450,7 +433,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 		infoSwap.add(downloadPanel, TAB_DOWNLOAD);
 
 		footer = new TintablePanel();
-		footer.setTintColor(COLOR_CENTRAL_BACK);
 		footer.setBackground(COLOR_FOOTER);
 		footer.setLayout(new BoxLayout(footer, BoxLayout.LINE_AXIS));
 		footer.setForeground(COLOR_WHITE_TEXT);

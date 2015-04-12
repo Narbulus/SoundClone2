@@ -250,10 +250,6 @@ public class LauncherMain {
 			StartupParameters startupParameters,
 			LauncherDirectories directories, ResourceLoader resources,
 			IBuildNumber buildNumber) throws Exception {
-		UIManager.put("ComboBox.disabledBackground",
-				LauncherFrame.COLOR_FORMELEMENT_INTERNAL);
-		UIManager.put("ComboBox.disabledForeground",
-				LauncherFrame.COLOR_GREY_TEXT);
 		System.setProperty("xr.load.xml-reader",
 				"org.ccil.cowan.tagsoup.Parser");
 
@@ -267,7 +263,7 @@ public class LauncherMain {
 
 		final SplashScreen splash = new SplashScreen(
 				resources.getImage("launch_splash.png"), 0);
-		Color bg = LauncherFrame.COLOR_FORMELEMENT_INTERNAL;
+		Color bg = Color.RED;
 		splash.getContentPane().setBackground(
 				new Color(bg.getRed(), bg.getGreen(), bg.getBlue(), 255));
 		splash.pack();

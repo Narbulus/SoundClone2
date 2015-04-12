@@ -143,7 +143,6 @@ public class Installer {
                             EventQueue.invokeLater(new Runnable() {
                                 @Override
                                 public void run() {
-                                    frame.launchCompleted();
                                 }
                             });
                         } else if (launchAction == LaunchAction.CLOSE) {
@@ -172,7 +171,6 @@ public class Installer {
                         EventQueue.invokeLater(new Runnable() {
                             @Override
                             public void run() {
-                                frame.launchCompleted();
                             }
                         });
                     }

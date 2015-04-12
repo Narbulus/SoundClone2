@@ -45,12 +45,7 @@ public class LauncherUnhider implements ProcessExitListener {
         }
 
         hasExited = true;
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                frame.launchCompleted();
-            }
-        });
+
     }
 
     public boolean hasExited() {
