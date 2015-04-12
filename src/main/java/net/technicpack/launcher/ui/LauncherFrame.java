@@ -341,6 +341,7 @@ public class LauncherFrame extends DraggableFrame implements
 		
 		flag.setBounds(50, 50,50, 50);*/
 		
+		/*
 		FlyerGlassPane fg = new FlyerGlassPane(resources, this);
 		setGlassPane(fg);
 		
@@ -348,7 +349,7 @@ public class LauncherFrame extends DraggableFrame implements
 		fg.setOpaque(false);
 		
 		new Timer(DownloadFlyer.FLIGHT_INTERVAL, (ActionListener) fg).start();
-		
+		*/
 		
 		
 		
@@ -520,8 +521,8 @@ public class LauncherFrame extends DraggableFrame implements
 	public void flagTrackForDownload(TrackInfo track, Point flagLoc) {
 		downloadPanel.addTrack(track);
 		
-		FlyerGlassPane flyerPane = ((FlyerGlassPane) getGlassPane());
-		flyerPane.addFlyer(new DownloadFlyer(flagLoc));
+		((DownloadHeaderTab) downloadTab).incDownloads();
+		beginDownloadTabFlash();
 	}
 	
 	public void unFlagTrackForDownload(TrackInfo track) {

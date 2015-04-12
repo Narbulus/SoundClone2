@@ -6,7 +6,7 @@ import net.technicpack.launcher.ui.FlyerGlassPane;
 
 public class DownloadFlyer {
 	public static final int FLIGHT_DURATION = 200;
-	public static final int FLIGHT_INTERVAL = 20;
+	public static final int FLIGHT_INTERVAL = 5;
 	
 	private Point flyerLocation;
 	private Point startPoint;
