@@ -19,6 +19,7 @@ import net.technicpack.ui.lang.ResourceLoader;
 
 public class TrackEntry extends JPanel {
 	
+	private static final int TRACK_TITLE_WIDTH = 600;
 	private TrackInfo info;
 	private boolean downloadFlag;
 	
@@ -87,7 +88,7 @@ public class TrackEntry extends JPanel {
 		title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 16));
 		title.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 		title.setPreferredSize(new Dimension(
-				title.getPreferredSize().width, 40));
+				TRACK_TITLE_WIDTH, 40));
 		
 		flag = new JButton(resources.getIcon("track_idle.png"));
 		flag.setContentAreaFilled(false);
