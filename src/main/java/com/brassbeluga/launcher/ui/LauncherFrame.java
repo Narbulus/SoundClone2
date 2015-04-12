@@ -106,11 +106,9 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 	public static final String DOWNLOAD_TRACK_COMMAND = "download_track";
 
 	private ResourceLoader resources;
-	private final UserModel<MojangUser> userModel;
 	private final ImageRepository<IUserType> skinRepository;
 	private final TechnicSettings settings;
 	private final ImageRepository<ModpackModel> iconRepo;
-	private final ImageRepository<ModpackModel> logoRepo;
 	private final ImageRepository<ModpackModel> backgroundRepo;
 	private final ImageRepository<AuthorshipInfo> avatarRepo;
 	private final Installer installer;
@@ -146,9 +144,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
 	public LauncherFrame(final ResourceLoader resources,
 			final ImageRepository<IUserType> skinRepository,
-			final UserModel userModel, final TechnicSettings settings,
+		    final TechnicSettings settings,
 			final ImageRepository<ModpackModel> iconRepo,
-			final ImageRepository<ModpackModel> logoRepo,
 			final ImageRepository<ModpackModel> backgroundRepo,
 			final Installer installer,
 			final ImageRepository<AuthorshipInfo> avatarRepo,
@@ -161,12 +158,10 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 			final IBuildNumber buildNumber, final DownloadLikes downloader) {
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
-		this.userModel = userModel;
+		
 		this.skinRepository = skinRepository;
 		this.settings = settings;
 		this.iconRepo = iconRepo;
-		this.logoRepo = logoRepo;
 		this.backgroundRepo = backgroundRepo;
 		this.installer = installer;
 		this.avatarRepo = avatarRepo;
@@ -219,13 +214,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 		this.setState(Frame.ICONIFIED);
 	}
 
-	protected void logout() {
-		if (installer.isCurrentlyRunning())
-			return;
-
-		userModel.setCurrentUser(null);
-	}
-
 	public void launchCompleted() {
 		if (installer.isCurrentlyRunning()) {
 			EventQueue.invokeLater(new Runnable() {
@@ -240,16 +228,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 		installProgress.setVisible(false);
 		installProgressPlaceholder.setVisible(true);
 
-		userModel.setCurrentUser(userModel.getCurrentUser());
-
 		invalidate();
-	}
-
-	protected void openLauncherOptions() {
-		centralPanel.setTintActive(true);
-		footer.setTintActive(true);
-		centralPanel.setTintActive(false);
-		footer.setTintActive(false);
 	}
 
 	// ///////////////////////////////////////////////
@@ -325,9 +304,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 		
 		new Timer(DownloadFlyer.FLIGHT_INTERVAL, (ActionListener) fg).start();
 		*/
-		
-		
-		
+
 		header.add(Box.createHorizontalGlue());
 
 		JPanel rightHeaderPanel = new JPanel();
@@ -369,31 +346,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 		closeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		closeButton.setFocusable(false);
 		windowGadgetPanel.add(closeButton);
-
 		rightHeaderPanel.add(windowGadgetPanel);
 		rightHeaderPanel.add(Box.createVerticalGlue());
-
-		JButton launcherOptionsLabel = new JButton(
-				resources.getString("launcher.title.options"));
-		launcherOptionsLabel.setIcon(resources.getIcon("options_cog.png"));
-		launcherOptionsLabel.setFont(resources.getFont(
-				ResourceLoader.FONT_RALEWAY, 14));
-		launcherOptionsLabel.setForeground(COLOR_WHITE_TEXT);
-		launcherOptionsLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-		launcherOptionsLabel.setHorizontalTextPosition(SwingConstants.LEADING);
-		launcherOptionsLabel.setAlignmentX(RIGHT_ALIGNMENT);
-		launcherOptionsLabel.setCursor(Cursor
-				.getPredefinedCursor(Cursor.HAND_CURSOR));
-		launcherOptionsLabel.setBorder(BorderFactory.createEmptyBorder());
-		launcherOptionsLabel.setContentAreaFilled(false);
-		launcherOptionsLabel.setFocusPainted(false);
-		launcherOptionsLabel.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				openLauncherOptions();
-			}
-		});
-		rightHeaderPanel.add(launcherOptionsLabel);
 
 		header.add(rightHeaderPanel);
 
@@ -578,45 +532,6 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 		((DownloadHeaderTab)downloadTab).decDownloads();
 	}
 
-	public void setupPlayButtonText(ModpackModel modpack, MojangUser user) {
-		playButton.setEnabled(true);
-		playButton.setForeground(LauncherFrame.COLOR_BUTTON_BLUE);
-
-		if (installer.isCurrentlyRunning()) {
-			playButton.setText(resources.getString("launcher.pack.cancel"));
-		} else if (modpack.getInstalledVersion() != null) {
-			if (userModel.getCurrentUser() == null
-					|| userModel.getCurrentUser().isOffline()) {
-				playButton.setText(resources
-						.getString("launcher.pack.launch.offline"));
-			} else {
-				playButton.setText(resources.getString("launcher.pack.launch"));
-			}
-			playButton.setIcon(new ImageIcon(resources.colorImage(
-					resources.getImage("play_button.png"),
-					LauncherFrame.COLOR_BUTTON_BLUE)));
-			playButton.setHoverIcon(new ImageIcon(resources.colorImage(
-					resources.getImage("play_button.png"),
-					LauncherFrame.COLOR_BLUE)));
-		} else {
-			if (userModel.getCurrentUser() == null
-					|| userModel.getCurrentUser().isOffline()) {
-				playButton.setEnabled(false);
-				playButton.setForeground(LauncherFrame.COLOR_GREY_TEXT);
-				playButton.setText(resources
-						.getString("launcher.pack.cannotinstall"));
-			} else {
-				playButton
-						.setText(resources.getString("launcher.pack.install"));
-			}
-			playButton.setIcon(new ImageIcon(resources.colorImage(
-					resources.getImage("download_button.png"),
-					LauncherFrame.COLOR_BUTTON_BLUE)));
-			playButton.setHoverIcon(new ImageIcon(resources.colorImage(
-					resources.getImage("download_button.png"),
-					LauncherFrame.COLOR_BLUE)));
-		}
-	}
 	
 	public Point getAbsolutePosition(Component component) {
 		int x = 0;
