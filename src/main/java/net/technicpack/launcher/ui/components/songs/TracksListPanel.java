@@ -37,6 +37,7 @@ public class TracksListPanel extends TintablePanel {
 	private ResourceLoader resources;
 	private JPanel trackList;
 	private JLabel loading;
+	private JPanel trackControls;
 	private JScrollPane scrollPane;
 	private List<TrackInfo> tracks;
 
@@ -78,6 +79,11 @@ public class TracksListPanel extends TintablePanel {
 		loading.setPreferredSize(new Dimension(
 				loading.getPreferredSize().width, 40));
 		loading.setAlignmentX(CENTER_ALIGNMENT);
+		
+		trackControls = new JPanel();
+		JButton selectAll = new JButton("Select All");
+		
+		
 
 		add(scrollPane);
 
@@ -112,7 +118,6 @@ public class TracksListPanel extends TintablePanel {
 
         trackList.add(Box.createGlue());
 		
-		revalidate();
 		repaint();
 	}
 	
