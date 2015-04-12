@@ -55,8 +55,6 @@ import net.technicpack.launcher.launch.Installer;
 import net.technicpack.launcher.settings.SettingsFactory;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
-import net.technicpack.launcher.settings.migration.IMigrator;
-import net.technicpack.launcher.settings.migration.InitialV3Migrator;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.auth.IUserType;
@@ -112,15 +110,12 @@ public class LauncherMain {
 	public static ConsoleFrame consoleFrame;
 
 	public static void main(String[] args) throws Exception {
-
-
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception ex) {
 			Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
 		}
 
-		ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
 
 		StartupParameters params = new StartupParameters(args);
 		try {
@@ -376,11 +371,6 @@ public class LauncherMain {
 						"installedPacks"));
 		IAuthoritativePackSource packInfoRepository = new PlatformPackInfoRepository(
 				platform, solder);
-
-		ArrayList<IMigrator> migrators = new ArrayList<IMigrator>(1);
-		migrators.add(new InitialV3Migrator(platform));
-		SettingsFactory.migrateSettings(settings, packStore, directories,
-				users, migrators);
 
 		MinecraftLauncher launcher = new MinecraftLauncher(platform,
 				directories, userModel, settings.getClientId(), javaVersions);
