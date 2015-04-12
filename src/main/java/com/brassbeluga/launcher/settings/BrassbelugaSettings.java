@@ -29,7 +29,7 @@ import java.nio.charset.Charset;
 import java.util.UUID;
 import java.util.logging.Level;
 
-public class TechnicSettings {
+public class BrassbelugaSettings {
     public static final String STABLE = "stable";
     public static final String BETA = "beta";
 

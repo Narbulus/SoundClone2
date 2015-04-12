@@ -2,7 +2,7 @@ package com.brassbeluga.launcher.ui.listeners;
 
 import java.awt.Point;
 
-import com.brassbeluga.launcher.ui.FlyerGlassPane;
+import com.brassbeluga.launcher.ui.GlassPane;
 
 public class DownloadFlyer {
 	public static final int FLIGHT_DURATION = 200;
@@ -17,8 +17,8 @@ public class DownloadFlyer {
 	public DownloadFlyer(Point flyerLocation) {
 		this.flyerLocation = flyerLocation;
 		this.startPoint = (Point) flyerLocation.clone();
-		this.endPoint = new Point(FlyerGlassPane.D_COUNTER_FLY_TO_X,
-				FlyerGlassPane.D_COUNTER_FLY_TO_Y);
+		this.endPoint = new Point(GlassPane.D_COUNTER_FLY_TO_X,
+				GlassPane.D_COUNTER_FLY_TO_Y);
 	}
 	
 	public double getX() {

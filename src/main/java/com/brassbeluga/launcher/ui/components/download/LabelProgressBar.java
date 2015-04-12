@@ -1,4 +1,4 @@
-package com.brassbeluga.launcher.ui.components.songs;
+package com.brassbeluga.launcher.ui.components.download;
 
 import java.awt.Color;
 import java.awt.Graphics;

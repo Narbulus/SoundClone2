@@ -13,7 +13,7 @@ import com.brassbeluga.launcher.ui.listeners.DownloadFlyer;
 
 import net.technicpack.ui.lang.ResourceLoader;
 
-public class FlyerGlassPane extends JPanel implements ActionListener {
+public class GlassPane extends JPanel implements ActionListener {
 	public static final int INITIAL_X_OFFSET = 44;
 	
 	public static final int FLIGHT_DURATION = 200;
@@ -26,7 +26,7 @@ public class FlyerGlassPane extends JPanel implements ActionListener {
 	private LauncherFrame launcher;
 	private List<DownloadFlyer> flyers;
 	
-	public FlyerGlassPane(ResourceLoader resources, LauncherFrame launcher) {
+	public GlassPane(ResourceLoader resources, LauncherFrame launcher) {
 		this.resources = resources;
 		this.launcher = launcher;
 		this.flyers = new ArrayList<DownloadFlyer>();

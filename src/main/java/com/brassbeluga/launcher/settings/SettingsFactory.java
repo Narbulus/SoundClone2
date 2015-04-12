@@ -31,7 +31,7 @@ import org.apache.commons.io.FileUtils;
 import com.google.gson.JsonSyntaxException;
 
 public class SettingsFactory {
-    public static TechnicSettings buildSettingsObject(String runningDir, boolean isMover) {
+    public static BrassbelugaSettings buildSettingsObject(String runningDir, boolean isMover) {
 
         System.out.println("Settings for exe: "+runningDir);
 
@@ -42,7 +42,7 @@ public class SettingsFactory {
         else
             System.out.println("Portable settings dir: "+portableSettingsDir.getAbsolutePath());
 
-        TechnicSettings portableSettings = tryGetSettings(portableSettingsDir);
+        BrassbelugaSettings portableSettings = tryGetSettings(portableSettingsDir);
 
         if (portableSettings != null && portableSettings.isPortable()) {
             System.out.println("Portable settings file found.");
@@ -51,12 +51,12 @@ public class SettingsFactory {
 
         File installedSettingsDir = OperatingSystem.getOperatingSystem().getUserDirectoryForApp("technic");
 
-        TechnicSettings settings = tryGetSettings(installedSettingsDir);
+        BrassbelugaSettings settings = tryGetSettings(installedSettingsDir);
 
         return settings;
     }
 
-    private static TechnicSettings tryGetSettings(File rootDir) {
+    private static BrassbelugaSettings tryGetSettings(File rootDir) {
         if (!rootDir.exists())
             return null;
 
@@ -66,7 +66,7 @@ public class SettingsFactory {
 
         try {
             String json = FileUtils.readFileToString(settingsFile, Charset.forName("UTF-8"));
-            TechnicSettings settings = Utils.getGson().fromJson(json, TechnicSettings.class);
+            BrassbelugaSettings settings = Utils.getGson().fromJson(json, BrassbelugaSettings.class);
 
             if (settings != null)
                 settings.setFilePath(settingsFile);

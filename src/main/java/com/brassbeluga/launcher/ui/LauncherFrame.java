@@ -50,7 +50,7 @@ import net.technicpack.ui.lang.IRelocalizableResource;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.DesktopUtils;
 
-import com.brassbeluga.launcher.ui.components.songs.DownloadPanel;
+import com.brassbeluga.launcher.ui.components.download.DownloadPanel;
 import com.brassbeluga.launcher.ui.components.songs.SongsInfoPanel;
 import com.brassbeluga.launcher.ui.components.songs.TracksListPanel;
 import com.brassbeluga.launcher.ui.controls.DownloadHeaderTab;

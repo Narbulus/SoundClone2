@@ -42,12 +42,10 @@ import net.technicpack.utilslib.OperatingSystem;
 import net.technicpack.utilslib.Utils;
 
 import com.beust.jcommander.JCommander;
-import com.brassbeluga.launcher.autoupdate.CommandLineBuildNumber;
-import com.brassbeluga.launcher.autoupdate.VersionFileBuildNumber;
 import com.brassbeluga.launcher.io.TechnicLauncherDirectories;
+import com.brassbeluga.launcher.settings.BrassbelugaSettings;
 import com.brassbeluga.launcher.settings.SettingsFactory;
 import com.brassbeluga.launcher.settings.StartupParameters;
-import com.brassbeluga.launcher.settings.TechnicSettings;
 import com.brassbeluga.launcher.ui.LauncherFrame;
 import com.brassbeluga.sound.main.DownloadLikes;
 
@@ -70,7 +68,7 @@ public class LauncherMain {
 			ex.printStackTrace();
 		}
 
-		TechnicSettings settings = null;
+		BrassbelugaSettings settings = null;
 
 		try {
 			settings = SettingsFactory.buildSettingsObject(
@@ -93,21 +91,13 @@ public class LauncherMain {
 				"technicpack", "launcher", "resources");
 		resources.setLocale(settings.getLanguageCode());
 
-		IBuildNumber buildNumber = null;
-
-		if (params.getBuildNumber() != null
-				&& !params.getBuildNumber().isEmpty())
-			buildNumber = new CommandLineBuildNumber(params);
-		else
-			buildNumber = new VersionFileBuildNumber(resources);
-
-		setupLogging(directories, resources, buildNumber);
+		setupLogging(directories, resources);
 		startLauncher(resources);
 
 	}
 
 	private static void setupLogging(LauncherDirectories directories,
-			ResourceLoader resources, IBuildNumber buildNumber) {
+			ResourceLoader resources) {
 		System.out.println("Setting up logging");
 		final Logger logger = Utils.getLogger();
 		File logDirectory = new File(directories.getLauncherDirectory(), "logs");
@@ -118,8 +108,7 @@ public class LauncherMain {
 		RotatingFileHandler fileHandler = new RotatingFileHandler(
 				logs.getPath());
 
-		fileHandler.setFormatter(new BuildLogFormatter(buildNumber
-				.getBuildNumber()));
+		fileHandler.setFormatter(new BuildLogFormatter("0"));
 
 		for (Handler h : logger.getHandlers()) {
 			logger.removeHandler(h);
@@ -130,7 +119,7 @@ public class LauncherMain {
 		LauncherMain.consoleFrame = new ConsoleFrame(2500,
 				resources.getImage("icon.png"));
 		Console console = new Console(LauncherMain.consoleFrame,
-				buildNumber.getBuildNumber());
+				"0");
 		LauncherMain.consoleFrame.setVisible(true);
 
 		logger.addHandler(new ConsoleHandler(console));

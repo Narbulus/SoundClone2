@@ -27,7 +27,7 @@ import javax.swing.SwingWorker;
 
 import net.technicpack.ui.lang.ResourceLoader;
 
-import com.brassbeluga.launcher.ui.components.songs.DownloadPanel;
+import com.brassbeluga.launcher.ui.components.download.DownloadPanel;
 import com.brassbeluga.launcher.ui.components.songs.SongsInfoPanel;
 import com.brassbeluga.launcher.ui.components.songs.TracksListPanel;
 import com.brassbeluga.sound.gson.Configuration;
