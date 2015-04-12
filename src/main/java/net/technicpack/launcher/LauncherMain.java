@@ -57,7 +57,6 @@ import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
 import net.technicpack.launcher.settings.migration.IMigrator;
 import net.technicpack.launcher.settings.migration.InitialV3Migrator;
-import net.technicpack.launcher.ui.InstallerFrame;
 import net.technicpack.launcher.ui.LauncherFrame;
 import net.technicpack.launchercore.auth.IUserStore;
 import net.technicpack.launchercore.auth.IUserType;
@@ -112,12 +111,8 @@ public class LauncherMain {
 
 	public static ConsoleFrame consoleFrame;
 
-	public static Locale[] supportedLanguages = new Locale[] { Locale.ENGLISH,
-			new Locale("pt", "BR"), new Locale("pt", "PT"), new Locale("cs"),
-			Locale.GERMAN, Locale.FRENCH, Locale.ITALIAN, new Locale("hu"),
-			new Locale("pl"), Locale.CHINA, Locale.TAIWAN };
-
 	public static void main(String[] args) throws Exception {
+
 
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -147,11 +142,7 @@ public class LauncherMain {
 		if (settings == null) {
 			ResourceLoader installerResources = new ResourceLoader(null, "net",
 					"technicpack", "launcher", "resources");
-			installerResources.setSupportedLanguages(supportedLanguages);
 			installerResources.setLocale(ResourceLoader.DEFAULT_LOCALE);
-			InstallerFrame dialog = new InstallerFrame(installerResources,
-					params);
-			dialog.setVisible(true);
 			return;
 		}
 
@@ -159,7 +150,6 @@ public class LauncherMain {
 				settings.getTechnicRoot());
 		ResourceLoader resources = new ResourceLoader(directories, "net",
 				"technicpack", "launcher", "resources");
-		resources.setSupportedLanguages(supportedLanguages);
 		resources.setLocale(settings.getLanguageCode());
 
 		IBuildNumber buildNumber = null;

@@ -26,7 +26,6 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Frame;
-import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -49,14 +48,12 @@ import net.technicpack.autoupdate.IBuildNumber;
 import net.technicpack.launcher.launch.Installer;
 import net.technicpack.launcher.settings.StartupParameters;
 import net.technicpack.launcher.settings.TechnicSettings;
-import net.technicpack.launcher.ui.components.OptionsDialog;
 import net.technicpack.launcher.ui.components.songs.DownloadPanel;
 import net.technicpack.launcher.ui.components.songs.SongsInfoPanel;
 import net.technicpack.launcher.ui.components.songs.TracksListPanel;
 import net.technicpack.launcher.ui.controls.DownloadHeaderTab;
 import net.technicpack.launcher.ui.controls.HeaderTab;
 import net.technicpack.launcher.ui.controls.UserWidget;
-import net.technicpack.launcher.ui.listeners.DownloadFlyer;
 import net.technicpack.launcher.ui.listeners.TabFlashListener;
 import net.technicpack.launchercore.auth.IAuthListener;
 import net.technicpack.launchercore.auth.IUserType;
@@ -270,9 +267,6 @@ public class LauncherFrame extends DraggableFrame implements
 	protected void openLauncherOptions() {
 		centralPanel.setTintActive(true);
 		footer.setTintActive(true);
-		OptionsDialog dialog = new OptionsDialog(this, settings, resources,
-				params, javaVersions, fileJavaSource, buildNumber);
-		dialog.setVisible(true);
 		centralPanel.setTintActive(false);
 		footer.setTintActive(false);
 	}
