@@ -40,6 +40,7 @@ public class TracksListPanel extends TintablePanel {
 	private JPanel trackControls;
 	private JScrollPane scrollPane;
 	private List<TrackInfo> tracks;
+	private List<TrackEntry> entries;
 
 	private LauncherFrame parent;
 	
@@ -53,6 +54,7 @@ public class TracksListPanel extends TintablePanel {
 
 	private void initComponents() {
 		tracks = new ArrayList<TrackInfo>();
+		entries = new ArrayList<TrackEntry>();
 		
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
@@ -81,11 +83,80 @@ public class TracksListPanel extends TintablePanel {
 		loading.setAlignmentX(CENTER_ALIGNMENT);
 		
 		trackControls = new JPanel();
-		JButton selectAll = new JButton("Select All");
-		
-		
+		trackControls.setLayout(new BoxLayout(trackControls, BoxLayout.X_AXIS));
+		trackControls.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+		trackControls.setBackground(LauncherFrame.COLOR_BLUE);
+		final JButton selectAll = new JButton("Select All");
+		selectAll.setContentAreaFilled(false);
+		selectAll.setFocusPainted(false);
+		// browseButton.setBorder(new LineBorder(new Color(0, 0, 0, 50)));
+		selectAll.setOpaque(true);
+		selectAll.setBackground(LauncherFrame.COLOR_BLUE);
+		selectAll.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
+		selectAll.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+		selectAll.addMouseListener(new MouseListener() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {	
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				selectAll.setBackground(LauncherFrame.COLOR_BUTTON_BLUE);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				selectAll.setBackground(LauncherFrame.COLOR_BLUE);
+			}
+		});
+		final JButton deselectAll = new JButton("Deselect All");
+		deselectAll.setContentAreaFilled(false);
+		deselectAll.setFocusPainted(false);
+		// browseButton.setBorder(new LineBorder(new Color(0, 0, 0, 50)));
+		deselectAll.setOpaque(true);
+		deselectAll.setBackground(LauncherFrame.COLOR_BLUE);
+		deselectAll.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
+		deselectAll.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+		deselectAll.addMouseListener(new MouseListener() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {	
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				deselectAll.setBackground(LauncherFrame.COLOR_BUTTON_BLUE);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				deselectAll.setBackground(LauncherFrame.COLOR_BLUE);
+			}
+		});
+		trackControls.add(Box.createHorizontalGlue());
+		trackControls.add(selectAll);
+		trackControls.add(Box.createRigidArea(new Dimension(16, 0)));
+		trackControls.add(deselectAll);
 
 		add(scrollPane);
+		add(trackControls);
 
 	}
 	
@@ -98,6 +169,12 @@ public class TracksListPanel extends TintablePanel {
 		
 		revalidate();
 		repaint();
+	}
+	
+	public void selectAll() {
+		for (TrackEntry t : entries) {
+			
+		}
 	}
 
 	public void addNewTracks(List<TrackInfo> newTracks) {
