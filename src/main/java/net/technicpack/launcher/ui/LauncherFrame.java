@@ -518,7 +518,7 @@ public class LauncherFrame extends DraggableFrame implements
 		songsInfoPanel.updateTrack(track);
 	}
 	
-	public void flagTrackForDownload(TrackInfo track, Point flagLoc) {
+	public void flagTrackForDownload(TrackInfo track) {
 		downloadPanel.addTrack(track);
 		
 		((DownloadHeaderTab) downloadTab).incDownloads();
@@ -528,6 +528,7 @@ public class LauncherFrame extends DraggableFrame implements
 	public void unFlagTrackForDownload(TrackInfo track) {
 		downloadPanel.removeTrack(track);
 		((DownloadHeaderTab) downloadTab).decDownloads();
+		endDownloadTabFlash();
 	}
 	
 	public String downloadButtonPressed(String path) throws JsonSyntaxException, Exception {

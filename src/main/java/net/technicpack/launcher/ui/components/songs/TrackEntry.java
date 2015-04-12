@@ -113,7 +113,7 @@ public class TrackEntry extends JPanel {
 				}else{
 					downloadFlag = true;
 					flag.setIcon(resources.getIcon("track_download.png"));
-					parent.flagTrackForDownload(info, parent.getAbsolutePosition(flag));
+					parent.flagTrackForDownload(info);
 				}
 			}
 
