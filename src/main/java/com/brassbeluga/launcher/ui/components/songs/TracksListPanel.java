@@ -1,6 +1,7 @@
 package com.brassbeluga.launcher.ui.components.songs;
 
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
@@ -13,11 +14,11 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingWorker;
 import javax.swing.border.MatteBorder;
 
 import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.controls.list.SimpleScrollbarUI;
-import net.technicpack.ui.lang.ResourceLoader;
 
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.LauncherFrame;
@@ -34,7 +35,7 @@ public class TracksListPanel extends TintablePanel {
 	private List<TrackEntry> entries;
 
 	private LauncherFrame parent;
-	
+
 	public TracksListPanel(LauncherFrame parent) {
 		this.parent = parent;
 
@@ -44,10 +45,11 @@ public class TracksListPanel extends TintablePanel {
 	private void initComponents() {
 		tracks = new ArrayList<TrackInfo>();
 		entries = new ArrayList<TrackEntry>();
-		
+
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-		setBorder(new MatteBorder(5, 5, 5, 5, LauncherFrame.COLOR_BLUE_DARKER));;
+		// setBorder(new MatteBorder(5, 5, 5, 5,
+		// LauncherFrame.COLOR_BLUE_DARKER));;
 
 		trackList = new JPanel();
 		trackList.setLayout(new BoxLayout(trackList, BoxLayout.Y_AXIS));
@@ -57,7 +59,8 @@ public class TracksListPanel extends TintablePanel {
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		scrollPane.setOpaque(false);
-		scrollPane.setBorder(BorderFactory.createEmptyBorder());
+		scrollPane.setBorder(BorderFactory.createMatteBorder(0, 8, 0, 0,
+				LauncherFrame.COLOR_BLUE_DARKER));
 		scrollPane.getViewport().setOpaque(false);
 		scrollPane.getVerticalScrollBar().setUI(
 				new SimpleScrollbarUI(LauncherFrame.COLOR_SCROLL_TRACK,
@@ -65,17 +68,19 @@ public class TracksListPanel extends TintablePanel {
 		scrollPane.getVerticalScrollBar().setPreferredSize(
 				new Dimension(10, 10));
 		scrollPane.getVerticalScrollBar().setUnitIncrement(12);
-		
+
 		loading = new JLabel("Loading user's likes...");
-		loading.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 20));
+		loading.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY,
+				20));
 		loading.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 		loading.setPreferredSize(new Dimension(
 				loading.getPreferredSize().width, 40));
 		loading.setAlignmentX(CENTER_ALIGNMENT);
-		
+
 		trackControls = new JPanel();
 		trackControls.setLayout(new BoxLayout(trackControls, BoxLayout.X_AXIS));
-		trackControls.setBorder(new MatteBorder(8, 0, 0, 0, LauncherFrame.COLOR_BLUE_DARKER));
+		trackControls.setBorder(new MatteBorder(8, 0, 0, 8,
+				LauncherFrame.COLOR_BLUE_DARKER));
 		trackControls.setBackground(LauncherFrame.COLOR_BLUE);
 		final JButton selectAll = new JButton("Select All");
 		selectAll.setContentAreaFilled(false);
@@ -83,7 +88,8 @@ public class TracksListPanel extends TintablePanel {
 		// browseButton.setBorder(new LineBorder(new Color(0, 0, 0, 50)));
 		selectAll.setOpaque(true);
 		selectAll.setBackground(LauncherFrame.COLOR_BLUE);
-		selectAll.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 26));
+		selectAll.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY,
+				26));
 		selectAll.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 		selectAll.addMouseListener(new MouseListener() {
 			@Override
@@ -92,13 +98,19 @@ public class TracksListPanel extends TintablePanel {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				for (TrackEntry t : entries)
-					t.setDownloadFlag(true);
-				parent.flagAllForDownload(tracks);
+				EventQueue.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						for (TrackEntry t : entries)
+							t.setDownloadFlag(true);
+						parent.flagAllForDownload(tracks);
+					}
+				});
+
 			}
 
 			@Override
-			public void mouseReleased(MouseEvent e) {	
+			public void mouseReleased(MouseEvent e) {
 			}
 
 			@Override
@@ -117,7 +129,8 @@ public class TracksListPanel extends TintablePanel {
 		// browseButton.setBorder(new LineBorder(new Color(0, 0, 0, 50)));
 		deselectAll.setOpaque(true);
 		deselectAll.setBackground(LauncherFrame.COLOR_BLUE);
-		deselectAll.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 26));
+		deselectAll.setFont(ResourceManager.getFont(
+				ResourceManager.FONT_RALEWAY, 26));
 		deselectAll.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 		deselectAll.addMouseListener(new MouseListener() {
 			@Override
@@ -126,13 +139,18 @@ public class TracksListPanel extends TintablePanel {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				for (TrackEntry t : entries)
-					t.setDownloadFlag(false);
-				parent.unflagAllForDownload();
+				EventQueue.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						for (TrackEntry t : entries)
+							t.setDownloadFlag(false);
+						parent.unflagAllForDownload();
+					}
+				});	
 			}
 
 			@Override
-			public void mouseReleased(MouseEvent e) {	
+			public void mouseReleased(MouseEvent e) {
 			}
 
 			@Override
@@ -154,23 +172,23 @@ public class TracksListPanel extends TintablePanel {
 		add(trackControls);
 
 	}
-	
+
 	// Called before tracks are loaded
 	public void startUpdateTracks() {
-		trackList.removeAll();	
+		trackList.removeAll();
 		tracks.clear();
 		entries.clear();
-		
+
 		trackList.add(loading);
-        trackList.add(Box.createGlue());
-		
+		trackList.add(Box.createGlue());
+
 		revalidate();
 		repaint();
 	}
-	
+
 	public void selectAll() {
 		for (TrackEntry t : entries) {
-			
+
 		}
 	}
 
@@ -180,7 +198,7 @@ public class TracksListPanel extends TintablePanel {
 			trackList.remove(trackList.getComponentCount() - 1);
 
 		tracks.addAll(newTracks);
-		
+
 		int i = tracks.size();
 		for (TrackInfo t : newTracks) {
 			if (i == newTracks.size())
@@ -191,17 +209,17 @@ public class TracksListPanel extends TintablePanel {
 			i++;
 		}
 
-        trackList.add(Box.createGlue());
-		
+		trackList.add(Box.createGlue());
+
 		repaint();
 		revalidate();
 	}
-	
+
 	public void onFinishedLoading() {
 		trackList.remove(0);
-		
+
 		revalidate();
 		repaint();
 	}
-	
+
 }

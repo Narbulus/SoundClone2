@@ -23,6 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
+import javax.swing.SwingWorker;
 import javax.swing.border.Border;
 
 import net.technicpack.ui.controls.list.SimpleScrollbarUI;
@@ -295,49 +296,61 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 	}
 
 	private void rebuildUI() {
-		trackList.removeAll();
+		SwingWorker worker = new SwingWorker<String, String>() {
+			
+			@Override 
+			public String doInBackground() {
+				trackList.removeAll();
+				
+				if (tracks.size() > 0) {
+					TrackInfo t = tracks.get(downloadIndex);
+					if (t.getArtworkURL() != null) {
+						Image image = null;
+				        try {
+				            URL url = new URL(t.getArtworkURL());
+				            image = ImageIO.read(url);
+				        } catch (IOException e) {
+				        	e.printStackTrace();
+				        }
+				        trackIcon.setIcon(new ImageIcon(image));
+					}
+				}
 		
-		if (tracks.size() > 0) {
-			TrackInfo t = tracks.get(downloadIndex);
-			if (t.getArtworkURL() != null) {
-				Image image = null;
-		        try {
-		            URL url = new URL(t.getArtworkURL());
-		            image = ImageIO.read(url);
-		        } catch (IOException e) {
-		        	e.printStackTrace();
-		        }
-		        trackIcon.setIcon(new ImageIcon(image));
-			}
-		}
-
-		int i = 0;
-		for (TrackInfo t : tracks) {
-			JLabel label;
-			if (i == downloadIndex) {
-				System.out.println("Load bar on " + i + " & " + t.getTitle());
-				label = trackProgress;
-				trackProgress.setProgress(0);
-				trackProgress.setText(t.getTitle());
-			}else{
-				label = new JLabel(t.getTitle());
-				label.setBorder(trackBorder);
-				label.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 16));
-				if (i > downloadIndex)
-					label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-				else
-					label.setForeground(LauncherFrame.COLOR_GREY_TEXT);
-			}
-			trackList.add(label);
-			i++;
-		}
+				int i = 0;
+				for (TrackInfo t : tracks) {
+					JLabel label;
+					if (i == downloadIndex) {
+						System.out.println("Load bar on " + i + " & " + t.getTitle());
+						label = trackProgress;
+						trackProgress.setProgress(0);
+						trackProgress.setText(t.getTitle());
+					}else{
+						label = new JLabel(t.getTitle());
+						label.setBorder(trackBorder);
+						label.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 16));
+						if (i > downloadIndex)
+							label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+						else
+							label.setForeground(LauncherFrame.COLOR_GREY_TEXT);
+					}
+					trackList.add(label);
+					i++;
+				}
+				
+				//trackProgress.scrollRectToVisible(trackProgress.getBounds());
 		
-		trackProgress.scrollRectToVisible(trackProgress.getBounds());
-
-		trackList.add(Box.createGlue());
-
-		revalidate();
-		repaint();
+				trackList.add(Box.createGlue());
+				return "Information";
+			}
+			
+			@Override
+			public void done() {
+				revalidate();
+				repaint();
+			}
+			
+		};
+		worker.execute();
 
 	}
 
