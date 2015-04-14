@@ -18,28 +18,29 @@
 
 package com.brassbeluga.launcher.ui.controls;
 
-import javax.swing.*;
-
-import com.brassbeluga.launcher.ui.LauncherFrame;
-
-import java.awt.*;
+import java.awt.EventQueue;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-import net.technicpack.ui.lang.ResourceLoader;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultButtonModel;
+import javax.swing.JLabel;
+
+import com.brassbeluga.launcher.resources.ResourceManager;
+import com.brassbeluga.launcher.ui.LauncherFrame;
 
 public class HeaderTab extends JLabel implements MouseListener {
     private boolean isActive;
     private DefaultButtonModel model;
 
-    public HeaderTab(String text, ResourceLoader resources) {
+    public HeaderTab(String text) {
         super(text);
 
         model = new DefaultButtonModel();
         setIsActive(false);
 
-        setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
+        setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 26));
         setForeground(LauncherFrame.COLOR_WHITE_TEXT);
         setBackground(LauncherFrame.COLOR_BLUE_DARKER);
         setBorder(BorderFactory.createEmptyBorder(20,18,20,18));

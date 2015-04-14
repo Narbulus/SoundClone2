@@ -12,11 +12,10 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.MatteBorder;
+
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.LauncherFrame;
 import com.brassbeluga.sound.gson.TrackInfo;
-
-import net.technicpack.ui.lang.ResourceLoader;
 
 public class TrackEntry extends JPanel {
 	public static final int DOWNLOAD_ICON_WIDTH = 120;
@@ -25,7 +24,6 @@ public class TrackEntry extends JPanel {
 	private TrackInfo info;
 	private boolean downloadFlag;
 	
-	private ResourceLoader resources;
 	private LauncherFrame parent;
 	private Color backColor;
 	private Color altColor;
@@ -34,10 +32,9 @@ public class TrackEntry extends JPanel {
 	private JButton flag;
 	private int index;
 	
-	public TrackEntry(ResourceLoader resources, TrackInfo info, int index, LauncherFrame parent) {
+	public TrackEntry(TrackInfo info, int index, LauncherFrame parent) {
 		this.info = info;
 		this.downloadFlag = false;
-		this.resources = resources;
 		this.index = index;
 		this.parent = parent;
 		

@@ -1,14 +1,10 @@
 package com.brassbeluga.launcher.ui.controls;
 
 import java.awt.Color;
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.RenderingHints;
-
-import net.technicpack.ui.lang.ResourceLoader;
-
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 
 import com.brassbeluga.launcher.ui.LauncherFrame;
 
@@ -20,8 +16,8 @@ public class DownloadHeaderTab extends HeaderTab {
 	
 	private int downloadsQueued;
 
-	public DownloadHeaderTab(String text, ResourceLoader resources) {
-		super(text, resources);
+	public DownloadHeaderTab(String text) {
+		super(text);
 		downloadsQueued = 0;
 	}
 	

@@ -3,7 +3,6 @@ package com.brassbeluga.launcher.ui.components.songs;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Image;
-import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
@@ -17,27 +16,20 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.JTextPane;
 import javax.swing.SwingWorker;
-import javax.swing.border.Border;
-import javax.swing.border.MatteBorder;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
-
-import com.brassbeluga.launcher.resources.ResourceManager;
-import com.brassbeluga.launcher.ui.LauncherFrame;
-import com.brassbeluga.sound.gson.TrackInfo;
 
 import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.controls.WatermarkTextField;
 import net.technicpack.ui.lang.ResourceLoader;
+
+import com.brassbeluga.launcher.resources.ResourceManager;
+import com.brassbeluga.launcher.ui.LauncherFrame;
+import com.brassbeluga.sound.gson.TrackInfo;
 
 public class SongsInfoPanel extends TintablePanel {
 	
@@ -59,9 +51,7 @@ public class SongsInfoPanel extends TintablePanel {
 	private static final int MAX_SEARCH_STRING = 90;
 	private static final int MAX_TITLE_LENGTH = 42;
 
-	public SongsInfoPanel(ResourceLoader resources, LauncherFrame parent) {
-
-		this.resources = resources;
+	public SongsInfoPanel(LauncherFrame parent) {
 		this.parent = parent;
 
 		initComponents();

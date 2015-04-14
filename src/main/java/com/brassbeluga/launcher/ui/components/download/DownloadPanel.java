@@ -25,19 +25,17 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.border.Border;
 
+import net.technicpack.ui.controls.list.SimpleScrollbarUI;
+
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.LauncherFrame;
 import com.brassbeluga.sound.gson.TrackInfo;
-
-import net.technicpack.ui.controls.list.SimpleScrollbarUI;
-import net.technicpack.ui.lang.ResourceLoader;
 
 public class DownloadPanel extends JPanel implements PropertyChangeListener {
 
 
 	public static final int DOWNLOAD_HEIGHT = 200;
 
-	private ResourceLoader resources;
 	private LauncherFrame parent;
 
 	private JPanel infoPanel;
@@ -60,9 +58,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 
 	private JScrollPane scrollPane;
 
-	public DownloadPanel(ResourceLoader resources, LauncherFrame parent) {
-
-		this.resources = resources;
+	public DownloadPanel(LauncherFrame parent) {
 		this.parent = parent;
 		downloadIndex = 0;
 

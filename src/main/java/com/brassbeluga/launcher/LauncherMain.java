@@ -151,6 +151,6 @@ public class LauncherMain {
 		}
 
 		// Start the launcher!
-		new LauncherFrame(resources, downloader);
+		new LauncherFrame(downloader);
 	}
 }

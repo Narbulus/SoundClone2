@@ -26,7 +26,6 @@ import com.brassbeluga.sound.gson.TrackInfo;
 @SuppressWarnings("serial")
 public class TracksListPanel extends TintablePanel {
 
-	private ResourceLoader resources;
 	private JPanel trackList;
 	private JLabel loading;
 	private JPanel trackControls;
@@ -36,9 +35,7 @@ public class TracksListPanel extends TintablePanel {
 
 	private LauncherFrame parent;
 	
-	public TracksListPanel(ResourceLoader resources, LauncherFrame parent) {
-
-		this.resources = resources;
+	public TracksListPanel(LauncherFrame parent) {
 		this.parent = parent;
 
 		initComponents();
@@ -188,7 +185,7 @@ public class TracksListPanel extends TintablePanel {
 		for (TrackInfo t : newTracks) {
 			if (i == newTracks.size())
 				parent.selectTrack(t);
-			TrackEntry track = new TrackEntry(resources, t, i, parent);
+			TrackEntry track = new TrackEntry(t, i, parent);
 			trackList.add(track);
 			entries.add(track);
 			i++;

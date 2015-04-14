@@ -46,7 +46,6 @@ import javax.swing.WindowConstants;
 import net.technicpack.ui.controls.DraggableFrame;
 import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.controls.installation.ProgressBar;
-import net.technicpack.ui.lang.IRelocalizableResource;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.DesktopUtils;
 
@@ -61,7 +60,7 @@ import com.brassbeluga.sound.gson.TrackInfo;
 import com.brassbeluga.sound.main.DownloadLikes;
 import com.google.gson.JsonSyntaxException;
 
-public class LauncherFrame extends DraggableFrame implements IRelocalizableResource{
+public class LauncherFrame extends DraggableFrame {
 	private static final long serialVersionUID = -5667136239041080648L;
 	private static final int FRAME_WIDTH = 1194;
 	private static final int FRAME_HEIGHT = 718;
@@ -113,7 +112,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 	private Timer tabFlashTimer;
 	private TabFlashListener tabFlashListener;
 
-	public LauncherFrame(final ResourceLoader resources,final DownloadLikes downloader) {
+	public LauncherFrame(final DownloadLikes downloader) {
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		
@@ -121,7 +120,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 
 		// Handles rebuilding the frame, so use it to build the frame in the
 		// first place
-		relocalize(resources);
+		relocalize();
 
 		// Initially SONGS tab is selected
 		selectTab(TAB_SONGS);
@@ -201,12 +200,12 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 		};
 
 
-		songsTab = new HeaderTab("SONGS", resources);
+		songsTab = new HeaderTab("SONGS");
 		songsTab.addActionListener(tabListener);
 		songsTab.setActionCommand(TAB_SONGS);
 		header.add(songsTab);
 		
-		downloadTab = new DownloadHeaderTab("DOWNLOAD", resources);
+		downloadTab = new DownloadHeaderTab("DOWNLOAD");
 		downloadTab.addActionListener(tabListener);
 		downloadTab.setActionCommand(TAB_DOWNLOAD);
 		tabFlashListener = new TabFlashListener(COLOR_BLUE, downloadTab, this);
@@ -300,8 +299,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 		centralPanel.add(infoSwap, BorderLayout.CENTER);
 
 		JPanel songsHost = new JPanel();
-		tracksPanel = new TracksListPanel(resources, this);
-		songsInfoPanel = new SongsInfoPanel(resources, this);
+		tracksPanel = new TracksListPanel(this);
+		songsInfoPanel = new SongsInfoPanel(this);
 		infoSwap.add(songsHost, TAB_SONGS);
 
 		songsHost.setLayout(new BorderLayout());
@@ -310,7 +309,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 		
 		JPanel downloadHost = new JPanel();
 		downloadHost.setBackground(COLOR_CENTRAL_BACK_OPAQUE);
-		downloadPanel = new DownloadPanel(resources, this);
+		downloadPanel = new DownloadPanel(this);
 		
 		infoSwap.add(downloadPanel, TAB_DOWNLOAD);
 
@@ -431,11 +430,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 		tabFlashTimer.stop();
 	}
 
-	@Override
-	public void relocalize(ResourceLoader loader) {
-		this.resources = loader;
-		this.resources.registerResource(this);
-
+	public void relocalize() {
 		setIconImage(ResourceManager.getImage("icon.png"));
 
 		// Wipe controls
