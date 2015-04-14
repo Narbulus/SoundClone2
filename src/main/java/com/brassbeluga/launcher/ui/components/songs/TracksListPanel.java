@@ -19,6 +19,7 @@ import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 import net.technicpack.ui.lang.ResourceLoader;
 
+import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.LauncherFrame;
 import com.brassbeluga.sound.gson.TrackInfo;
 
@@ -69,7 +70,7 @@ public class TracksListPanel extends TintablePanel {
 		scrollPane.getVerticalScrollBar().setUnitIncrement(12);
 		
 		loading = new JLabel("Loading user's likes...");
-		loading.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 20));
+		loading.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 20));
 		loading.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 		loading.setPreferredSize(new Dimension(
 				loading.getPreferredSize().width, 40));
@@ -85,7 +86,7 @@ public class TracksListPanel extends TintablePanel {
 		// browseButton.setBorder(new LineBorder(new Color(0, 0, 0, 50)));
 		selectAll.setOpaque(true);
 		selectAll.setBackground(LauncherFrame.COLOR_BLUE);
-		selectAll.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
+		selectAll.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 26));
 		selectAll.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 		selectAll.addMouseListener(new MouseListener() {
 			@Override
@@ -119,7 +120,7 @@ public class TracksListPanel extends TintablePanel {
 		// browseButton.setBorder(new LineBorder(new Color(0, 0, 0, 50)));
 		deselectAll.setOpaque(true);
 		deselectAll.setBackground(LauncherFrame.COLOR_BLUE);
-		deselectAll.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
+		deselectAll.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 26));
 		deselectAll.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 		deselectAll.addMouseListener(new MouseListener() {
 			@Override

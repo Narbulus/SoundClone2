@@ -31,6 +31,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
+import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.LauncherFrame;
 import com.brassbeluga.sound.gson.TrackInfo;
 
@@ -86,8 +87,8 @@ public class SongsInfoPanel extends TintablePanel {
 		usernameField = new WatermarkTextField("username",
 				LauncherFrame.COLOR_WHITE_TEXT);
 		usernameField.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
-		usernameField.setFont(resources
-				.getFont(ResourceLoader.FONT_RALEWAY, 16));
+		usernameField.setFont(ResourceManager
+				.getFont(ResourceManager.FONT_RALEWAY, 16));
 		usernameField.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 		usernameField.setBackground(LauncherFrame.COLOR_BUTTON_BLUE);
 		usernameField.setCaretColor(LauncherFrame.COLOR_WHITE_TEXT);
@@ -139,7 +140,7 @@ public class SongsInfoPanel extends TintablePanel {
 
 		});
 
-		ImageIcon userDefaultImg = resources.getIcon("default_user.png");
+		ImageIcon userDefaultImg = ResourceManager.getIcon("default_user.png");
 		userIcon = new JButton(userDefaultImg);
 		userIcon.setContentAreaFilled(false);
 		userIcon.setFocusPainted(false);
@@ -159,13 +160,13 @@ public class SongsInfoPanel extends TintablePanel {
 		trackName = new JLabel();
 		trackName.setText("Track Name");
 		trackName.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-		trackName.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 18));
+		trackName.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 18));
 		trackName.setAlignmentX(CENTER_ALIGNMENT);
 		Dimension d = new Dimension(SONGS_INFO_WIDTH, trackName.getPreferredSize().height);
 		trackName.setPreferredSize(d);
 		trackNameOverflow = new JLabel();
 		trackNameOverflow.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-		trackNameOverflow.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 18));
+		trackNameOverflow.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 18));
 		trackNameOverflow.setAlignmentX(CENTER_ALIGNMENT);
 		trackNameOverflow.setPreferredSize(d);
 		
@@ -173,12 +174,12 @@ public class SongsInfoPanel extends TintablePanel {
 		trackInfo.add(trackNameOverflow);
 		trackArtist = new JLabel("Artist");
 		trackArtist.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-		trackArtist.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 16));
+		trackArtist.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 16));
 		trackArtist.setAlignmentX(CENTER_ALIGNMENT);
 		trackInfo.add(Box.createVerticalGlue());
 		trackInfo.add(trackArtist);
 		trackInfo.add(Box.createVerticalGlue());
-		trackArt = new JButton(resources.getIcon("default_track.png"));
+		trackArt = new JButton(ResourceManager.getIcon("default_track.png"));
 		trackArt.setAlignmentX(CENTER_ALIGNMENT);
 		trackArt.setContentAreaFilled(false);
 		trackArt.setFocusPainted(false);

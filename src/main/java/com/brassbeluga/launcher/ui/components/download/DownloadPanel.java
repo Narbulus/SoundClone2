@@ -25,6 +25,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.border.Border;
 
+import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.LauncherFrame;
 import com.brassbeluga.sound.gson.TrackInfo;
 
@@ -101,10 +102,10 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 				DOWNLOAD_HEIGHT));
 		infoPanel.setBackground(LauncherFrame.COLOR_BLUE_DARKER);
 
-		trackIcon = new JLabel(resources.getIcon("default_track_small.png"));
+		trackIcon = new JLabel(ResourceManager.getIcon("default_track_small.png"));
 
 		progress = new JProgressBar(0, 100);
-		progress.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 34));
+		progress.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 34));
 		progress.setStringPainted(true);
 		progress.setForeground(LauncherFrame.COLOR_GREEN);
 		progress.setBackground(Color.white);
@@ -118,7 +119,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 		// button.setBorder(new LineBorder(new Color(0, 0, 0, 50)));
 		button.setOpaque(true);
 		button.setBackground(LauncherFrame.COLOR_BLUE);
-		button.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 34));
+		button.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 34));
 		button.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 		button.addMouseListener(new MouseListener() {
 
@@ -162,7 +163,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 		// browseButton.setBorder(new LineBorder(new Color(0, 0, 0, 50)));
 		browseButton.setOpaque(true);
 		browseButton.setBackground(LauncherFrame.COLOR_BLUE);
-		browseButton.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 34));
+		browseButton.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 34));
 		browseButton.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 		browseButton.addMouseListener(new MouseListener() {
 
@@ -193,12 +194,12 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 		
 		progressInfo = new JLabel();
 		progressInfo.setAlignmentX(CENTER_ALIGNMENT);
-		progressInfo.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 22));
+		progressInfo.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 22));
 		progressInfo.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 		
 		overallInfo = new JLabel();
 		overallInfo.setAlignmentX(CENTER_ALIGNMENT);
-		overallInfo.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 22));
+		overallInfo.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 22));
 		overallInfo.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 		Dimension d = overallInfo.getPreferredSize();
 		overallInfo.setPreferredSize(new Dimension(220, d.height));
@@ -221,7 +222,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 		infoPanel.add(browseButton);
 		
 		trackProgress = new LabelProgressBar(0, 100, 400);
-		trackProgress.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 26));
+		trackProgress.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 26));
 		trackProgress.setLoadColor(LauncherFrame.COLOR_GREEN);
 		trackProgress.setBackground(LauncherFrame.COLOR_GREY_TEXT);
 		trackProgress.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
@@ -325,7 +326,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 			}else{
 				label = new JLabel(t.getTitle());
 				label.setBorder(trackBorder);
-				label.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 16));
+				label.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 16));
 				if (i > downloadIndex)
 					label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 				else

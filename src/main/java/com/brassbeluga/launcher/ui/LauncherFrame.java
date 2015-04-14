@@ -50,6 +50,7 @@ import net.technicpack.ui.lang.IRelocalizableResource;
 import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.DesktopUtils;
 
+import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.components.download.DownloadPanel;
 import com.brassbeluga.launcher.ui.components.songs.SongsInfoPanel;
 import com.brassbeluga.launcher.ui.components.songs.TracksListPanel;
@@ -176,7 +177,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 		header.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 10));
 		this.add(header, BorderLayout.PAGE_START);
 
-		ImageIcon headerIcon = resources.getIcon("soundcloud_logo.png");
+		ImageIcon headerIcon = ResourceManager.getIcon("soundcloud_logo.png");
 		JButton headerLabel = new JButton(headerIcon);
 		headerLabel.setBorder(BorderFactory.createEmptyBorder(5, 8, 5, 0));
 		headerLabel.setContentAreaFilled(false);
@@ -246,7 +247,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 				BoxLayout.LINE_AXIS));
 		windowGadgetPanel.setAlignmentX(RIGHT_ALIGNMENT);
 
-		ImageIcon minimizeIcon = resources.getIcon("minimize.png");
+		ImageIcon minimizeIcon = ResourceManager.getIcon("minimize.png");
 		JButton minimizeButton = new JButton(minimizeIcon);
 		minimizeButton.setBorder(BorderFactory.createEmptyBorder());
 		minimizeButton.setContentAreaFilled(false);
@@ -260,7 +261,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 		});
 		windowGadgetPanel.add(minimizeButton);
 
-		ImageIcon closeIcon = resources.getIcon("close.png");
+		ImageIcon closeIcon = ResourceManager.getIcon("close.png");
 		JButton closeButton = new JButton(closeIcon);
 		closeButton.setBorder(BorderFactory.createEmptyBorder());
 		closeButton.setContentAreaFilled(false);
@@ -324,8 +325,8 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 		installProgress.setBackground(LauncherFrame.COLOR_GREEN);
 		installProgress
 				.setBorder(BorderFactory.createEmptyBorder(5, 45, 4, 45));
-		installProgress.setIcon(resources.getIcon("download_icon.png"));
-		installProgress.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS,
+		installProgress.setIcon(ResourceManager.getIcon("download_icon.png"));
+		installProgress.setFont(ResourceManager.getFont(ResourceManager.FONT_OPENSANS,
 				12));
 		installProgress.setVisible(false);
 		footer.add(installProgress);
@@ -339,7 +340,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 		Random r = new Random();
 		JLabel buildCtrl = new JLabel(names[r.nextInt(names.length)]);
 		buildCtrl.setForeground(COLOR_WHITE_TEXT);
-		buildCtrl.setFont(resources.getFont(ResourceLoader.FONT_OPENSANS, 20));
+		buildCtrl.setFont(ResourceManager.getFont(ResourceManager.FONT_OPENSANS, 20));
 		buildCtrl.setHorizontalTextPosition(SwingConstants.RIGHT);
 		buildCtrl.setHorizontalAlignment(SwingConstants.RIGHT);
 		footer.add(buildCtrl);
@@ -435,7 +436,7 @@ public class LauncherFrame extends DraggableFrame implements IRelocalizableResou
 		this.resources = loader;
 		this.resources.registerResource(this);
 
-		setIconImage(this.resources.getImage("icon.png"));
+		setIconImage(ResourceManager.getImage("icon.png"));
 
 		// Wipe controls
 		this.getContentPane().removeAll();

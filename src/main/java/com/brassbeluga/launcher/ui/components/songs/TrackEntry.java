@@ -12,7 +12,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.MatteBorder;
-
+import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.LauncherFrame;
 import com.brassbeluga.sound.gson.TrackInfo;
 
@@ -20,8 +20,8 @@ import net.technicpack.ui.lang.ResourceLoader;
 
 public class TrackEntry extends JPanel {
 	public static final int DOWNLOAD_ICON_WIDTH = 120;
-	
 	private static final int TRACK_TITLE_WIDTH = 600;
+	
 	private TrackInfo info;
 	private boolean downloadFlag;
 	
@@ -54,9 +54,9 @@ public class TrackEntry extends JPanel {
 	
 	public void setDownloadFlag(boolean flagValue) {
 		if (!flagValue) {
-			flag.setIcon(resources.getIcon("track_idle.png"));
+			flag.setIcon(ResourceManager.getIcon("track_idle.png"));
 		}else{
-			flag.setIcon(resources.getIcon("track_download.png"));
+			flag.setIcon(ResourceManager.getIcon("track_download.png"));
 		}
 		downloadFlag = flagValue;
 	}
@@ -96,12 +96,12 @@ public class TrackEntry extends JPanel {
 		
 		
 		title = new JLabel(info.getTitle());
-		title.setFont(resources.getFont(ResourceLoader.FONT_RALEWAY, 16));
+		title.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 16));
 		title.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 		title.setPreferredSize(new Dimension(
 				TRACK_TITLE_WIDTH, 40));
 		
-		flag = new JButton(resources.getIcon("track_idle.png"));
+		flag = new JButton(ResourceManager.getIcon("track_idle.png"));
 		flag.setContentAreaFilled(false);
 		flag.setFocusPainted(false);
 		flag.setOpaque(false);
@@ -132,14 +132,14 @@ public class TrackEntry extends JPanel {
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				if (!downloadFlag)
-					flag.setIcon(resources.getIcon("track_hover.png"));
+					flag.setIcon(ResourceManager.getIcon("track_hover.png"));
 				setBackground(LauncherFrame.COLOR_BUTTON_BLUE);
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
 				if (!downloadFlag)
-					flag.setIcon(resources.getIcon("track_idle.png"));
+					flag.setIcon(ResourceManager.getIcon("track_idle.png"));
 				setBackground(backColor);
 			}
 		});
