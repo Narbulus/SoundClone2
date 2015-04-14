@@ -2,8 +2,6 @@ package com.brassbeluga.sound.main;
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -27,6 +25,7 @@ import javax.swing.SwingWorker;
 
 import net.technicpack.ui.lang.ResourceLoader;
 
+import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.components.download.DownloadPanel;
 import com.brassbeluga.launcher.ui.components.songs.SongsInfoPanel;
 import com.brassbeluga.launcher.ui.components.songs.TracksListPanel;
@@ -61,7 +60,7 @@ public class DownloadLikes {
 	private static final int TRACK_INFO_REQUEST_SIZE = 50;
 	protected static final long CHUNK_SIZE = 1000;
 
-	public DownloadLikes(ResourceLoader resources) throws Exception {
+	public DownloadLikes() throws Exception {
 		// Create download locations if nonexistant
 		String workingDirectory;
 		String OS = (System.getProperty("os.name")).toUpperCase();
@@ -81,8 +80,8 @@ public class DownloadLikes {
 
 		threadRunning = false;
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
-				resources.getResourceAsStream("/config")));
-		File oldConfig = new File(tempDir + "/config");
+				ResourceManager.getResourceAsStream("config")));
+		File oldConfig = new File(tempDir + "config");
 		Scanner config;
 		if (oldConfig.exists())
 			config = new Scanner(oldConfig);
@@ -107,7 +106,7 @@ public class DownloadLikes {
 		config.close();
 
 		// Load the template id3 tag from resource file
-		InputStream is = resources.getResourceAsStream("/tagdata");
+		InputStream is = ResourceManager.getResourceAsStream("tagdata");
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
 		int nRead;

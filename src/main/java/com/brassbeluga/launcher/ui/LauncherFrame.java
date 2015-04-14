@@ -46,7 +46,6 @@ import javax.swing.WindowConstants;
 import net.technicpack.ui.controls.DraggableFrame;
 import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.controls.installation.ProgressBar;
-import net.technicpack.ui.lang.ResourceLoader;
 import net.technicpack.utilslib.DesktopUtils;
 
 import com.brassbeluga.launcher.resources.ResourceManager;
@@ -88,8 +87,6 @@ public class LauncherFrame extends DraggableFrame {
 	public static final String TAB_SONGS = "songs";
 	public static final String TAB_DOWNLOAD = "download";
 	public static final String DOWNLOAD_TRACK_COMMAND = "download_track";
-
-	private ResourceLoader resources;
 
 	private HeaderTab songsTab;
 	private HeaderTab downloadTab;

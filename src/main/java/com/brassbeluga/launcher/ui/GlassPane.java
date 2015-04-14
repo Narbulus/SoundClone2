@@ -9,9 +9,9 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
+import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.listeners.DownloadFlyer;
 
-import net.technicpack.ui.lang.ResourceLoader;
 
 public class GlassPane extends JPanel implements ActionListener {
 	public static final int INITIAL_X_OFFSET = 44;
@@ -22,12 +22,10 @@ public class GlassPane extends JPanel implements ActionListener {
 	public static final int D_COUNTER_FLY_TO_X = 208;
 	public static final int D_COUNTER_FLY_TO_Y = 43;
 	
-	private ResourceLoader resources;
 	private LauncherFrame launcher;
 	private List<DownloadFlyer> flyers;
 	
-	public GlassPane(ResourceLoader resources, LauncherFrame launcher) {
-		this.resources = resources;
+	public GlassPane(LauncherFrame launcher) {
 		this.launcher = launcher;
 		this.flyers = new ArrayList<DownloadFlyer>();
 	}
@@ -61,7 +59,7 @@ public class GlassPane extends JPanel implements ActionListener {
 		super.paintComponent(g);
 		
 		for (DownloadFlyer f : flyers) {
-			g.drawImage(resources.getImage("track_download.png"), 
+			g.drawImage(ResourceManager.getImage("track_download.png"), 
 					(int)f.getX(), (int)f.getY(), null);
 		}
 	}
