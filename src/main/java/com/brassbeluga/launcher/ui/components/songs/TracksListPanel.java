@@ -142,8 +142,9 @@ public class TracksListPanel extends TintablePanel {
 				EventQueue.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						for (TrackEntry t : entries)
+						for (TrackEntry t : entries) {
 							t.setDownloadFlag(false);
+						}
 						parent.unflagAllForDownload();
 					}
 				});	

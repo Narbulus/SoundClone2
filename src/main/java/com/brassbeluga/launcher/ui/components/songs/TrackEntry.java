@@ -109,17 +109,17 @@ public class TrackEntry extends JPanel {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
+
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
 				((TrackEntry)flag.getParent()).setDownloadFlag(!downloadFlag);
 				if (downloadFlag)
 					parent.flagTrackForDownload(info);
 				else
 					parent.unFlagTrackForDownload(info);
 				repaint();
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-				
 			}
 
 			@Override
