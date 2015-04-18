@@ -85,6 +85,7 @@ public class TracksListPanel extends TintablePanel {
 		final JButton selectAll = new JButton("Select All");
 		selectAll.setContentAreaFilled(false);
 		selectAll.setFocusPainted(false);
+		selectAll.setBorder(BorderFactory.createEmptyBorder(6, 8, 6, 8));
 		// browseButton.setBorder(new LineBorder(new Color(0, 0, 0, 50)));
 		selectAll.setOpaque(true);
 		selectAll.setBackground(LauncherFrame.COLOR_BLUE);
@@ -103,7 +104,8 @@ public class TracksListPanel extends TintablePanel {
 					public void run() {
 						for (TrackEntry t : entries)
 							t.setDownloadFlag(true);
-						parent.flagAllForDownload(tracks);
+						if (entries.size() > 0)
+							parent.flagAllForDownload(tracks);
 					}
 				});
 
@@ -126,6 +128,7 @@ public class TracksListPanel extends TintablePanel {
 		final JButton deselectAll = new JButton("Deselect All");
 		deselectAll.setContentAreaFilled(false);
 		deselectAll.setFocusPainted(false);
+		deselectAll.setBorder(BorderFactory.createEmptyBorder(6, 8, 6, 8));
 		// browseButton.setBorder(new LineBorder(new Color(0, 0, 0, 50)));
 		deselectAll.setOpaque(true);
 		deselectAll.setBackground(LauncherFrame.COLOR_BLUE);

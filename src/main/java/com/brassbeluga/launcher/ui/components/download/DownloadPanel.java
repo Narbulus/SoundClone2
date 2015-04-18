@@ -113,6 +113,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 		button.setText("START");
 		button.setContentAreaFilled(false);
 		button.setFocusPainted(false);
+		button.setBorder(BorderFactory.createEmptyBorder(4, 6, 4, 6));
 		// button.setBorder(new LineBorder(new Color(0, 0, 0, 50)));
 		button.setOpaque(true);
 		button.setBackground(LauncherFrame.COLOR_BLUE);
@@ -157,6 +158,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 		browseButton = new JButton("BROWSE");
 		browseButton.setContentAreaFilled(false);
 		browseButton.setFocusPainted(false);
+		browseButton.setBorder(BorderFactory.createEmptyBorder(4, 10, 4, 10));
 		// browseButton.setBorder(new LineBorder(new Color(0, 0, 0, 50)));
 		browseButton.setOpaque(true);
 		browseButton.setBackground(LauncherFrame.COLOR_BLUE);

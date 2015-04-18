@@ -41,7 +41,7 @@ public class LauncherMain {
 
 	public static void main(String[] args) throws Exception {
 		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			//UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception ex) {
 			Utils.getLogger().log(Level.SEVERE, ex.getMessage(), ex);
 		}

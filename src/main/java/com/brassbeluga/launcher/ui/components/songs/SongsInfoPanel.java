@@ -132,6 +132,7 @@ public class SongsInfoPanel extends TintablePanel {
 
 		ImageIcon userDefaultImg = ResourceManager.getIcon("default_user.png");
 		userIcon = new JButton(userDefaultImg);
+		userIcon.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
 		userIcon.setContentAreaFilled(false);
 		userIcon.setFocusPainted(false);
 
@@ -170,6 +171,7 @@ public class SongsInfoPanel extends TintablePanel {
 		trackInfo.add(trackArtist);
 		trackInfo.add(Box.createVerticalGlue());
 		trackArt = new JButton(ResourceManager.getIcon("default_track.png"));
+		trackArt.setBorder(BorderFactory.createEmptyBorder());
 		trackArt.setAlignmentX(CENTER_ALIGNMENT);
 		trackArt.setContentAreaFilled(false);
 		trackArt.setFocusPainted(false);
