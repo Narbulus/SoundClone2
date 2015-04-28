@@ -79,8 +79,8 @@ public class LauncherFrame extends DraggableFrame {
 	public static final Color COLOR_FOOTER = new Color(27, 32, 36);
 	public static final Color COLOR_SONGS_INFO = new Color(170, 0, 0);
 	public static final Color COLOR_TRACKS_LIST = new Color(0, 0, 102);
-	
-	/* Specifies how long the DOWNLOAD tab should take to flash  */
+
+	/* Specifies how long the DOWNLOAD tab should take to flash */
 	public static final int TAB_FLASH_TIME = 200;
 	public static final int TAB_FLAST_INTERVAL = 20;
 
@@ -112,7 +112,7 @@ public class LauncherFrame extends DraggableFrame {
 	public LauncherFrame(final DownloadLikes downloader) {
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		
+
 		this.downloader = downloader;
 
 		// Handles rebuilding the frame, so use it to build the frame in the
@@ -137,7 +137,7 @@ public class LauncherFrame extends DraggableFrame {
 
 		if (tabName.equalsIgnoreCase(TAB_SONGS)) {
 			songsTab.setIsActive(true);
-		}else if (tabName.equalsIgnoreCase(TAB_DOWNLOAD)) {
+		} else if (tabName.equalsIgnoreCase(TAB_DOWNLOAD)) {
 			downloadTab.setIsActive(true);
 		}
 
@@ -153,7 +153,6 @@ public class LauncherFrame extends DraggableFrame {
 	protected void minimizeWindow() {
 		this.setState(Frame.ICONIFIED);
 	}
-
 
 	// ///////////////////////////////////////////////
 	// End Action responses
@@ -186,7 +185,7 @@ public class LauncherFrame extends DraggableFrame {
 			}
 		});
 		header.add(headerLabel);
-		
+
 		header.add(Box.createRigidArea(new Dimension(6, 0)));
 
 		ActionListener tabListener = new ActionListener() {
@@ -196,12 +195,11 @@ public class LauncherFrame extends DraggableFrame {
 			}
 		};
 
-
 		songsTab = new HeaderTab("SONGS");
 		songsTab.addActionListener(tabListener);
 		songsTab.setActionCommand(TAB_SONGS);
 		header.add(songsTab);
-		
+
 		downloadTab = new DownloadHeaderTab("DOWNLOAD");
 		downloadTab.addActionListener(tabListener);
 		downloadTab.setActionCommand(TAB_DOWNLOAD);
@@ -212,22 +210,21 @@ public class LauncherFrame extends DraggableFrame {
 		header.add(downloadTab);
 
 		/*
-		JLabel flag = new JLabel(resources.getIcon("track_idle.png"));
-		flag.setOpaque(true);
-		flag.setVisible(true);
-		flag.set
-		
-		flag.setBounds(50, 50,50, 50);*/
-		
+		 * JLabel flag = new JLabel(resources.getIcon("track_idle.png"));
+		 * flag.setOpaque(true); flag.setVisible(true); flag.set
+		 * 
+		 * flag.setBounds(50, 50,50, 50);
+		 */
+
 		/*
-		FlyerGlassPane fg = new FlyerGlassPane(resources, this);
-		setGlassPane(fg);
-		
-		fg.setVisible(true);
-		fg.setOpaque(false);
-		
-		new Timer(DownloadFlyer.FLIGHT_INTERVAL, (ActionListener) fg).start();
-		*/
+		 * FlyerGlassPane fg = new FlyerGlassPane(resources, this);
+		 * setGlassPane(fg);
+		 * 
+		 * fg.setVisible(true); fg.setOpaque(false);
+		 * 
+		 * new Timer(DownloadFlyer.FLIGHT_INTERVAL, (ActionListener)
+		 * fg).start();
+		 */
 
 		header.add(Box.createHorizontalGlue());
 
@@ -298,16 +295,20 @@ public class LauncherFrame extends DraggableFrame {
 		JPanel songsHost = new JPanel();
 		tracksPanel = new TracksListPanel(this);
 		songsInfoPanel = new SongsInfoPanel(this);
+		System.out.println("Trying to update user " + downloader);
+		if (downloader != null && downloader.getLastUser() != null) {
+			songsInfoPanel.setUsername(downloader.getLastUser());
+		}
 		infoSwap.add(songsHost, TAB_SONGS);
 
 		songsHost.setLayout(new BorderLayout());
 		songsHost.add(tracksPanel, BorderLayout.CENTER);
 		songsHost.add(songsInfoPanel, BorderLayout.WEST);
-		
+
 		JPanel downloadHost = new JPanel();
 		downloadHost.setBackground(COLOR_CENTRAL_BACK_OPAQUE);
 		downloadPanel = new DownloadPanel(this);
-		
+
 		infoSwap.add(downloadPanel, TAB_DOWNLOAD);
 
 		footer = new TintablePanel();
@@ -322,8 +323,8 @@ public class LauncherFrame extends DraggableFrame {
 		installProgress
 				.setBorder(BorderFactory.createEmptyBorder(5, 45, 4, 45));
 		installProgress.setIcon(ResourceManager.getIcon("download_icon.png"));
-		installProgress.setFont(ResourceManager.getFont(ResourceManager.FONT_OPENSANS,
-				12));
+		installProgress.setFont(ResourceManager.getFont(
+				ResourceManager.FONT_OPENSANS, 12));
 		installProgress.setVisible(false);
 		footer.add(installProgress);
 
@@ -332,11 +333,14 @@ public class LauncherFrame extends DraggableFrame {
 
 		String[] names = { "TuneZip", "Zipmeister", "Zip Zop", "SoundZip",
 				"iZip", "ZipCloud", "ZipMan", "Zorp", "Zoop", "Zoodily",
-				"Zippster", "ZippMe", "SipZip", "Music Downloader" };
+				"Zippster", "ZippMe", "SipZip", "Music Downloader",
+				"Music Wizard 95", "z!pp$ter", "<h1>Zip Clone</h1>" };
+
 		Random r = new Random();
 		JLabel buildCtrl = new JLabel(names[r.nextInt(names.length)]);
 		buildCtrl.setForeground(COLOR_WHITE_TEXT);
-		buildCtrl.setFont(ResourceManager.getFont(ResourceManager.FONT_OPENSANS, 20));
+		buildCtrl.setFont(ResourceManager.getFont(
+				ResourceManager.FONT_OPENSANS, 20));
 		buildCtrl.setHorizontalTextPosition(SwingConstants.RIGHT);
 		buildCtrl.setHorizontalAlignment(SwingConstants.RIGHT);
 		footer.add(buildCtrl);
@@ -368,59 +372,61 @@ public class LauncherFrame extends DraggableFrame {
 	public void selectTrack(TrackInfo track) {
 		songsInfoPanel.updateTrack(track);
 	}
-	
+
 	public void flagTrackForDownload(TrackInfo track) {
 		downloadPanel.addTrack(track);
 		System.out.println("Flag");
 		((DownloadHeaderTab) downloadTab).incDownloads();
 		beginDownloadTabFlash();
 	}
-	
+
 	public void unFlagTrackForDownload(TrackInfo track) {
 		downloadPanel.removeTrack(track);
 		((DownloadHeaderTab) downloadTab).decDownloads();
 		endDownloadTabFlash();
 	}
-	
+
 	public void flagAllForDownload(List<TrackInfo> tracks) {
 		((DownloadHeaderTab) downloadTab).setDownloads(tracks.size());
 		downloadPanel.addAllTracks(tracks);
 		beginDownloadTabFlash();
 	}
-	
+
 	public void unflagAllForDownload() {
 		((DownloadHeaderTab) downloadTab).setDownloads(0);
 		downloadPanel.removeAllTracks();
 		endDownloadTabFlash();
 	}
-	
-	public String downloadButtonPressed(String path) throws JsonSyntaxException, Exception {
+
+	public String downloadButtonPressed(String path)
+			throws JsonSyntaxException, Exception {
 		if (!downloader.isThreadRunning()) {
-			downloader.downloadTracks("narbulus", path, downloadPanel.getTracks(), downloadPanel);
+			downloader.downloadTracks("narbulus", path,
+					downloadPanel.getTracks(), downloadPanel);
 			downloadPanel.updateInfo();
 			return "CANCEL";
-		}else{
+		} else {
 			if (downloader.isThreadRunning())
 				downloader.stopThread();
 			return "START";
 		}
 	}
-	
+
 	public void onDownloadFinished() {
 		downloadPanel.onDownloadFinished();
 	}
-	
+
 	public void onFlyerArrival() {
 		((DownloadHeaderTab) downloadTab).incDownloads();
-		beginDownloadTabFlash();	
+		beginDownloadTabFlash();
 	}
-	
+
 	public void beginDownloadTabFlash() {
 		downloadTab.setOpaque(true);
 		tabFlashListener.reset();
 		tabFlashTimer.start();
 	}
-	
+
 	public void endDownloadTabFlash() {
 		downloadTab.setOpaque(false);
 		downloadTab.setBackground(COLOR_BLUE_DARKER);
@@ -449,22 +455,20 @@ public class LauncherFrame extends DraggableFrame {
 			}
 		});
 	}
-	
+
 	public void onTrackDownloaded() {
-		((DownloadHeaderTab)downloadTab).decDownloads();
+		((DownloadHeaderTab) downloadTab).decDownloads();
 	}
 
-	
 	public Point getAbsolutePosition(Component component) {
 		int x = 0;
 		int y = 0;
-		do { 
+		do {
 			x += component.getX();
 			y += component.getY();
 			component = component.getParent();
-		}
-		while (component != this);
-		
-		return new Point(x,y);
+		} while (component != this);
+
+		return new Point(x, y);
 	}
 }

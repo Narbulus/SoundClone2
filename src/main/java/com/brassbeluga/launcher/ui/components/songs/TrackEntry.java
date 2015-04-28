@@ -30,6 +30,7 @@ public class TrackEntry extends JPanel {
 	
 	private JLabel title;
 	private JButton flag;
+	private JLabel warning;
 	private int index;
 	
 	public TrackEntry(TrackInfo info, int index, LauncherFrame parent) {
@@ -141,8 +142,13 @@ public class TrackEntry extends JPanel {
 			}
 		});
 		
+		warning = new JLabel(ResourceManager.getIcon("danger_icon.png"));
+		warning.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 16));
+		warning.setVisible(info.getDownload());
+
 		add(title);
 		add(Box.createHorizontalGlue());
+		add(warning);
 		add(flag);
 	}
 	

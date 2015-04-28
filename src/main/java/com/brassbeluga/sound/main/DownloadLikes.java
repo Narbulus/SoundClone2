@@ -71,7 +71,7 @@ public class DownloadLikes {
 			workingDirectory += "/Library/Application Support";
 		}
 
-		tempDir = workingDirectory + "/SoundClone";
+		tempDir = workingDirectory + "\\SoundClone";
 
 		File tempFile = new File(tempDir);
 		tempFile.mkdirs();
@@ -81,7 +81,8 @@ public class DownloadLikes {
 		threadRunning = false;
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
 				ResourceManager.getResourceAsStream("config")));
-		File oldConfig = new File(tempDir + "config");
+		System.out.println(tempDir);
+		File oldConfig = new File(tempDir + "\\config");
 		Scanner config;
 		if (oldConfig.exists())
 			config = new Scanner(oldConfig);
@@ -167,9 +168,6 @@ public class DownloadLikes {
 							.getResponse("http://api.soundcloud.com/resolve.json?url=http://soundcloud.com/"
 									+ user + "&client_id=" + clientID);
 				} catch (Exception e) {
-					// gui.updateStatus("Username '" + user + "' not found",
-					// SoundCloneGUI.StatusType.WARNING);
-					// gui.unlockControls();
 					threadRunning = false;
 					e.printStackTrace();
 				}
@@ -180,7 +178,6 @@ public class DownloadLikes {
 						load.getResponse(response.getLocation()),
 						UserInfo.class);
 
-				System.out.println(info.getAvatarURL());
 				Image image = null;
 				try {
 					URL url = new URL(info.getAvatarURL());
@@ -204,8 +201,13 @@ public class DownloadLikes {
 									+ "&offset=" + i);
 					List<TrackInfo> newLikes = new Gson().fromJson(partLikes,
 							listType);
+					for (TrackInfo curInfo : newLikes) {
+						for (int j = 0; j < currentConfig.getHistory().length; j++) {
+							if (curInfo.getId() == currentConfig.getHistory()[j])
+								curInfo.setDownload(true);
+						}
+					}
 					likes.addAll(newLikes);
-					System.out.println("Likes size " + likes.size());
 					publish(newLikes);
 				}
 
@@ -455,6 +457,13 @@ public class DownloadLikes {
 	public String getCurrentUser() {
 		if (currentConfig != null)
 			return currentConfig.getUsername();
+		return null;
+	}
+	
+	public String getLastUser() {
+		if (configs.size() > 0){
+			return configs.get(0).getUsername();
+		}
 		return null;
 	}
 

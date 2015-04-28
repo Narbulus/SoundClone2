@@ -234,4 +234,11 @@ public class SongsInfoPanel extends TintablePanel {
 	protected void detectNameChanges() {
 		parent.onUserChanged(usernameField.getText());
 	}
+
+	public void setUsername(String username) {
+		System.out.println(username);
+		usernameField.setText(username);
+		parent.onUserChanged(username);
+	}
+	
 }
