@@ -29,6 +29,7 @@ import java.awt.Frame;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
@@ -58,6 +59,8 @@ import com.brassbeluga.launcher.ui.listeners.TabFlashListener;
 import com.brassbeluga.sound.gson.TrackInfo;
 import com.brassbeluga.sound.main.DownloadLikes;
 import com.google.gson.JsonSyntaxException;
+import com.mpatric.mp3agic.InvalidDataException;
+import com.mpatric.mp3agic.UnsupportedTagException;
 
 public class LauncherFrame extends DraggableFrame {
 	private static final long serialVersionUID = -5667136239041080648L;
@@ -327,7 +330,6 @@ public class LauncherFrame extends DraggableFrame {
 		installProgressPlaceholder = Box.createHorizontalGlue();
 		footer.add(installProgressPlaceholder);
 		
-		System.out.println("Trying to update user " + downloader);
 		if (downloader != null && downloader.getLastUser() != null) {
 			songsInfoPanel.setUsername(downloader.getLastUser());
 		}
@@ -359,7 +361,6 @@ public class LauncherFrame extends DraggableFrame {
 							select))) {
 				try {
 					downloader.updateUser(select.replace(".", "-"));
-					System.out.println(downloader.getDownloadPath());
 					if (downloader.getDownloadPath() != null && downloadPanel != null) {
 						downloadPanel.setBrowseInfo(downloader.getDownloadPath());
 					}
@@ -380,7 +381,6 @@ public class LauncherFrame extends DraggableFrame {
 
 	public void flagTrackForDownload(TrackInfo track) {
 		downloadPanel.addTrack(track);
-		System.out.println("Flag");
 		((DownloadHeaderTab) downloadTab).incDownloads();
 		beginDownloadTabFlash();
 	}
@@ -463,6 +463,14 @@ public class LauncherFrame extends DraggableFrame {
 
 	public void onTrackDownloaded() {
 		((DownloadHeaderTab) downloadTab).decDownloads();
+	}
+	
+	public void onDownloadPathChanged(String path) {
+		try {
+			downloader.updateDownloadDirectory(path);
+		} catch (UnsupportedTagException | InvalidDataException | IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public Point getAbsolutePosition(Component component) {

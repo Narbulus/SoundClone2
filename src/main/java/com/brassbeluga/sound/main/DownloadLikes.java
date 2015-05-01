@@ -17,8 +17,10 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 import javax.swing.SwingWorker;
@@ -40,7 +42,9 @@ import com.mpatric.mp3agic.ID3v1Tag;
 import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.ID3v22Tag;
 import com.mpatric.mp3agic.ID3v23Tag;
+import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
+import com.mpatric.mp3agic.UnsupportedTagException;
 
 public class DownloadLikes {
 
@@ -48,6 +52,7 @@ public class DownloadLikes {
 	private int maxDuration;
 	private ArrayList<Configuration> configs;
 	private ArrayList<TrackInfo> likes;
+	private Set<Integer> downloaded;
 	private Configuration currentConfig;
 	private ID3v2 template;
 	private SoundLoader load;
@@ -62,7 +67,6 @@ public class DownloadLikes {
 		// Create download locations if nonexistent
 		String workingDirectory;
 		String OS = (System.getProperty("os.name")).toUpperCase();
-		System.out.println(OS);
 		if (OS.contains("WIN")) {
 			workingDirectory = System.getenv("AppData");
 		} else if (OS.contains("MAC")) {
@@ -86,7 +90,6 @@ public class DownloadLikes {
 		threadRunning = false;
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
 				ResourceManager.getResourceAsStream("config")));
-		System.out.println(tempDir);
 		File oldConfig = new File(tempDir + "/config");
 		Scanner config;
 		if (oldConfig.exists())
@@ -98,6 +101,7 @@ public class DownloadLikes {
 
 		configs = new ArrayList<Configuration>();
 		currentConfig = null;
+		downloaded = new HashSet<Integer>();
 
 		// Nothing
 
@@ -150,7 +154,37 @@ public class DownloadLikes {
 			currentConfig = new Configuration(user, defaultDownload, null);
 			configs.add(currentConfig);
 		}
+		
+		if (currentConfig.getDownloadPath() != null)
+			updateDownloadDirectory(currentConfig.getDownloadPath());
 
+	}
+	
+	/**
+	 * Updates the current configuration to the new download directory
+	 * and scans the directory for existing mp3's. If they were downloaded
+	 * by SoundClone, the SoundCloud track id is parsed from the mp3 tag
+	 * @param downloadPath The new download path
+	 * @throws UnsupportedTagException
+	 * @throws InvalidDataException
+	 * @throws IOException
+	 */
+	public void updateDownloadDirectory(String downloadPath) throws UnsupportedTagException, InvalidDataException, IOException {
+		currentConfig.setDownloadPath(downloadPath);
+		
+		File folder = new File(downloadPath);
+		File[] files = folder.listFiles();
+		for (int i=0; i < files.length; i++) {
+			if (files[i].isFile()) {
+				File f = files[i];
+				if (f.getName().contains(".mp3")) {
+					Mp3File mp3file = new Mp3File(f.getAbsolutePath());
+					ID3v2 tag = mp3file.getId3v2Tag();
+					if (tag.getPaymentUrl() != null)
+						downloaded.add(Integer.parseInt(tag.getPaymentUrl()));
+				}
+			}
+		}
 	}
 	
 	public void updateUserLikes(final String user, final SongsInfoPanel panel,
@@ -160,8 +194,6 @@ public class DownloadLikes {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		// gui.updateStatus("Loading user's likes");
 
 		// Dispatch worker to download songs in background and update status
 		SwingWorker<List<TrackInfo>, List<TrackInfo>> worker = new SwingWorker<List<TrackInfo>, List<TrackInfo>>() {
@@ -208,14 +240,10 @@ public class DownloadLikes {
 									+ "&offset=" + i);
 					List<TrackInfo> newLikes = new Gson().fromJson(partLikes,
 							listType);
-					/*
-					for (TrackInfo curInfo : newLikes) {
-						for (int j = 0; j < currentConfig.getHistory().length; j++) {
-							if (curInfo.getId() == currentConfig.getHistory()[j])
-								curInfo.setDownload(true);
-						}
+					for (TrackInfo t : newLikes) {
+						if (downloaded.contains(t.getId()))
+							t.setDownload(true);
 					}
-					*/
 					likes.addAll(newLikes);
 					publish(newLikes);
 				}
@@ -263,7 +291,6 @@ public class DownloadLikes {
 				Gson gson = new Gson();
 				TrackStreams tStream;
 				int downloads = 0;
-				System.out.println("Size : " + tracks.size());
 				for (TrackInfo t : tracks) {
 					if (threadRunning) {
 						publish(t);
@@ -289,7 +316,6 @@ public class DownloadLikes {
 							
 
 							if (mediaPath != null) {
-								System.out.println("Generate mp3");
 								
 								// Open the url connection
 								URL website = new URL(mediaPath);
@@ -376,6 +402,9 @@ public class DownloadLikes {
 									id3v2Tag.setAlbumImage(bytes, 2,
 											"image/jpeg");
 								}
+								
+								// Embed track id for directory scanning
+								id3v2Tag.setPaymentUrl("" + t.getId());
 
 								// Save the final file in the download directory
 								mp3file.save(finalPath);

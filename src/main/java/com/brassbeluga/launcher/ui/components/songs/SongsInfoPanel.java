@@ -43,6 +43,8 @@ public class SongsInfoPanel extends TintablePanel {
 	private JLabel trackNameOverflow;
 	private JLabel trackArtist;
 	private JButton trackArt;
+	
+	private TrackInfo selected;
 
 	private LauncherFrame parent;
 
@@ -180,48 +182,51 @@ public class SongsInfoPanel extends TintablePanel {
 	}
 
 	public void updateTrack(final TrackInfo track) {
-		String title = track.getTitle();
-		String[] split = title.split(" - ");
-		if (split.length > 1) {
-			trackArtist.setText(split[0]);
-			title = split[1];
-		} else {
-			trackArtist.setText("");
-			title = split[0];
-		}
-		if (title.length() > MAX_TITLE_LENGTH) {
-			int lastSpace = title.lastIndexOf(' ', MAX_TITLE_LENGTH);
-			String top = title.substring(0, lastSpace);
-			String bottom = title.substring(lastSpace);
-			trackName.setText(top);
-			trackNameOverflow.setText(bottom);
-		}else{
-			trackName.setText(title);
-			trackNameOverflow.setText("");
-		}
-		SwingWorker<String, String> worker = new SwingWorker<String, String>() {
-
-			@Override
-			protected String doInBackground() {
-				Image image = null;
-				try {
-					URL url = new URL(track.getArtworkURL().replace("-large",
-							"-t300x300"));
-					image = ImageIO.read(url);
-				} catch (IOException e) {
-					e.printStackTrace();
+		if (selected != track) {
+			selected = track;
+			String title = track.getTitle();
+			String[] split = title.split(" - ");
+			if (split.length > 1) {
+				trackArtist.setText(split[0]);
+				title = split[1];
+			} else {
+				trackArtist.setText("");
+				title = split[0];
+			}
+			if (title.length() > MAX_TITLE_LENGTH) {
+				int lastSpace = title.lastIndexOf(' ', MAX_TITLE_LENGTH);
+				String top = title.substring(0, lastSpace);
+				String bottom = title.substring(lastSpace);
+				trackName.setText(top);
+				trackNameOverflow.setText(bottom);
+			}else{
+				trackName.setText(title);
+				trackNameOverflow.setText("");
+			}
+			SwingWorker<String, String> worker = new SwingWorker<String, String>() {
+	
+				@Override
+				protected String doInBackground() {
+					Image image = null;
+					try {
+						URL url = new URL(track.getArtworkURL().replace("-large",
+								"-t300x300"));
+						image = ImageIO.read(url);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					trackArt.setIcon(new ImageIcon(image));
+					return "";
 				}
-				trackArt.setIcon(new ImageIcon(image));
-				return "";
-			}
-
-			@Override
-			protected void done() {
-				revalidate();
-				repaint();
-			}
-		};
-		worker.execute();
+	
+				@Override
+				protected void done() {
+					revalidate();
+					repaint();
+				}
+			};
+			worker.execute();
+		}
 	}
 
 	public void changeIcon(final Image icon) {
