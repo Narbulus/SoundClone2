@@ -23,8 +23,6 @@ import java.util.Scanner;
 import javax.imageio.ImageIO;
 import javax.swing.SwingWorker;
 
-import net.technicpack.ui.lang.ResourceLoader;
-
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.components.download.DownloadPanel;
 import com.brassbeluga.launcher.ui.components.songs.SongsInfoPanel;
@@ -61,17 +59,24 @@ public class DownloadLikes {
 	protected static final long CHUNK_SIZE = 1000;
 
 	public DownloadLikes() throws Exception {
-		// Create download locations if nonexistant
+		// Create download locations if nonexistent
 		String workingDirectory;
 		String OS = (System.getProperty("os.name")).toUpperCase();
+		System.out.println(OS);
 		if (OS.contains("WIN")) {
 			workingDirectory = System.getenv("AppData");
-		} else {
+		} else if (OS.contains("MAC")) {
 			workingDirectory = System.getProperty("user.home");
 			workingDirectory += "/Library/Application Support";
+		} else if (OS.contains("NIX") || OS.contains("NUX") || OS.contains("AIX")) {
+			workingDirectory = System.getProperty("user.home");
+			workingDirectory += "/.config/";
+		} else {
+			System.out.println("Warning: OS not recognized!");
+			workingDirectory = "";
 		}
 
-		tempDir = workingDirectory + "\\SoundClone";
+		tempDir = workingDirectory + "/SoundClone";
 
 		File tempFile = new File(tempDir);
 		tempFile.mkdirs();
@@ -82,7 +87,7 @@ public class DownloadLikes {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
 				ResourceManager.getResourceAsStream("config")));
 		System.out.println(tempDir);
-		File oldConfig = new File(tempDir + "\\config");
+		File oldConfig = new File(tempDir + "/config");
 		Scanner config;
 		if (oldConfig.exists())
 			config = new Scanner(oldConfig);
@@ -134,8 +139,7 @@ public class DownloadLikes {
 	 * @throws JsonSyntaxException
 	 * @return Returns a new status for the program
 	 */
-	public void updateUser(final String user, final SongsInfoPanel panel,
-			final TracksListPanel trackPanel) throws JsonSyntaxException,
+	public void updateUser(final String user) throws JsonSyntaxException,
 			Exception {
 		for (Configuration c : configs) {
 			if (c.getUsername().equals(user))
@@ -147,6 +151,10 @@ public class DownloadLikes {
 			configs.add(currentConfig);
 		}
 
+	}
+	
+	public void updateUserLikes(final String user, final SongsInfoPanel panel,
+			final TracksListPanel trackPanel) throws JsonSyntaxException  {
 		try {
 			load = new SoundLoader(currentConfig, clientID);
 		} catch (IOException e) {
@@ -158,7 +166,6 @@ public class DownloadLikes {
 		// Dispatch worker to download songs in background and update status
 		SwingWorker<List<TrackInfo>, List<TrackInfo>> worker = new SwingWorker<List<TrackInfo>, List<TrackInfo>>() {
 
-			@SuppressWarnings("unchecked")
 			@Override
 			protected List<TrackInfo> doInBackground()
 					throws JsonSyntaxException, Exception {
@@ -201,12 +208,14 @@ public class DownloadLikes {
 									+ "&offset=" + i);
 					List<TrackInfo> newLikes = new Gson().fromJson(partLikes,
 							listType);
+					/*
 					for (TrackInfo curInfo : newLikes) {
 						for (int j = 0; j < currentConfig.getHistory().length; j++) {
 							if (curInfo.getId() == currentConfig.getHistory()[j])
 								curInfo.setDownload(true);
 						}
 					}
+					*/
 					likes.addAll(newLikes);
 					publish(newLikes);
 				}
@@ -229,7 +238,6 @@ public class DownloadLikes {
 
 		threadRunning = true;
 		worker.execute();
-
 	}
 
 	/**
@@ -243,13 +251,8 @@ public class DownloadLikes {
 	public void downloadTracks(String user, final String downloadPath,
 			final List<TrackInfo> tracks, final DownloadPanel downloadPanel)
 			throws JsonSyntaxException, Exception {
-		// If a new path is specified, clear history on config so new files are
-		// downloaded
-		if (user.equals(currentConfig.getUsername())
-				&& !downloadPath.equals(currentConfig.getDownloadPath())) {
-			currentConfig.setDownloadPath(downloadPath);
-			load.clearHistory();
-		}
+		
+		currentConfig.setDownloadPath(downloadPath);
 		// gui.updateStatus("Intializing downloads",
 		// SoundCloneGUI.StatusType.PROCESS);
 		// Dispatch worker to download songs in background and update status
@@ -259,16 +262,12 @@ public class DownloadLikes {
 			protected String doInBackground() throws Exception {
 				Gson gson = new Gson();
 				TrackStreams tStream;
-				Mp3Downloader download = new Mp3Downloader(template,
-						currentConfig, tempDir);
-				int i = 1;
 				int downloads = 0;
 				System.out.println("Size : " + tracks.size());
 				for (TrackInfo t : tracks) {
 					if (threadRunning) {
 						publish(t);
-						tStream = gson
-								.fromJson(
+						tStream = gson.fromJson(
 										load.getResponse("https://api.soundcloud.com/i1/tracks/"
 												+ t.getId()
 												+ "/streams?client_id="
@@ -292,27 +291,27 @@ public class DownloadLikes {
 							if (mediaPath != null) {
 								System.out.println("Generate mp3");
 								
-								// Download the mp3 file
+								// Open the url connection
 								URL website = new URL(mediaPath);
 								HttpURLConnection connect = (HttpURLConnection) website
 										.openConnection();
 								connect.setRequestMethod("HEAD");
-								InputStream urlIn = connect.getInputStream();
+								
+								// Get the total length of the file
 								long total = connect.getContentLengthLong();
-								System.out.println(total);
 								ReadableByteChannel rbc = null;
 								rbc = Channels.newChannel(website.openStream());
+								
+								// Format track name to a valid file path name
 								String title = t.getTitle();
-								String fuzzTitle = t.getTitle();
-								fuzzTitle = fuzzTitle.replaceAll(
-										"[<>?*:|/\\\\]", " ");
-								fuzzTitle = fuzzTitle.replaceAll("\"", "'");
-								String tempPath = tempDir + "/" + fuzzTitle
-										+ ".mp3";
-								String finalPath = downloadPath + "/"
-										+ fuzzTitle + ".mp3";
+								String finalPath = fuzzTrackTitle(title, downloadPath);
+								String tempPath = fuzzTrackTitle(title, tempDir);
+								
+								// Create all the necessary directories for file download
 								File finalDir = new File(finalPath);
 								finalDir.getParentFile().mkdirs();
+								
+								// Download the file itself to the temporary directory
 								FileOutputStream fos = null;
 								try {
 									fos = new FileOutputStream(tempPath);
@@ -320,6 +319,7 @@ public class DownloadLikes {
 									e.printStackTrace();
 								}
 
+								// Read the file from url, CHUNK_SIZE bytes at a time
 								long pos = 0;
 								long read;
 								do {
@@ -327,20 +327,23 @@ public class DownloadLikes {
 											pos, CHUNK_SIZE);
 									pos += read;
 									int prog = (int)(((pos * 1.0) / (total * 1.0)) * 100.0);
+									
+									// Update the loading bar progress
 									setProgress(prog);
 
 								} while (read > 0);
-
+								
+								// Clean up after ourselves
 								fos.close();
 
 								File f = new File(tempPath);
 
+								// Open the downloaded file as an Mp3File for tag editing
 								Mp3File mp3file = new Mp3File(tempPath);
 								mp3file.setId3v2Tag(template);
 								ID3v2 id3v2Tag = mp3file.getId3v2Tag();
 
-								// If the file name has a parseable title and
-								// artist,
+								// If the file name has a parseable title and artist,
 								// update tag with new info
 								if (title.contains(" - ")) {
 									String[] halves = title.split(" - ");
@@ -350,6 +353,7 @@ public class DownloadLikes {
 									}
 								}
 
+								// Download artwork from URL if available
 								if (t.getArtworkURL() != null) {
 									URL artworkURL = new URL(t
 											.getArtworkURL().replace("large",
@@ -357,6 +361,8 @@ public class DownloadLikes {
 
 									BufferedImage image = ImageIO
 											.read(artworkURL.openStream());
+									
+									// Write the image bytes to the mp3 tag
 									ByteArrayOutputStream out = new ByteArrayOutputStream();
 									ImageIO.write(image, "jpg", out);
 									out.flush();
@@ -371,32 +377,22 @@ public class DownloadLikes {
 											"image/jpeg");
 								}
 
+								// Save the final file in the download directory
 								mp3file.save(finalPath);
+								
+								// Delete the temporary file
 								f.delete();
-								load.writeToHistory(t.getId());
-								// downloadPanel.removeTrack(t);
+								
 								downloads++;
 							}
 						}
-						i++;
 					}
 				}
 
 				// update the current configuration's history
 				load.closeHistory();
 
-				// write the configurations to file
-				PrintStream output = new PrintStream(tempDir + "/config");
-
-				output.println(clientID);
-				output.println(maxDuration);
-
-				for (Configuration c : configs) {
-					output.println(gson.toJson(c));
-				}
-
-				output.flush();
-				output.close();
+				updateConfigFile();
 
 				return downloads + " songs downloaded successfully!";
 			}
@@ -416,6 +412,15 @@ public class DownloadLikes {
 		threadRunning = true;
 		worker.addPropertyChangeListener(downloadPanel);
 		worker.execute();
+	}
+	
+	private String fuzzTrackTitle(String track, String path) {
+		track = track.replaceAll(
+				"[<>?*:|/\\\\]", " ");
+		track = track.replaceAll("\"", "'");
+		String finalPath = path + "/"
+				+ track + ".mp3";
+		return finalPath;
 	}
 
 	/**
@@ -485,5 +490,21 @@ public class DownloadLikes {
 		likes.get(index).setDownload(!likes.get(index).getDownload());
 	}
 
+	private void updateConfigFile() throws FileNotFoundException {
+		// write the configurations to file
+		PrintStream output = new PrintStream(tempDir + "/config");
+
+		output.println(clientID);
+		output.println(maxDuration);
+
+		Gson gson = new Gson();
+		
+		for (Configuration c : configs) {
+			output.println(gson.toJson(c));
+		}
+
+		output.flush();
+		output.close();
+	}
 
 }

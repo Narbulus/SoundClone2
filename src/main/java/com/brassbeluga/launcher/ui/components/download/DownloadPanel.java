@@ -1,12 +1,14 @@
 package com.brassbeluga.launcher.ui.components.download;
 
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -58,6 +60,8 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 	private JFileChooser browse;
 
 	private JScrollPane scrollPane;
+
+	private JButton openButton;
 
 	public DownloadPanel(LauncherFrame parent) {
 		this.parent = parent;
@@ -203,6 +207,52 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 		Dimension d = overallInfo.getPreferredSize();
 		overallInfo.setPreferredSize(new Dimension(220, d.height));
 		
+		openButton = new JButton("OPEN");
+		openButton.setContentAreaFilled(false);
+		openButton.setFocusPainted(false);
+		openButton.setBorder(BorderFactory.createEmptyBorder(4, 10, 4, 10));
+		// openButton.setBorder(new LineBorder(new Color(0, 0, 0, 50)));
+		openButton.setOpaque(true);
+		openButton.setBackground(LauncherFrame.COLOR_BLUE);
+		openButton.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 22));
+		openButton.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+		openButton.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				try {
+					Desktop.getDesktop().open(new File(overallInfo.getText()));
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {	
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				openButton.setBackground(LauncherFrame.COLOR_BUTTON_BLUE);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				openButton.setBackground(LauncherFrame.COLOR_BLUE);
+			}
+		});
+		
+		JPanel browseInfo = new JPanel();
+		browseInfo.setLayout(new BoxLayout(browseInfo, BoxLayout.X_AXIS));
+		browseInfo.setOpaque(false);
+		browseInfo.add(overallInfo);
+		browseInfo.add(Box.createRigidArea(new Dimension(16, 0)));
+		browseInfo.add(openButton);
+		
 		JPanel loadInfo = new JPanel();
 		loadInfo.setOpaque(false);
 		loadInfo.setLayout(new BoxLayout(loadInfo, BoxLayout.Y_AXIS));
@@ -210,7 +260,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 		loadInfo.add(Box.createRigidArea(new Dimension(0, 16)));
 		loadInfo.add(progress);
 		loadInfo.add(Box.createRigidArea(new Dimension(0, 16)));
-		loadInfo.add(overallInfo);
+		loadInfo.add(browseInfo);
 
 		infoPanel.add(trackIcon);
 		infoPanel.add(Box.createHorizontalGlue());
@@ -283,6 +333,11 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 				rebuildUI();
 			}
 		}
+	}
+	
+	public void setBrowseInfo(String s) {
+		browse.setCurrentDirectory(new File(s));
+		setBrowseInfo();
 	}
 	
 	private void setBrowseInfo() {

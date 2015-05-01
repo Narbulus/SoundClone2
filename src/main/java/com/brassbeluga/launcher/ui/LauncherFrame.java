@@ -295,10 +295,6 @@ public class LauncherFrame extends DraggableFrame {
 		JPanel songsHost = new JPanel();
 		tracksPanel = new TracksListPanel(this);
 		songsInfoPanel = new SongsInfoPanel(this);
-		System.out.println("Trying to update user " + downloader);
-		if (downloader != null && downloader.getLastUser() != null) {
-			songsInfoPanel.setUsername(downloader.getLastUser());
-		}
 		infoSwap.add(songsHost, TAB_SONGS);
 
 		songsHost.setLayout(new BorderLayout());
@@ -330,6 +326,11 @@ public class LauncherFrame extends DraggableFrame {
 
 		installProgressPlaceholder = Box.createHorizontalGlue();
 		footer.add(installProgressPlaceholder);
+		
+		System.out.println("Trying to update user " + downloader);
+		if (downloader != null && downloader.getLastUser() != null) {
+			songsInfoPanel.setUsername(downloader.getLastUser());
+		}
 
 		String[] names = { "TuneZip", "Zipmeister", "Zip Zop", "SoundZip",
 				"iZip", "ZipCloud", "ZipMan", "Zorp", "Zoop", "Zoodily",
@@ -357,8 +358,12 @@ public class LauncherFrame extends DraggableFrame {
 					|| (curUser != null && !downloader.getCurrentUser().equals(
 							select))) {
 				try {
-					downloader.updateUser(select.replace(".", "-"),
-							songsInfoPanel, tracksPanel);
+					downloader.updateUser(select.replace(".", "-"));
+					System.out.println(downloader.getDownloadPath());
+					if (downloader.getDownloadPath() != null && downloadPanel != null) {
+						downloadPanel.setBrowseInfo(downloader.getDownloadPath());
+					}
+					downloader.updateUserLikes(select.replace(".", "-"), songsInfoPanel, tracksPanel);
 					tracksPanel.startUpdateTracks();
 				} catch (JsonSyntaxException e) {
 					e.printStackTrace();
