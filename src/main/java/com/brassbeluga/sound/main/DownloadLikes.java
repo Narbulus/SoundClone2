@@ -536,4 +536,11 @@ public class DownloadLikes {
 		output.close();
 	}
 
+	public List<String> getPreviousUsers() {
+		List<String> users = new ArrayList<String>();
+		for (Configuration c : configs) {
+			users.add(c.getUsername());
+		}
+		return users;
+	}
 }

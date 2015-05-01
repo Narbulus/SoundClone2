@@ -360,17 +360,17 @@ public class LauncherFrame extends DraggableFrame {
 
 	public void onUserChanged(String user) {
 		if (downloader != null && !downloader.isThreadRunning()) {
-			String select = user;
+			String select = user.trim().replace(".", "-");
 			String curUser = downloader.getCurrentUser();
 			if (curUser == null
 					|| (curUser != null && !downloader.getCurrentUser().equals(
 							select))) {
 				try {
-					downloader.updateUser(select.replace(".", "-"));
+					downloader.updateUser(select);
 					if (downloader.getDownloadPath() != null && downloadPanel != null) {
 						downloadPanel.setBrowseInfo(downloader.getDownloadPath());
 					}
-					downloader.updateUserLikes(select.replace(".", "-"), songsInfoPanel, tracksPanel);
+					downloader.updateUserLikes(select, songsInfoPanel, tracksPanel);
 					tracksPanel.startUpdateTracks();
 				} catch (JsonSyntaxException e) {
 					e.printStackTrace();
@@ -477,6 +477,10 @@ public class LauncherFrame extends DraggableFrame {
 		} catch (UnsupportedTagException | InvalidDataException | IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public List<String> getPreviousUsers() {
+		return downloader.getPreviousUsers();
 	}
 
 	public Point getAbsolutePosition(Component component) {

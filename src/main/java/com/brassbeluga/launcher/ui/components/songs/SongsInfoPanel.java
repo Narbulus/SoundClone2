@@ -17,6 +17,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.SwingWorker;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
@@ -28,6 +29,7 @@ import net.technicpack.ui.controls.WatermarkTextField;
 import net.technicpack.ui.lang.ResourceLoader;
 
 import com.brassbeluga.launcher.resources.ResourceManager;
+import com.brassbeluga.launcher.ui.Autocomplete;
 import com.brassbeluga.launcher.ui.LauncherFrame;
 import com.brassbeluga.sound.gson.TrackInfo;
 
@@ -52,6 +54,8 @@ public class SongsInfoPanel extends TintablePanel {
 	public static final int SONGS_INFO_HEIGHT = 140;
 	private static final int MAX_SEARCH_STRING = 90;
 	private static final int MAX_TITLE_LENGTH = 42;
+	
+	private static final String COMMIT_ACTION = "commit";
 
 	public SongsInfoPanel(LauncherFrame parent) {
 		this.parent = parent;
@@ -78,6 +82,7 @@ public class SongsInfoPanel extends TintablePanel {
 
 		usernameField = new WatermarkTextField("username",
 				LauncherFrame.COLOR_WHITE_TEXT);
+		usernameField.setFocusTraversalKeysEnabled(false);
 		usernameField.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
 		usernameField.setFont(ResourceManager
 				.getFont(ResourceManager.FONT_RALEWAY, 16));
@@ -85,35 +90,15 @@ public class SongsInfoPanel extends TintablePanel {
 		usernameField.setBackground(LauncherFrame.COLOR_BUTTON_BLUE);
 		usernameField.setCaretColor(LauncherFrame.COLOR_WHITE_TEXT);
 		usernameField.setPreferredSize(new Dimension(200, 40));
-		((AbstractDocument) usernameField.getDocument())
-				.setDocumentFilter(new DocumentFilter() {
-					@Override
-					public void insertString(DocumentFilter.FilterBypass fb,
-							int offset, String string, AttributeSet attr)
-							throws BadLocationException {
-						if (fb.getDocument().getLength() + string.length() <= MAX_SEARCH_STRING) {
-							fb.insertString(offset, string, attr);
-						}
-					}
-
-					@Override
-					public void remove(DocumentFilter.FilterBypass fb,
-							int offset, int length) throws BadLocationException {
-						fb.remove(offset, length);
-					}
-
-					@Override
-					public void replace(DocumentFilter.FilterBypass fb,
-							int offset, int length, String text,
-							AttributeSet attrs) throws BadLocationException {
-						int finalTextLength = (fb.getDocument().getLength() - length)
-								+ text.length();
-						if (finalTextLength > MAX_SEARCH_STRING)
-							text = text.substring(0, text.length()
-									- (finalTextLength - MAX_SEARCH_STRING));
-						fb.replace(offset, length, text, attrs);
-					}
-				});
+		// Initialize the new autocomplete document listener
+		System.out.println(parent.getPreviousUsers().toString());
+		Autocomplete autocomplete = new Autocomplete(usernameField, parent.getPreviousUsers());
+		// Assign it to the username field's document
+		usernameField.getDocument().addDocumentListener(autocomplete);
+		// Assign the tab keystroke to the complete action
+		usernameField.getInputMap().put(KeyStroke.getKeyStroke("TAB"), COMMIT_ACTION);
+		usernameField.getActionMap().put(COMMIT_ACTION, autocomplete.new CommitAction());
+		
 		usernameField.addKeyListener(new KeyListener() {
 
 			@Override
