@@ -111,6 +111,7 @@ public class LauncherFrame extends DraggableFrame {
 	private String currentTabName;
 	private Timer tabFlashTimer;
 	private TabFlashListener tabFlashListener;
+	private JLabel warnings;
 
 	public LauncherFrame(final DownloadLikes downloader) {
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
@@ -325,7 +326,12 @@ public class LauncherFrame extends DraggableFrame {
 		installProgress.setFont(ResourceManager.getFont(
 				ResourceManager.FONT_OPENSANS, 12));
 		installProgress.setVisible(false);
-		footer.add(installProgress);
+		
+		warnings = new JLabel();
+		warnings.setForeground(COLOR_WHITE_TEXT);
+		warnings.setFont(ResourceManager.getFont(
+				ResourceManager.FONT_OPENSANS, 20));
+		footer.add(warnings);
 
 		installProgressPlaceholder = Box.createHorizontalGlue();
 		footer.add(installProgressPlaceholder);
@@ -483,5 +489,13 @@ public class LauncherFrame extends DraggableFrame {
 		} while (component != this);
 
 		return new Point(x, y);
+	}
+
+	public void onWarningHoverEnter() {
+		warnings.setText("This track has already been downloaded");
+	}
+
+	public void onWarningHoverExit() {
+		warnings.setText("");
 	}
 }

@@ -53,8 +53,12 @@ public class TrackEntry extends JPanel {
 	public void setDownloadFlag(boolean flagValue) {
 		if (!flagValue) {
 			flag.setIcon(ResourceManager.getIcon("track_idle.png"));
+			if (info.getDownload())
+				warning.setIcon(ResourceManager.getIcon("danger_icon.png"));
 		}else{
 			flag.setIcon(ResourceManager.getIcon("track_download.png"));
+			if (info.getDownload())
+				warning.setIcon(ResourceManager.getIcon("warning_icon.png"));
 		}
 		downloadFlag = flagValue;
 	}
@@ -145,6 +149,30 @@ public class TrackEntry extends JPanel {
 		warning = new JLabel(ResourceManager.getIcon("danger_icon.png"));
 		warning.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 16));
 		warning.setVisible(info.getDownload());
+		warning.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {	
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				parent.onWarningHoverEnter();
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				parent.onWarningHoverExit();
+			}
+		});
 
 		add(title);
 		add(Box.createHorizontalGlue());
