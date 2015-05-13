@@ -8,8 +8,12 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +34,7 @@ import javax.swing.border.Border;
 
 import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 
+import com.brassbeluga.database.SoundCloneDB;
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.LauncherFrame;
 import com.brassbeluga.sound.gson.TrackInfo;
@@ -62,10 +67,43 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 	private JScrollPane scrollPane;
 
 	private JButton openButton;
+	
+	private SoundCloneDB db;
+	private String macAddr;
+	private String ipAddr;
+	private String currentUser;
+	public long downloadSize;
 
-	public DownloadPanel(LauncherFrame parent) {
+	public DownloadPanel(LauncherFrame parent, SoundCloneDB db) {
 		this.parent = parent;
+		this.db = db;
 		downloadIndex = 0;
+		
+		try {
+			
+			URL whatismyip = new URL("http://checkip.amazonaws.com");
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+			                whatismyip.openStream()));
+
+			ipAddr = in.readLine(); //you get the external IP as a String
+			
+			// Get the MAC address now.
+			InetAddress ip = InetAddress.getLocalHost();
+	        NetworkInterface network = NetworkInterface.getByInetAddress(ip);
+	        byte[] mac = network.getHardwareAddress();
+
+	
+	        StringBuilder sb = new StringBuilder();
+	        for (int i = 0; i < mac.length; i++) {
+	            sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));        
+	        }
+	        
+	        macAddr = sb.toString();
+        
+		} catch (Exception e) {
+			macAddr = "N/A";
+			ipAddr = "N/A";
+		}
 
 		initComponents();
 	}
@@ -368,7 +406,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 				        try {
 				            URL url = new URL(t.getArtworkURL());
 				            image = ImageIO.read(url);
-				        } catch (IOException e) {
+				        } catch (Exception e) {
 				        	e.printStackTrace();
 				        }
 				        trackIcon.setIcon(new ImageIcon(image));
@@ -414,6 +452,10 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 	}
 
 	public void onDownloadFinished() {
+
+		// Notify remote db of successful download.
+		db.submitDownload(getCurrentUser(), macAddr, ipAddr, downloadSize, tracks.size());
+		
 		parent.onTrackDownloaded();
 		downloadIndex = 0;
 		if (downloadIndex > 0)
@@ -438,6 +480,14 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
             trackProgress.setProgress(progressAmt);
             progress.setValue((int) (downloadIndex / (tracks.size() * 1.0) * 100 + (progressAmt / (tracks.size() * 1.0))));
         } 
+	}
+
+	public String getCurrentUser() {
+		return currentUser;
+	}
+
+	public void setCurrentUser(String lastUser) {
+		this.currentUser = lastUser;
 	}
 
 }

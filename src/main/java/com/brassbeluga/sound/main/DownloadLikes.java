@@ -281,6 +281,7 @@ public class DownloadLikes {
 			throws JsonSyntaxException, Exception {
 		
 		currentConfig.setDownloadPath(downloadPath);
+		downloadPanel.setCurrentUser(getCurrentUser());
 		// gui.updateStatus("Intializing downloads",
 		// SoundCloneGUI.StatusType.PROCESS);
 		// Dispatch worker to download songs in background and update status
@@ -291,6 +292,7 @@ public class DownloadLikes {
 				Gson gson = new Gson();
 				TrackStreams tStream;
 				int downloads = 0;
+				downloadPanel.downloadSize = 0;
 				for (TrackInfo t : tracks) {
 					if (threadRunning) {
 						publish(t);
@@ -325,6 +327,7 @@ public class DownloadLikes {
 								
 								// Get the total length of the file
 								long total = connect.getContentLengthLong();
+								downloadPanel.downloadSize += connect.getContentLengthLong();
 								ReadableByteChannel rbc = null;
 								rbc = Channels.newChannel(website.openStream());
 								

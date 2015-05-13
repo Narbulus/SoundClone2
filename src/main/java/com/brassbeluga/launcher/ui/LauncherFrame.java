@@ -49,6 +49,7 @@ import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.controls.installation.ProgressBar;
 import net.technicpack.utilslib.DesktopUtils;
 
+import com.brassbeluga.database.SoundCloneDB;
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.components.download.DownloadPanel;
 import com.brassbeluga.launcher.ui.components.songs.SongsInfoPanel;
@@ -90,6 +91,8 @@ public class LauncherFrame extends DraggableFrame {
 	public static final String TAB_SONGS = "songs";
 	public static final String TAB_DOWNLOAD = "download";
 	public static final String DOWNLOAD_TRACK_COMMAND = "download_track";
+	
+	public long downloadSize;
 
 	private HeaderTab songsTab;
 	private HeaderTab downloadTab;
@@ -112,13 +115,18 @@ public class LauncherFrame extends DraggableFrame {
 	private Timer tabFlashTimer;
 	private TabFlashListener tabFlashListener;
 	private JLabel warnings;
+	
+	private SoundCloneDB db;
 
 	public LauncherFrame(final DownloadLikes downloader) {
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
 		this.downloader = downloader;
-
+		
+		this.downloadSize = 0;
+		this.db = new SoundCloneDB();
+		
 		// Handles rebuilding the frame, so use it to build the frame in the
 		// first place
 		relocalize();
@@ -307,7 +315,7 @@ public class LauncherFrame extends DraggableFrame {
 
 		JPanel downloadHost = new JPanel();
 		downloadHost.setBackground(COLOR_CENTRAL_BACK_OPAQUE);
-		downloadPanel = new DownloadPanel(this);
+		downloadPanel = new DownloadPanel(this, db);
 
 		infoSwap.add(downloadPanel, TAB_DOWNLOAD);
 
