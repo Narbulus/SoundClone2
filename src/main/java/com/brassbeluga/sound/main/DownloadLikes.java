@@ -105,8 +105,6 @@ public class DownloadLikes {
 		currentConfig = null;
 		downloaded = new HashSet<Integer>();
 
-		// Nothing
-
 		// Load past configurations from config file's json
 		while (config.hasNext()) {
 			String nextConfig = config.nextLine();
