@@ -32,7 +32,7 @@ public class DownloadHeaderTab extends HeaderTab {
 	}
 	
 	public void decDownloads() {
-		downloadsQueued--;
+		downloadsQueued = (downloadsQueued == 0) ? 0 : downloadsQueued - 1;
 		setIsActive(true);
 	}
 	

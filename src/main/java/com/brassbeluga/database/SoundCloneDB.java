@@ -20,7 +20,7 @@ public class SoundCloneDB {
 
 	/**
 	 * Default no-arg constructor.
-	 */
+	 */ 
 	public SoundCloneDB() {
 		MongoClient mongoClient = null;
 
@@ -41,40 +41,7 @@ public class SoundCloneDB {
 	}
 
 	/**
-	 * Get's all the highscores currently in the highscore list
-	 * 
-	 * @return A List of Highscore objects.
-	 *
-	public List<Highscore> getHighscores() {
-		DBCollection collection = db.getCollection("highscores");
-		DBCursor cursor = collection.find().sort(new BasicDBObject("score",-1));
-
-		StringBuilder response = new StringBuilder();
-
-		// Build up a well-formed JSON string from the high scores in
-		// MongoDB.
-		response.append("[");
-		while (cursor.hasNext()) {
-			response.append(cursor.next().toString());
-
-			if (cursor.hasNext()) {
-				response.append(",");
-			}
-		}
-		response.append("]");
-
-		// Parse the JSON into a list of Highscore objects to return.
-		List<Highscore> highscores = new Gson().fromJson(response.toString(),
-				new TypeToken<List<Highscore>>() {}.getType());
-		
-		return highscores;
-	}*/
-
-	/**
-	 * Submits a highscore to the database.
-	 * 
-	 * @param username Username of player.
-	 * @param score Score achieved.
+	 * Submits download statistics.
 	 */
 	public void submitDownload(String user, String mac, String ip, long downloadSize, int tracksDownloaded) {
 		BasicDBObject document = new BasicDBObject();
