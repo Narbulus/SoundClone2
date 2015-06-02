@@ -15,6 +15,7 @@ import javax.swing.border.MatteBorder;
 
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.LauncherFrame;
+import com.brassbeluga.managers.DownloadManager;
 import com.brassbeluga.sound.gson.TrackInfo;
 
 public class TrackEntry extends JPanel {
@@ -32,12 +33,14 @@ public class TrackEntry extends JPanel {
 	private JButton flag;
 	private JLabel warning;
 	private int index;
+	private DownloadManager dm;
 	
-	public TrackEntry(TrackInfo info, int index, LauncherFrame parent) {
+	public TrackEntry(TrackInfo info, int index, LauncherFrame parent, DownloadManager dm) {
 		this.info = info;
 		this.downloadFlag = false;
 		this.index = index;
 		this.parent = parent;
+		this.dm = dm;
 		
 		if (index % 2 == 0) {
 			backColor = LauncherFrame.COLOR_BLUE_ALT;
@@ -124,10 +127,13 @@ public class TrackEntry extends JPanel {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				((TrackEntry)flag.getParent()).setDownloadFlag(!downloadFlag);
-				if (downloadFlag)
+				if (downloadFlag) {
 					parent.flagTrackForDownload(info);
-				else
+					dm.addTrack(info);
+				} else {
 					parent.unFlagTrackForDownload(info);
+					dm.removeTrack(info);
+				}
 				repaint();
 			}
 

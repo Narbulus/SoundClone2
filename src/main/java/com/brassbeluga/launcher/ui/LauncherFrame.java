@@ -57,6 +57,7 @@ import com.brassbeluga.launcher.ui.components.songs.TracksListPanel;
 import com.brassbeluga.launcher.ui.controls.DownloadHeaderTab;
 import com.brassbeluga.launcher.ui.controls.HeaderTab;
 import com.brassbeluga.launcher.ui.listeners.TabFlashListener;
+import com.brassbeluga.managers.DownloadManager;
 import com.brassbeluga.sound.gson.TrackInfo;
 import com.brassbeluga.sound.main.DownloadLikes;
 import com.google.gson.JsonSyntaxException;
@@ -117,6 +118,7 @@ public class LauncherFrame extends DraggableFrame {
 	private JLabel warnings;
 	
 	private SoundCloneDB db;
+	private DownloadManager downloadManager;
 
 	public LauncherFrame(final DownloadLikes downloader) {
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
@@ -126,6 +128,7 @@ public class LauncherFrame extends DraggableFrame {
 		
 		this.downloadSize = 0;
 		this.db = new SoundCloneDB();
+		this.downloadManager = new DownloadManager();
 		
 		// Handles rebuilding the frame, so use it to build the frame in the
 		// first place
@@ -213,6 +216,7 @@ public class LauncherFrame extends DraggableFrame {
 		header.add(songsTab);
 
 		downloadTab = new DownloadHeaderTab("DOWNLOAD");
+		downloadManager.addObserver((DownloadHeaderTab) downloadTab);
 		downloadTab.addActionListener(tabListener);
 		downloadTab.setActionCommand(TAB_DOWNLOAD);
 		tabFlashListener = new TabFlashListener(COLOR_BLUE, downloadTab, this);
@@ -287,7 +291,7 @@ public class LauncherFrame extends DraggableFrame {
 		centralPanel.add(infoSwap, BorderLayout.CENTER);
 
 		JPanel songsHost = new JPanel();
-		tracksPanel = new TracksListPanel(this);
+		tracksPanel = new TracksListPanel(this, this.downloadManager);
 		songsInfoPanel = new SongsInfoPanel(this);
 		infoSwap.add(songsHost, TAB_SONGS);
 
@@ -297,7 +301,7 @@ public class LauncherFrame extends DraggableFrame {
 
 		JPanel downloadHost = new JPanel();
 		downloadHost.setBackground(COLOR_CENTRAL_BACK_OPAQUE);
-		downloadPanel = new DownloadPanel(this, db);
+		downloadPanel = new DownloadPanel(this, db, this.downloadManager);
 
 		infoSwap.add(downloadPanel, TAB_DOWNLOAD);
 

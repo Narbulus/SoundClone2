@@ -37,6 +37,7 @@ import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 import com.brassbeluga.database.SoundCloneDB;
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.LauncherFrame;
+import com.brassbeluga.managers.DownloadManager;
 import com.brassbeluga.sound.gson.TrackInfo;
 
 public class DownloadPanel extends JPanel implements PropertyChangeListener {
@@ -74,9 +75,12 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 	private String currentUser;
 	public long downloadSize;
 
-	public DownloadPanel(LauncherFrame parent, SoundCloneDB db) {
+	private DownloadManager dm;
+
+	public DownloadPanel(LauncherFrame parent, SoundCloneDB db, DownloadManager dm) {
 		this.parent = parent;
 		this.db = db;
+		this.dm = dm;
 		downloadIndex = 0;
 		
 		try {

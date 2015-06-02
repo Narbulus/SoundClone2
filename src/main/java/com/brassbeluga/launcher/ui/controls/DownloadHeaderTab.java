@@ -7,9 +7,11 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 
 import com.brassbeluga.launcher.ui.LauncherFrame;
+import com.brassbeluga.managers.DownloadManager;
+import com.brassbeluga.observer.DownloadsObserver;
 
 @SuppressWarnings("serial")
-public class DownloadHeaderTab extends HeaderTab {
+public class DownloadHeaderTab extends HeaderTab implements DownloadsObserver {
 	public static final int D_COUNTER_SIZE = 20;
 	public static final int D_COUNTER_MARGIN = 3;
 	public static final int D_COUNTER_EXP = 8;
@@ -22,18 +24,15 @@ public class DownloadHeaderTab extends HeaderTab {
 	}
 	
 	public void setDownloads(int n) {
-		downloadsQueued = n;
-		setIsActive(true);
+
 	}
 	
 	public void incDownloads() {
-		downloadsQueued++;
-		setIsActive(true);
+
 	}
 	
 	public void decDownloads() {
-		downloadsQueued = (downloadsQueued == 0) ? 0 : downloadsQueued - 1;
-		setIsActive(true);
+
 	}
 	
 	
@@ -69,6 +68,12 @@ public class DownloadHeaderTab extends HeaderTab {
 			g2d.setFont(new Font(f.getName(), Font.PLAIN, (int)(f.getSize() * .5)));
 			g2d.drawChars(arr, 0, arr.length, 10, this.getSize().height - 8);
 		}
+	}
+
+	@Override
+	public void update(DownloadManager dm) {
+		downloadsQueued = dm.getTracks().size();
+		repaint();
 	}
 
 }

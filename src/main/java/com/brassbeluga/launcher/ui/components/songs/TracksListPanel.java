@@ -22,6 +22,7 @@ import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.LauncherFrame;
+import com.brassbeluga.managers.DownloadManager;
 import com.brassbeluga.sound.gson.TrackInfo;
 
 @SuppressWarnings("serial")
@@ -35,9 +36,11 @@ public class TracksListPanel extends TintablePanel {
 	private List<TrackEntry> entries;
 
 	private LauncherFrame parent;
+	private DownloadManager dm;
 
-	public TracksListPanel(LauncherFrame parent) {
+	public TracksListPanel(LauncherFrame parent, DownloadManager dm) {
 		this.parent = parent;
+		this.dm = dm;
 
 		initComponents();
 	}
@@ -111,6 +114,9 @@ public class TracksListPanel extends TintablePanel {
 						}
 						if (selectTracks.size() > 0)
 							parent.flagAllForDownload(selectTracks);
+						
+						dm.removeAllTracks();
+						dm.addAllTracks(selectTracks);
 					}
 				});
 
@@ -154,7 +160,9 @@ public class TracksListPanel extends TintablePanel {
 							t.setDownloadFlag(false);
 						}
 						parent.unflagAllForDownload();
+						dm.removeAllTracks();
 					}
+					
 				});	
 			}
 
@@ -212,7 +220,7 @@ public class TracksListPanel extends TintablePanel {
 		for (TrackInfo t : newTracks) {
 			if (i == newTracks.size())
 				parent.selectTrack(t);
-			TrackEntry track = new TrackEntry(t, i, parent);
+			TrackEntry track = new TrackEntry(t, i, parent, dm);
 			trackList.add(track);
 			entries.add(track);
 			i++;
