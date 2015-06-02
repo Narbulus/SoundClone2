@@ -193,7 +193,7 @@ public class LauncherFrame extends DraggableFrame {
 		headerLabel.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				DesktopUtils.browseUrl("http://www.technicpack.net/");
+				DesktopUtils.browseUrl("http://www.soundcloud.com/");
 			}
 		});
 		header.add(headerLabel);
@@ -419,7 +419,7 @@ public class LauncherFrame extends DraggableFrame {
 
 	public String downloadButtonPressed(String path)
 			throws JsonSyntaxException, Exception {
-		if (!downloader.isThreadRunning()) {
+		if (!downloader.isThreadRunning() && downloadPanel.getTracks().size() > 0) {
 			downloader.downloadTracks("narbulus", path,
 					downloadPanel.getTracks(), downloadPanel);
 			downloadPanel.updateInfo();

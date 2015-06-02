@@ -95,17 +95,22 @@ public class TracksListPanel extends TintablePanel {
 		selectAll.addMouseListener(new MouseListener() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-			}
+			} 
 
 			@Override
 			public void mousePressed(MouseEvent e) {
 				EventQueue.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						for (TrackEntry t : entries)
-							t.setDownloadFlag(true);
-						if (entries.size() > 0)
-							parent.flagAllForDownload(tracks);
+						List<TrackInfo> selectTracks = new ArrayList<TrackInfo>();
+						for (TrackEntry t : entries) {
+							if (!t.getInfo().getDownload()) {
+								selectTracks.add(t.getInfo());
+								t.setDownloadFlag(true);
+							}
+						}
+						if (selectTracks.size() > 0)
+							parent.flagAllForDownload(selectTracks);
 					}
 				});
 

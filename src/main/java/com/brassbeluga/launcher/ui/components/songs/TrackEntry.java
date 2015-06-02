@@ -50,6 +50,10 @@ public class TrackEntry extends JPanel {
 		initComponents();
 	}
 	
+	public TrackInfo getInfo() {
+		return this.info;
+	}
+	
 	public void setDownloadFlag(boolean flagValue) {
 		if (!flagValue) {
 			flag.setIcon(ResourceManager.getIcon("track_idle.png"));

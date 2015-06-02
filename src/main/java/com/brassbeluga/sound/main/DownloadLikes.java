@@ -59,6 +59,7 @@ public class DownloadLikes {
 	private Boolean threadRunning;
 	private String tempDir;
 	private String defaultDownload;
+	private boolean cancelDownload;
 
 	private static final int TRACK_INFO_REQUEST_SIZE = 50;
 	protected static final long CHUNK_SIZE = 1000;
@@ -88,6 +89,7 @@ public class DownloadLikes {
 		defaultDownload = System.getProperty("user.home");
 
 		threadRunning = false;
+		cancelDownload = false;
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
 				ResourceManager.getResourceAsStream("config")));
 		File oldConfig = new File(tempDir + "/config");
@@ -267,7 +269,7 @@ public class DownloadLikes {
 		threadRunning = true;
 		worker.execute();
 	}
-
+	
 	/**
 	 * Called when the user presses start
 	 * 
@@ -282,7 +284,7 @@ public class DownloadLikes {
 		
 		currentConfig.setDownloadPath(downloadPath);
 		downloadPanel.setCurrentUser(getCurrentUser());
-		// gui.updateStatus("Intializing downloads",
+		// gui.updateStatus("Initializing downloads",
 		// SoundCloneGUI.StatusType.PROCESS);
 		// Dispatch worker to download songs in background and update status
 		SwingWorker<String, TrackInfo> worker = new SwingWorker<String, TrackInfo>() {
@@ -347,7 +349,7 @@ public class DownloadLikes {
 								} catch (FileNotFoundException e) {
 									e.printStackTrace();
 								}
-
+								
 								// Read the file from url, CHUNK_SIZE bytes at a time
 								long pos = 0;
 								long read;
@@ -360,62 +362,64 @@ public class DownloadLikes {
 									// Update the loading bar progress
 									setProgress(prog);
 
-								} while (read > 0);
+								} while (read > 0  && threadRunning);
 								
 								// Clean up after ourselves
 								fos.close();
-
-								File f = new File(tempPath);
-
-								// Open the downloaded file as an Mp3File for tag editing
-								Mp3File mp3file = new Mp3File(tempPath);
-								mp3file.setId3v2Tag(template);
-								ID3v2 id3v2Tag = mp3file.getId3v2Tag();
-
-								// If the file name has a parseable title and artist,
-								// update tag with new info
-								if (title.contains(" - ")) {
-									String[] halves = title.split(" - ");
-									if (halves.length == 2) {
-										id3v2Tag.setArtist(halves[0]);
-										id3v2Tag.setTitle(halves[1]);
-									}
-								}
-
-								// Download artwork from URL if available
-								if (t.getArtworkURL() != null) {
-									URL artworkURL = new URL(t
-											.getArtworkURL().replace("large",
-													"t500x500"));
-
-									BufferedImage image = ImageIO
-											.read(artworkURL.openStream());
-									
-									// Write the image bytes to the mp3 tag
-									ByteArrayOutputStream out = new ByteArrayOutputStream();
-									ImageIO.write(image, "jpg", out);
-									out.flush();
-									byte[] bytes = out.toByteArray();
-									out.close();
-
-									ID3Wrapper newId3Wrapper = new ID3Wrapper(
-											new ID3v1Tag(), new ID3v23Tag());
-									newId3Wrapper.setAlbumImage(bytes,
-											"image/jpeg");
-									id3v2Tag.setAlbumImage(bytes, 2,
-											"image/jpeg");
-								}
 								
-								// Embed track id for directory scanning
-								id3v2Tag.setPaymentUrl("" + t.getId());
-
-								// Save the final file in the download directory
-								mp3file.save(finalPath);
+								File f = new File(tempPath);
+								
+								if (threadRunning) {
+									// Open the downloaded file as an Mp3File for tag editing
+									Mp3File mp3file = new Mp3File(tempPath);
+									mp3file.setId3v2Tag(template);
+									ID3v2 id3v2Tag = mp3file.getId3v2Tag();
+	
+									// If the file name has a parseable title and artist,
+									// update tag with new info
+									if (title.contains(" - ")) {
+										String[] halves = title.split(" - ");
+										if (halves.length == 2) {
+											id3v2Tag.setArtist(halves[0]);
+											id3v2Tag.setTitle(halves[1]);
+										}
+									}
+	
+									// Download artwork from URL if available
+									if (t.getArtworkURL() != null) {
+										URL artworkURL = new URL(t
+												.getArtworkURL().replace("large",
+														"t500x500"));
+	
+										BufferedImage image = ImageIO
+												.read(artworkURL.openStream());
+										
+										// Write the image bytes to the mp3 tag
+										ByteArrayOutputStream out = new ByteArrayOutputStream();
+										ImageIO.write(image, "jpg", out);
+										out.flush();
+										byte[] bytes = out.toByteArray();
+										out.close();
+	
+										ID3Wrapper newId3Wrapper = new ID3Wrapper(
+												new ID3v1Tag(), new ID3v23Tag());
+										newId3Wrapper.setAlbumImage(bytes,
+												"image/jpeg");
+										id3v2Tag.setAlbumImage(bytes, 2,
+												"image/jpeg");
+									}
+									
+									// Embed track id for directory scanning
+									id3v2Tag.setPaymentUrl("" + t.getId());
+	
+									// Save the final file in the download directory
+									mp3file.save(finalPath);
+									
+									downloads++;
+								}
 								
 								// Delete the temporary file
 								f.delete();
-								
-								downloads++;
 							}
 						}
 					}
