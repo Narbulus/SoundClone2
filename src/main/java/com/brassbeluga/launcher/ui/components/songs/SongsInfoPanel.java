@@ -31,6 +31,7 @@ import net.technicpack.ui.lang.ResourceLoader;
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.Autocomplete;
 import com.brassbeluga.launcher.ui.LauncherFrame;
+import com.brassbeluga.managers.DownloadManager;
 import com.brassbeluga.sound.gson.TrackInfo;
 
 public class SongsInfoPanel extends TintablePanel {
@@ -49,6 +50,7 @@ public class SongsInfoPanel extends TintablePanel {
 	private TrackInfo selected;
 
 	private LauncherFrame parent;
+	private DownloadManager dm;
 
 	public static final int SONGS_INFO_WIDTH = 400;
 	public static final int SONGS_INFO_HEIGHT = 140;
@@ -57,8 +59,9 @@ public class SongsInfoPanel extends TintablePanel {
 	
 	private static final String COMMIT_ACTION = "commit";
 
-	public SongsInfoPanel(LauncherFrame parent) {
+	public SongsInfoPanel(LauncherFrame parent, DownloadManager dm) {
 		this.parent = parent;
+		this.dm = dm;
 
 		initComponents();
 	}
@@ -91,8 +94,8 @@ public class SongsInfoPanel extends TintablePanel {
 		usernameField.setCaretColor(LauncherFrame.COLOR_WHITE_TEXT);
 		usernameField.setPreferredSize(new Dimension(200, 40));
 		// Initialize the new autocomplete document listener
-		System.out.println(parent.getPreviousUsers().toString());
-		Autocomplete autocomplete = new Autocomplete(usernameField, parent.getPreviousUsers());
+		System.out.println(dm.getPreviousUsers().toString());
+		Autocomplete autocomplete = new Autocomplete(usernameField, dm.getPreviousUsers());
 		// Assign it to the username field's document
 		usernameField.getDocument().addDocumentListener(autocomplete);
 		// Assign the tab keystroke to the complete action

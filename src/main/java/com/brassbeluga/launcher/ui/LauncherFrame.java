@@ -110,25 +110,23 @@ public class LauncherFrame extends DraggableFrame {
 	private SongsInfoPanel songsInfoPanel;
 	private DownloadPanel downloadPanel;
 
-	private DownloadLikes downloader;
-
 	private String currentTabName;
 	private Timer tabFlashTimer;
 	private TabFlashListener tabFlashListener;
 	private JLabel warnings;
 	
 	private SoundCloneDB db;
-	private DownloadManager downloadManager;
+	private DownloadManager dm;
 
-	public LauncherFrame(final DownloadLikes downloader) {
+	public LauncherFrame() {
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-		this.downloader = downloader;
+		//this.downloader = downloader;
 		
 		this.downloadSize = 0;
 		this.db = new SoundCloneDB();
-		this.downloadManager = new DownloadManager();
+		this.dm = new DownloadManager();
 		
 		// Handles rebuilding the frame, so use it to build the frame in the
 		// first place
@@ -216,13 +214,14 @@ public class LauncherFrame extends DraggableFrame {
 		header.add(songsTab);
 
 		downloadTab = new DownloadHeaderTab("DOWNLOAD");
-		downloadManager.addObserver((DownloadHeaderTab) downloadTab);
+		dm.addObserver((DownloadHeaderTab) downloadTab);
 		downloadTab.addActionListener(tabListener);
 		downloadTab.setActionCommand(TAB_DOWNLOAD);
-		tabFlashListener = new TabFlashListener(COLOR_BLUE, downloadTab, this);
+		/*
+		tabFlashListener = new TabFlashListener(COLOR_BLUE, downloadTab);
 		downloadTab.addActionListener(tabFlashListener);
 		tabFlashTimer = new Timer(TAB_FLAST_INTERVAL, tabFlashListener);
-		tabFlashTimer.setActionCommand(DOWNLOAD_TRACK_COMMAND);
+		tabFlashTimer.setActionCommand(DOWNLOAD_TRACK_COMMAND);*/
 		header.add(downloadTab);
 		header.add(Box.createHorizontalGlue());
 
@@ -291,8 +290,8 @@ public class LauncherFrame extends DraggableFrame {
 		centralPanel.add(infoSwap, BorderLayout.CENTER);
 
 		JPanel songsHost = new JPanel();
-		tracksPanel = new TracksListPanel(this, this.downloadManager);
-		songsInfoPanel = new SongsInfoPanel(this);
+		tracksPanel = new TracksListPanel(this, this.dm);
+		songsInfoPanel = new SongsInfoPanel(this, this.dm);
 		infoSwap.add(songsHost, TAB_SONGS);
 
 		songsHost.setLayout(new BorderLayout());
@@ -301,7 +300,8 @@ public class LauncherFrame extends DraggableFrame {
 
 		JPanel downloadHost = new JPanel();
 		downloadHost.setBackground(COLOR_CENTRAL_BACK_OPAQUE);
-		downloadPanel = new DownloadPanel(this, db, this.downloadManager);
+		downloadPanel = new DownloadPanel(this, db, this.dm);
+		dm.addObserver(downloadPanel);
 
 		infoSwap.add(downloadPanel, TAB_DOWNLOAD);
 
@@ -330,8 +330,8 @@ public class LauncherFrame extends DraggableFrame {
 		installProgressPlaceholder = Box.createHorizontalGlue();
 		footer.add(installProgressPlaceholder);
 		
-		if (downloader != null && downloader.getLastUser() != null) {
-			songsInfoPanel.setUsername(downloader.getLastUser());
+		if (dm.getLastUser() != null) {
+			songsInfoPanel.setUsername(dm.getLastUser());
 		}
 
 		String[] names = { "TuneZip", "Zipmeister", "Zip Zop", "SoundZip",
@@ -353,18 +353,18 @@ public class LauncherFrame extends DraggableFrame {
 	}
 
 	public void onUserChanged(String user) {
-		if (downloader != null && !downloader.isThreadRunning()) {
+		if (!dm.downloadInProgress()) {
 			String select = user.trim().replace(".", "-");
-			String curUser = downloader.getCurrentUser();
+			String curUser = dm.getCurrentUser();
 			if (curUser == null
-					|| (curUser != null && !downloader.getCurrentUser().equals(
+					|| (curUser != null && !dm.getCurrentUser().equals(
 							select))) {
 				try {
-					downloader.updateUser(select);
-					if (downloader.getDownloadPath() != null && downloadPanel != null) {
-						downloadPanel.setBrowseInfo(downloader.getDownloadPath());
+					dm.updateUser(select);
+					if (dm.getDownloadPath() != null) {
+						downloadPanel.setBrowseInfo(dm.getDownloadPath());
 					}
-					downloader.updateUserLikes(select, songsInfoPanel, tracksPanel);
+					dm.updateUserLikes(select, songsInfoPanel, tracksPanel);
 					tracksPanel.startUpdateTracks();
 				} catch (JsonSyntaxException e) {
 					e.printStackTrace();
@@ -379,63 +379,20 @@ public class LauncherFrame extends DraggableFrame {
 		songsInfoPanel.updateTrack(track);
 	}
 
-	public void flagTrackForDownload(TrackInfo track) {
-		downloadPanel.addTrack(track);
-		((DownloadHeaderTab) downloadTab).incDownloads();
-		beginDownloadTabFlash();
-	}
-
-	public void unFlagTrackForDownload(TrackInfo track) {
-		downloadPanel.removeTrack(track);
-		((DownloadHeaderTab) downloadTab).decDownloads();
-		endDownloadTabFlash();
-	}
-
-	public void flagAllForDownload(List<TrackInfo> tracks) {
-		((DownloadHeaderTab) downloadTab).setDownloads(tracks.size());
-		downloadPanel.addAllTracks(tracks);
-		beginDownloadTabFlash();
-	}
-
-	public void unflagAllForDownload() {
-		((DownloadHeaderTab) downloadTab).setDownloads(0);
-		downloadPanel.removeAllTracks();
-		endDownloadTabFlash();
-	}
-
-	public String downloadButtonPressed(String path)
-			throws JsonSyntaxException, Exception {
-		if (!downloader.isThreadRunning() && downloadPanel.getTracks().size() > 0) {
-			downloader.downloadTracks("narbulus", path,
-					downloadPanel.getTracks(), downloadPanel);
+	public String downloadButtonPressed(String path) throws Exception {
+		if (!dm.downloadInProgress() && dm.getDownloadsSize() > 0) {
+			dm.startDownload(downloadPanel);
 			downloadPanel.updateInfo();
 			return "CANCEL";
 		} else {
-			if (downloader.isThreadRunning())
-				downloader.stopThread();
+			if (dm.downloadInProgress())
+				dm.stopDownload();
 			return "START";
 		}
 	}
 
 	public void onDownloadFinished() {
 		downloadPanel.onDownloadFinished();
-	}
-
-	public void onFlyerArrival() {
-		((DownloadHeaderTab) downloadTab).incDownloads();
-		beginDownloadTabFlash();
-	}
-
-	public void beginDownloadTabFlash() {
-		downloadTab.setOpaque(true);
-		tabFlashListener.reset();
-		tabFlashTimer.start();
-	}
-
-	public void endDownloadTabFlash() {
-		downloadTab.setOpaque(false);
-		downloadTab.setBackground(COLOR_BLUE_DARKER);
-		tabFlashTimer.stop();
 	}
 
 	public void relocalize() {
@@ -459,23 +416,8 @@ public class LauncherFrame extends DraggableFrame {
 			}
 		});
 	}
-
-	public void onTrackDownloaded() {
-		((DownloadHeaderTab) downloadTab).decDownloads();
-	}
 	
-	public void onDownloadPathChanged(String path) {
-		try {
-			downloader.updateDownloadDirectory(path);
-		} catch (UnsupportedTagException | InvalidDataException | IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public List<String> getPreviousUsers() {
-		return downloader.getPreviousUsers();
-	}
-
+	/*
 	public Point getAbsolutePosition(Component component) {
 		int x = 0;
 		int y = 0;
@@ -486,7 +428,7 @@ public class LauncherFrame extends DraggableFrame {
 		} while (component != this);
 
 		return new Point(x, y);
-	}
+	}*/
 
 	public void onWarningHoverEnter() {
 		warnings.setText("This track has already been downloaded");

@@ -6,36 +6,61 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 
+import javax.swing.Timer;
+
 import com.brassbeluga.launcher.ui.LauncherFrame;
+import com.brassbeluga.launcher.ui.listeners.TabFlashListener;
 import com.brassbeluga.managers.DownloadManager;
 import com.brassbeluga.observer.DownloadsObserver;
 
 @SuppressWarnings("serial")
 public class DownloadHeaderTab extends HeaderTab implements DownloadsObserver {
-	public static final int D_COUNTER_SIZE = 20;
-	public static final int D_COUNTER_MARGIN = 3;
-	public static final int D_COUNTER_EXP = 8;
+	private static final int D_COUNTER_SIZE = 20;
+	private static final int D_COUNTER_MARGIN = 3;
+	private static final int D_COUNTER_EXP = 8;
 	
 	private int downloadsQueued;
+	private TabFlashListener tabFlashListener;
+	private Timer tabFlashTimer;
 
 	public DownloadHeaderTab(String text) {
 		super(text);
 		downloadsQueued = 0;
+		
+		// Set up tab flashing
+		tabFlashListener = new TabFlashListener(LauncherFrame.COLOR_BLUE, this);
+		this.addActionListener(tabFlashListener);
+		tabFlashTimer = new Timer(LauncherFrame.TAB_FLAST_INTERVAL, tabFlashListener);
+		tabFlashTimer.setActionCommand(LauncherFrame.DOWNLOAD_TRACK_COMMAND);
 	}
 	
-	public void setDownloads(int n) {
+	/**
+	 * Begins the flashing animation on the download tab.
+	 */
+	public void beginDownloadTabFlash() {
+		this.setOpaque(true);
+		tabFlashListener.reset();
+		tabFlashTimer.start();
+	}
 
+	/**
+	 * ends the flashing animation on the download tab (also stops the flash timer.)
+	 */
+	public void endDownloadTabFlash() {
+		this.setOpaque(false);
+		this.setBackground(LauncherFrame.COLOR_BLUE_DARKER);
+		tabFlashTimer.stop();
 	}
 	
-	public void incDownloads() {
-
+	@Override
+	public void update(DownloadManager dm) {
+		// Only flash when the downloads are added not removed.
+		if (downloadsQueued < dm.getTracks().size()) {
+			beginDownloadTabFlash();
+		}
+		downloadsQueued = dm.getTracks().size();
+		repaint();
 	}
-	
-	public void decDownloads() {
-
-	}
-	
-	
 	
 	@Override
 	protected void paintComponent(Graphics g) {
@@ -69,11 +94,4 @@ public class DownloadHeaderTab extends HeaderTab implements DownloadsObserver {
 			g2d.drawChars(arr, 0, arr.length, 10, this.getSize().height - 8);
 		}
 	}
-
-	@Override
-	public void update(DownloadManager dm) {
-		downloadsQueued = dm.getTracks().size();
-		repaint();
-	}
-
 }

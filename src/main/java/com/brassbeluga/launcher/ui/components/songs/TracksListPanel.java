@@ -112,8 +112,6 @@ public class TracksListPanel extends TintablePanel {
 								t.setDownloadFlag(true);
 							}
 						}
-						if (selectTracks.size() > 0)
-							parent.flagAllForDownload(selectTracks);
 						
 						dm.removeAllTracks();
 						dm.addAllTracks(selectTracks);
@@ -159,7 +157,6 @@ public class TracksListPanel extends TintablePanel {
 						for (TrackEntry t : entries) {
 							t.setDownloadFlag(false);
 						}
-						parent.unflagAllForDownload();
 						dm.removeAllTracks();
 					}
 					

@@ -128,10 +128,8 @@ public class TrackEntry extends JPanel {
 			public void mousePressed(MouseEvent e) {
 				((TrackEntry)flag.getParent()).setDownloadFlag(!downloadFlag);
 				if (downloadFlag) {
-					parent.flagTrackForDownload(info);
 					dm.addTrack(info);
 				} else {
-					parent.unFlagTrackForDownload(info);
 					dm.removeTrack(info);
 				}
 				repaint();

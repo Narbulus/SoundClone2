@@ -79,16 +79,7 @@ public class LauncherMain {
 	}
 
 	private static void startLauncher() {
-
-
-		DownloadLikes downloader = null;
-		try {
-			downloader = new DownloadLikes();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
 		// Start the launcher!
-		new LauncherFrame(downloader);
+		new LauncherFrame();
 	}
 }
