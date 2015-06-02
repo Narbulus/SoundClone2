@@ -38,10 +38,11 @@ import com.brassbeluga.database.SoundCloneDB;
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.LauncherFrame;
 import com.brassbeluga.managers.DownloadManager;
+import com.brassbeluga.observer.DownloadsObserver;
 import com.brassbeluga.sound.gson.TrackInfo;
 
-public class DownloadPanel extends JPanel implements PropertyChangeListener {
-
+@SuppressWarnings("serial")
+public class DownloadPanel extends JPanel implements PropertyChangeListener, DownloadsObserver {
 
 	public static final int DOWNLOAD_HEIGHT = 200;
 
@@ -59,8 +60,6 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 	private LabelProgressBar trackProgress;
 	
 	private int downloadIndex;
-
-	private ArrayList<TrackInfo> tracks;
 
 	private JPanel trackList;
 	private JFileChooser browse;
@@ -117,7 +116,6 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 		setBackground(LauncherFrame.COLOR_CENTRAL_BACK_OPAQUE);
 		trackBorder = BorderFactory.createEmptyBorder(4, 8, 4, 8);
 
-		tracks = new ArrayList<TrackInfo>();
 		trackList = new JPanel();
 		trackList.setLayout(new BoxLayout(trackList, BoxLayout.Y_AXIS));
 		trackList.setBackground(LauncherFrame.COLOR_CHARCOAL);
@@ -326,52 +324,12 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 		setBrowseInfo();
 	}
 	
-	public void setProgressInfo(String info) {
-		progressInfo.setText(info);
-	}
-	
-	public void setOverallInfo(String info) {
-		overallInfo.setText(info);
-	}
-	
-	public List<TrackInfo> getTracks() {
-		return this.tracks;
-	}
-
-	public void addTrack(TrackInfo track) {
-		if (!tracks.contains(track)) {
-			tracks.add(track);
-			rebuildUI();
-		}
-		progressInfo.setText(tracks.size() + " tracks ready to download");
-	}
-	
-	public void addAllTracks(List<TrackInfo> newTracks) {
-		tracks.clear();
-		tracks.addAll(newTracks);
-		rebuildUI();
-		progressInfo.setText(tracks.size() + " tracks ready to download");
-	}
-	
-	public void removeAllTracks() {
-		tracks.clear();
-		rebuildUI();
-		progressInfo.setText("No tracks selected for download");
-	}
-
-	public void removeTrack(TrackInfo track) {
-		if (tracks.remove(track))
-			rebuildUI();
-		progressInfo.setText(tracks.size() + " tracks ready to download");
-	}
-	
 	public void setCurrentTrack(TrackInfo track) {
-		if (tracks.size() > 0) {
-			if (track.getId() != tracks.get(downloadIndex).getId()) {
+		if (dm.getDownloadsSize() > 0) {
+			if (track.getId() != dm.getTracks().get(downloadIndex).getId()) {
 				downloadIndex++;
 				trackList.getComponent(downloadIndex).setBackground(LauncherFrame.COLOR_GREY_TEXT);
 				updateInfo();
-				parent.onTrackDownloaded();
 				rebuildUI();
 			}
 		}
@@ -392,8 +350,8 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 	}
 	
 	public void updateInfo() {
-		overallInfo.setText(tracks.get(downloadIndex).getTitle());
-		progressInfo.setText("Downloading track " + (downloadIndex + 1) + " of " + tracks.size());
+		overallInfo.setText(dm.getTracks().get(downloadIndex).getTitle());
+		progressInfo.setText("Downloading track " + (downloadIndex + 1) + " of " + dm.getDownloadsSize());
 	}
 
 	private void rebuildUI() {
@@ -403,8 +361,8 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 			public String doInBackground() {
 				trackList.removeAll();
 				
-				if (tracks.size() > 0) {
-					TrackInfo t = tracks.get(downloadIndex);
+				if (dm.getDownloadsSize() > 0) {
+					TrackInfo t = dm.getTracks().get(downloadIndex);
 					if (t.getArtworkURL() != null) {
 						Image image = null;
 				        try {
@@ -418,7 +376,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 				}
 		
 				int i = 0;
-				for (TrackInfo t : tracks) {
+				for (TrackInfo t : dm.getTracks()) {
 					JLabel label;
 					if (i == downloadIndex) {
 						System.out.println("Load bar on " + i + " & " + t.getTitle());
@@ -458,18 +416,13 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 	public void onDownloadFinished() {
 
 		// Notify remote db of successful download.
-		db.submitDownload(getCurrentUser(), macAddr, ipAddr, downloadSize, tracks.size());
+		db.submitDownload(getCurrentUser(), macAddr, ipAddr, downloadSize, dm.getDownloadsSize());
 		
-		parent.onTrackDownloaded();
 		downloadIndex = 0;
-		if (downloadIndex > 0)
-			progressInfo.setText((downloadIndex + 1) + " tracks successfully downloaded!");
-		else
-			progressInfo.setText("No tracks selected for download");
 		setBrowseInfo();
 			
 		button.setText("START");
-		tracks.clear();
+		dm.removeAllTracks();
 		trackList.removeAll();
 		progress.setValue(0);
 		
@@ -482,7 +435,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 		if ("progress" == evt.getPropertyName()) {
             int progressAmt = (Integer) evt.getNewValue();
             trackProgress.setProgress(progressAmt);
-            progress.setValue((int) (downloadIndex / (tracks.size() * 1.0) * 100 + (progressAmt / (tracks.size() * 1.0))));
+            progress.setValue((int) (downloadIndex / (dm.getDownloadsSize() * 1.0) * 100 + (progressAmt / (dm.getDownloadsSize() * 1.0))));
         } 
 	}
 
@@ -492,6 +445,12 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 
 	public void setCurrentUser(String lastUser) {
 		this.currentUser = lastUser;
+	}
+
+	@Override
+	public void update(DownloadManager dm) {
+		rebuildUI();
+		progressInfo.setText(dm.getDownloadsSize() + " tracks ready to download");
 	}
 
 }

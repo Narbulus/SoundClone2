@@ -16,34 +16,35 @@ public class DownloadManager {
 		observers = new ArrayList<DownloadsObserver>();
 	}
 	
-	public void addTrack(TrackInfo trackInfo) {
+	public synchronized void addTrack(TrackInfo trackInfo) {
 		tracks.add(trackInfo);
 		notifyObservers();
 	}
 	
-	public void addAllTracks(List<TrackInfo> trackInfos) {
+	public synchronized void addAllTracks(List<TrackInfo> trackInfos) {
 		tracks.addAll(trackInfos);
 		notifyObservers();
 	}
 	
-	public void removeTrack(TrackInfo trackInfo) {
-		tracks.remove(trackInfo);
+	public synchronized boolean removeTrack(TrackInfo trackInfo) {
+		boolean removed = tracks.remove(trackInfo);
 		notifyObservers();
+		return removed;
 	}
 	
-	public void removeAllTracks() {
+	public synchronized void removeAllTracks() {
 		tracks.clear();
 		notifyObservers();
 	}
 	
-	public int getDownloadsSize() {
+	public synchronized int getDownloadsSize() {
 		return tracks.size();
 	}
 	
 	/**
 	 * Gets a read-only copy of the tracks list.
 	 */
-	public List<TrackInfo> getTracks() {
+	public synchronized List<TrackInfo> getTracks() {
 		return Collections.unmodifiableList(tracks);
 	}
 	

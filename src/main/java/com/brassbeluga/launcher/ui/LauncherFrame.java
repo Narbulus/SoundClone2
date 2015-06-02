@@ -219,10 +219,11 @@ public class LauncherFrame extends DraggableFrame {
 		downloadManager.addObserver((DownloadHeaderTab) downloadTab);
 		downloadTab.addActionListener(tabListener);
 		downloadTab.setActionCommand(TAB_DOWNLOAD);
-		tabFlashListener = new TabFlashListener(COLOR_BLUE, downloadTab, this);
+		/*
+		tabFlashListener = new TabFlashListener(COLOR_BLUE, downloadTab);
 		downloadTab.addActionListener(tabFlashListener);
 		tabFlashTimer = new Timer(TAB_FLAST_INTERVAL, tabFlashListener);
-		tabFlashTimer.setActionCommand(DOWNLOAD_TRACK_COMMAND);
+		tabFlashTimer.setActionCommand(DOWNLOAD_TRACK_COMMAND);*/
 		header.add(downloadTab);
 		header.add(Box.createHorizontalGlue());
 
@@ -302,6 +303,7 @@ public class LauncherFrame extends DraggableFrame {
 		JPanel downloadHost = new JPanel();
 		downloadHost.setBackground(COLOR_CENTRAL_BACK_OPAQUE);
 		downloadPanel = new DownloadPanel(this, db, this.downloadManager);
+		downloadManager.addObserver(downloadPanel);
 
 		infoSwap.add(downloadPanel, TAB_DOWNLOAD);
 
@@ -379,35 +381,11 @@ public class LauncherFrame extends DraggableFrame {
 		songsInfoPanel.updateTrack(track);
 	}
 
-	public void flagTrackForDownload(TrackInfo track) {
-		downloadPanel.addTrack(track);
-		((DownloadHeaderTab) downloadTab).incDownloads();
-		beginDownloadTabFlash();
-	}
-
-	public void unFlagTrackForDownload(TrackInfo track) {
-		downloadPanel.removeTrack(track);
-		((DownloadHeaderTab) downloadTab).decDownloads();
-		endDownloadTabFlash();
-	}
-
-	public void flagAllForDownload(List<TrackInfo> tracks) {
-		((DownloadHeaderTab) downloadTab).setDownloads(tracks.size());
-		downloadPanel.addAllTracks(tracks);
-		beginDownloadTabFlash();
-	}
-
-	public void unflagAllForDownload() {
-		((DownloadHeaderTab) downloadTab).setDownloads(0);
-		downloadPanel.removeAllTracks();
-		endDownloadTabFlash();
-	}
-
 	public String downloadButtonPressed(String path)
 			throws JsonSyntaxException, Exception {
-		if (!downloader.isThreadRunning() && downloadPanel.getTracks().size() > 0) {
+		if (!downloader.isThreadRunning() && downloadManager.getDownloadsSize() > 0) {
 			downloader.downloadTracks("narbulus", path,
-					downloadPanel.getTracks(), downloadPanel);
+					downloadManager.getTracks(), downloadPanel);
 			downloadPanel.updateInfo();
 			return "CANCEL";
 		} else {
@@ -419,23 +397,6 @@ public class LauncherFrame extends DraggableFrame {
 
 	public void onDownloadFinished() {
 		downloadPanel.onDownloadFinished();
-	}
-
-	public void onFlyerArrival() {
-		((DownloadHeaderTab) downloadTab).incDownloads();
-		beginDownloadTabFlash();
-	}
-
-	public void beginDownloadTabFlash() {
-		downloadTab.setOpaque(true);
-		tabFlashListener.reset();
-		tabFlashTimer.start();
-	}
-
-	public void endDownloadTabFlash() {
-		downloadTab.setOpaque(false);
-		downloadTab.setBackground(COLOR_BLUE_DARKER);
-		tabFlashTimer.stop();
 	}
 
 	public void relocalize() {
@@ -458,10 +419,6 @@ public class LauncherFrame extends DraggableFrame {
 				repaint();
 			}
 		});
-	}
-
-	public void onTrackDownloaded() {
-		((DownloadHeaderTab) downloadTab).decDownloads();
 	}
 	
 	public void onDownloadPathChanged(String path) {

@@ -5,19 +5,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import com.brassbeluga.launcher.ui.LauncherFrame;
+import com.brassbeluga.launcher.ui.controls.DownloadHeaderTab;
 import com.brassbeluga.launcher.ui.controls.HeaderTab;
 
 public class TabFlashListener implements ActionListener {
 	private Color startColor;
-	private HeaderTab downloadTab;
-	private LauncherFrame launcher;
+	private DownloadHeaderTab downloadTab;
 	private boolean brighten;
 	private int callCount;
 	
-	public TabFlashListener(Color startingColor, HeaderTab downloadTab, LauncherFrame launcher) {
+	public TabFlashListener(Color startingColor, DownloadHeaderTab downloadTab) {
 		this.startColor = startingColor;
 		this.downloadTab = downloadTab;
-		this.launcher = launcher;
 		brighten = true;
 		callCount = 0;
 	}
@@ -38,6 +37,7 @@ public class TabFlashListener implements ActionListener {
 			b = (int) tween(callCount * LauncherFrame.TAB_FLAST_INTERVAL, startColor.getBlue(), 
 					255 - startColor.getBlue(), LauncherFrame.TAB_FLASH_TIME);
 		} else {
+			// darken
 			r = (int) tween(callCount * LauncherFrame.TAB_FLAST_INTERVAL, 255, 
 					startColor.getRed() - 255, LauncherFrame.TAB_FLASH_TIME);
 			g = (int) tween(callCount * LauncherFrame.TAB_FLAST_INTERVAL, 255, 
@@ -50,10 +50,12 @@ public class TabFlashListener implements ActionListener {
 		
 		if (callCount * LauncherFrame.TAB_FLAST_INTERVAL == LauncherFrame.TAB_FLASH_TIME 
 				&& !brighten) {
-			launcher.endDownloadTabFlash();
+			// Done with the flash, so reset.
+			downloadTab.endDownloadTabFlash();
 			callCount = 0;
 			brighten = true;
 		} else if (callCount * LauncherFrame.TAB_FLAST_INTERVAL == LauncherFrame.TAB_FLASH_TIME) {
+			// Tab is now white so begin to descend back to original color.
 			brighten = false;
 			callCount = 0;
 		}
