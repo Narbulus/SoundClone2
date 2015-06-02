@@ -4,41 +4,117 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.brassbeluga.launcher.ui.components.download.DownloadPanel;
+import com.brassbeluga.launcher.ui.components.songs.SongsInfoPanel;
+import com.brassbeluga.launcher.ui.components.songs.TracksListPanel;
 import com.brassbeluga.observer.DownloadsObserver;
 import com.brassbeluga.sound.gson.TrackInfo;
+import com.brassbeluga.sound.main.DownloadLikes;
 
 public class DownloadManager {
 	private List<TrackInfo> tracks;
 	private List<DownloadsObserver> observers;
+	private String downloadPath;
+	private DownloadLikes downloader;
 	
 	public DownloadManager() {
 		tracks = new ArrayList<TrackInfo>();
 		observers = new ArrayList<DownloadsObserver>();
+		downloadPath = null;
+		try {
+			downloader = new DownloadLikes();
+		} catch (Exception e) {
+			downloader = null;
+			e.printStackTrace();
+		}
 	}
 	
-	public synchronized void addTrack(TrackInfo trackInfo) {
-		tracks.add(trackInfo);
+	public void addTrack(TrackInfo trackInfo) {
+		synchronized(tracks) {
+			if (!tracks.contains(trackInfo)) {
+				tracks.add(trackInfo);
+				notifyObservers();
+			}
+		}
+	}
+	
+	public void addAllTracks(List<TrackInfo> trackInfos) {
+		synchronized(tracks) {
+			tracks.addAll(trackInfos);
+		}
 		notifyObservers();
 	}
 	
-	public synchronized void addAllTracks(List<TrackInfo> trackInfos) {
-		tracks.addAll(trackInfos);
-		notifyObservers();
-	}
-	
-	public synchronized boolean removeTrack(TrackInfo trackInfo) {
-		boolean removed = tracks.remove(trackInfo);
+	public boolean removeTrack(TrackInfo trackInfo) {
+		boolean removed;
+		synchronized(tracks) {
+			removed = tracks.remove(trackInfo);
+		}
 		notifyObservers();
 		return removed;
 	}
 	
-	public synchronized void removeAllTracks() {
-		tracks.clear();
+	public void removeAllTracks() {
+		synchronized(tracks) {
+			tracks.clear();
+		}
 		notifyObservers();
 	}
 	
-	public synchronized int getDownloadsSize() {
-		return tracks.size();
+	public int getDownloadsSize() {
+		synchronized(tracks) {
+			return tracks.size();
+		}
+	}
+	
+	public String getLastUser() {
+		return downloader.getLastUser();
+	}
+	
+	public List<String> getPreviousUsers() {
+		return downloader.getPreviousUsers();
+	}
+	
+	public String getCurrentUser() {
+		return downloader.getCurrentUser();
+	}
+	
+	public void updateUser(String user) {
+		try {
+			downloader.updateUser(user);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void updateUserLikes(String user, SongsInfoPanel siPanel, TracksListPanel tlPanel) {
+		downloader.updateUserLikes(user, siPanel, tlPanel);
+	}
+	
+	/**
+	 * Checks if the downloader is currently downloading.
+	 */
+	public boolean downloadInProgress() {
+		return downloader.isThreadRunning();
+	}
+	
+	/**
+	 * Begin the download.
+	 */
+	public void startDownload(DownloadPanel downloadPanel) {
+		try {
+			downloader.downloadTracks("narbulus",downloadPath,
+					tracks, downloadPanel);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Stops the current download in progress.
+	 */
+	public void stopDownload() {
+		downloader.stopThread();
 	}
 	
 	/**
@@ -48,6 +124,20 @@ public class DownloadManager {
 		return Collections.unmodifiableList(tracks);
 	}
 	
+	public String getDownloadPath() {
+		return downloadPath;
+	}
+
+	public void setDownloadPath(String downloadPath) {
+		this.downloadPath = downloadPath;
+		try {
+			downloader.updateDownloadDirectory(downloadPath);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		notifyObservers();
+	}
+
 	/**
 	 * Add an observer to be notified when the underlying list of
 	 * tracks to be downloaded is changed.

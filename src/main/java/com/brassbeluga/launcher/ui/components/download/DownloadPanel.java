@@ -344,7 +344,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener, Dow
 		String downloadPath = browse.getCurrentDirectory().getAbsolutePath();
 		if (browse.getSelectedFile() != null) {
 			downloadPath = browse.getSelectedFile().getAbsolutePath();
-			parent.onDownloadPathChanged(downloadPath);
+			dm.setDownloadPath(downloadPath);
 		}
 		overallInfo.setText(downloadPath);
 	}
