@@ -220,24 +220,6 @@ public class LauncherFrame extends DraggableFrame {
 		tabFlashTimer = new Timer(TAB_FLAST_INTERVAL, tabFlashListener);
 		tabFlashTimer.setActionCommand(DOWNLOAD_TRACK_COMMAND);
 		header.add(downloadTab);
-
-		/*
-		 * JLabel flag = new JLabel(resources.getIcon("track_idle.png"));
-		 * flag.setOpaque(true); flag.setVisible(true); flag.set
-		 * 
-		 * flag.setBounds(50, 50,50, 50);
-		 */
-
-		/*
-		 * FlyerGlassPane fg = new FlyerGlassPane(resources, this);
-		 * setGlassPane(fg);
-		 * 
-		 * fg.setVisible(true); fg.setOpaque(false);
-		 * 
-		 * new Timer(DownloadFlyer.FLIGHT_INTERVAL, (ActionListener)
-		 * fg).start();
-		 */
-
 		header.add(Box.createHorizontalGlue());
 
 		JPanel rightHeaderPanel = new JPanel();
@@ -460,7 +442,6 @@ public class LauncherFrame extends DraggableFrame {
 		this.setLayout(null);
 
 		// Clear references to existing controls
-
 		initComponents();
 
 		if (currentTabName != null)
