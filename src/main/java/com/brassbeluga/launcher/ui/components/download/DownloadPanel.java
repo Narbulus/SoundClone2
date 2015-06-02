@@ -263,7 +263,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				try {
-					Desktop.getDesktop().open(new File(overallInfo.getText()));
+					Desktop.getDesktop().open(new File(browse.getCurrentDirectory().getAbsolutePath()));
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
