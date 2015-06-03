@@ -262,8 +262,15 @@ public class DownloadLikes {
 									
 									// Update the loading bar progress
 									dm.updateSongDownloadProgress(prog);
+									if (!threadRunning) {
+										fos.close();
+										File f = new File(tempPath);
+										f.delete();
+										return "";
+									}
+										
 
-								} while (read > 0  && threadRunning);
+								} while (read > 0);
 								
 								// Clean up after ourselves
 								fos.close();
@@ -336,6 +343,7 @@ public class DownloadLikes {
 
 			@Override
 			protected void done() {
+				dm.onDownloadsFinished();
 				threadRunning = false;
 			}
 

@@ -411,4 +411,8 @@ public class DownloadManager {
 		output.flush();
 		output.close();
 	}
+
+	public void onDownloadsFinished() {
+		notifyObservers(DownloadAction.DOWNLOADS_FINISHED);
+	}
 }

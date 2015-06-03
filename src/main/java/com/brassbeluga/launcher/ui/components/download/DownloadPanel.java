@@ -453,6 +453,8 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 		}else if (action == DownloadAction.SONG_PROGRESS) {
 			trackProgress.setProgress(dm.getSongProgress());
             progress.setValue((int) (downloadIndex / (dm.getDownloadsSize() * 1.0) * 100 + (dm.getSongProgress() / (dm.getDownloadsSize() * 1.0))));
+		}else if (action == DownloadAction.DOWNLOADS_FINISHED) {
+			onDownloadFinished();
 		}
 	}
 
