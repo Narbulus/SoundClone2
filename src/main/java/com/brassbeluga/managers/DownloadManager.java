@@ -283,6 +283,8 @@ public class DownloadManager {
 	 * Notify all observers that the tracks to be downloaded has changed
 	 */
 	private void notifyObservers(DownloadAction action) {
+		if (action != DownloadAction.SONG_PROGRESS)
+			System.out.println(action);
 		for (DownloadsObserver observer : observers) {
 			observer.update(this, action);
 		}

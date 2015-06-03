@@ -277,6 +277,9 @@ public class DownloadLikes {
 				tag.setArtist(halves[0]);
 				tag.setTitle(halves[1]);
 			}
+		} else {
+			tag.setTitle(title);
+			tag.setArtist("");
 		}
 
 		BufferedImage image = downloadArtwork(t.getArtworkURL().replace("-large", "-t500x500"));

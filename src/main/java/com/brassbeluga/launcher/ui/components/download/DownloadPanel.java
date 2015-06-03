@@ -411,7 +411,10 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 		button.setText("START");
 		setBrowseInfo();
 		
-		dm.removeAllTracks();
+		if (dm.getDownloadsSize() > 0) {
+			rebuildUI();
+		}
+		
 			
 		progress.setValue(0);
 		
