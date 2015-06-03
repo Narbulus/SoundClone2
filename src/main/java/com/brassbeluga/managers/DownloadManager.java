@@ -173,7 +173,7 @@ public class DownloadManager {
 		return removed;
 	}
 	
-	public synchronized void removeAllTracks() {
+	public void removeAllTracks() {
 		synchronized(tracks) {
 			tracks.clear();
 		}
