@@ -40,7 +40,6 @@ public class DownloadLikes {
 
 	private ID3v2 template;
 	private SoundLoader load;
-	private Boolean threadRunning;
 
 	private String tempDir;
 	private String defaultDownload;
@@ -76,7 +75,6 @@ public class DownloadLikes {
 
 		defaultDownload = System.getProperty("user.home");
 
-		threadRunning = false;
 
 		// Load the template id3 tag from resource file
 		InputStream is = ResourceManager.getResourceAsStream("tagdata");
@@ -94,7 +92,7 @@ public class DownloadLikes {
 		template = new ID3v22Tag(buffer.toByteArray());
 	}
 	
-	public void updateUserLikes(final Configuration currentConfig, final String clientID) throws JsonSyntaxException  {
+	public SwingWorker<List<TrackInfo>, List<TrackInfo>> updateUserLikes(final Configuration currentConfig, final String clientID) throws JsonSyntaxException  {
 		try {
 			load = new SoundLoader(currentConfig, clientID);
 		} catch (IOException e) {
@@ -113,7 +111,6 @@ public class DownloadLikes {
 							.getResponse("http://api.soundcloud.com/resolve.json?url=http://soundcloud.com/"
 									+ currentConfig.getUsername() + "&client_id=" + clientID);
 				} catch (Exception e) {
-					threadRunning = false;
 					e.printStackTrace();
 				}
 
@@ -137,7 +134,8 @@ public class DownloadLikes {
 				}.getType();
 
 				List<TrackInfo> likes = new ArrayList<TrackInfo>();
-				for (int i = 0; i < info.getFavoritesCount(); i += TRACK_INFO_REQUEST_SIZE) {
+				int i = 0;
+				while (i < info.getFavoritesCount() && !isCancelled()) {
 					String partLikes = load
 							.getResponse("http://api.soundcloud.com/users/"
 									+ info.getId()
@@ -150,7 +148,10 @@ public class DownloadLikes {
 							t.setDownload(true);
 					}
 					likes.addAll(newLikes);
-					publish(newLikes);
+					if (!isCancelled()) {
+						dm.addNewLikes(likes);
+					}
+					i += TRACK_INFO_REQUEST_SIZE;
 				}
 				
 				return likes;
@@ -160,18 +161,12 @@ public class DownloadLikes {
 			@Override
 			protected void done() {
 				dm.onLikesFinished();
-				threadRunning = false;
-			}
-
-			@Override
-			protected void process(List<List<TrackInfo>> tracks) {
-				dm.addNewLikes(tracks.get(tracks.size() - 1));
 			}
 
 		};
 
-		threadRunning = true;
 		worker.execute();
+		return worker;
 	}
 	
 	/**
@@ -182,7 +177,7 @@ public class DownloadLikes {
 	 * @throws Exception
 	 * @throws JsonSyntaxException
 	 */
-	public void downloadTracks(final String appDataPath, 
+	public SwingWorker<String, TrackInfo> downloadTracks(final String appDataPath, 
 			final String clientID, final List<TrackInfo> tracks)
 			throws JsonSyntaxException, Exception {
 		// gui.updateStatus("Initializing downloads",
@@ -197,141 +192,138 @@ public class DownloadLikes {
 				int downloads = 0;
 				while (dm.getDownloadsSize() > 0) {
 					TrackInfo t = dm.getTracks().get(0);
-					if (threadRunning) {
-						publish(t);
-						tStream = gson.fromJson(
-										load.getResponse("https://api.soundcloud.com/i1/tracks/"
-												+ t.getId()
-												+ "/streams?client_id="
-												+ clientID), TrackStreams.class);
-						String mediaPath = tStream.getHttp_mp3_128_url();
+					publish(t);
+					tStream = gson.fromJson(
+									load.getResponse("https://api.soundcloud.com/i1/tracks/"
+											+ t.getId()
+											+ "/streams?client_id="
+											+ clientID), TrackStreams.class);
+					String mediaPath = tStream.getHttp_mp3_128_url();
+					if (mediaPath != null) {
+						if (t.getArtworkURL() == null) {
+							// Load uploader profile picture url for track
+							// image
+							UserInfo uploader = gson
+									.fromJson(
+											load.getResponse("https://api.soundcloud.com/users/"
+													+ t.getUserId()
+													+ ".json?client_id="
+													+ clientID),
+											UserInfo.class);
+							t.setArtworkURL(uploader.getAvatarURL());
+						}
+						
+
 						if (mediaPath != null) {
-							if (t.getArtworkURL() == null) {
-								// Load uploader profile picture url for track
-								// image
-								UserInfo uploader = gson
-										.fromJson(
-												load.getResponse("https://api.soundcloud.com/users/"
-														+ t.getUserId()
-														+ ".json?client_id="
-														+ clientID),
-												UserInfo.class);
-								t.setArtworkURL(uploader.getAvatarURL());
+							
+							// Open the url connection
+							URL website = new URL(mediaPath);
+							HttpURLConnection connect = (HttpURLConnection) website
+									.openConnection();
+							connect.setRequestMethod("HEAD");
+							
+							// Get the total length of the file
+							long total = connect.getContentLengthLong();
+							//downloadPanel.downloadSize += connect.getContentLengthLong();
+							ReadableByteChannel rbc = null;
+							rbc = Channels.newChannel(website.openStream());
+							
+							// Format track name to a valid file path name
+							String title = t.getTitle();
+							String finalPath = fuzzTrackTitle(title, dm.getDownloadPath());
+							String tempPath = fuzzTrackTitle(title, appDataPath);
+							
+							// Create all the necessary directories for file download
+							File finalDir = new File(finalPath);
+							finalDir.getParentFile().mkdirs();
+							
+							// Download the file itself to the temporary directory
+							FileOutputStream fos = null;
+							try {
+								fos = new FileOutputStream(tempPath);
+							} catch (FileNotFoundException e) {
+								e.printStackTrace();
 							}
 							
+							// Read the file from url, CHUNK_SIZE bytes at a time
+							long pos = 0;
+							long read;
+							do {
+								read = fos.getChannel().transferFrom(rbc,
+										pos, CHUNK_SIZE);
+								pos += read;
+								int prog = (int)(((pos * 1.0) / (total * 1.0)) * 100.0);
+								
+								// Update the loading bar progress
+								dm.updateSongDownloadProgress(prog);
+								
+								/*if (!downloadThreadRunning) {
+									fos.close();
+									File f = new File(tempPath);
+									f.delete();
+									return "";
+								}*/
+									
 
-							if (mediaPath != null) {
-								
-								// Open the url connection
-								URL website = new URL(mediaPath);
-								HttpURLConnection connect = (HttpURLConnection) website
-										.openConnection();
-								connect.setRequestMethod("HEAD");
-								
-								// Get the total length of the file
-								long total = connect.getContentLengthLong();
-								//downloadPanel.downloadSize += connect.getContentLengthLong();
-								ReadableByteChannel rbc = null;
-								rbc = Channels.newChannel(website.openStream());
-								
-								// Format track name to a valid file path name
-								String title = t.getTitle();
-								String finalPath = fuzzTrackTitle(title, dm.getDownloadPath());
-								String tempPath = fuzzTrackTitle(title, appDataPath);
-								
-								// Create all the necessary directories for file download
-								File finalDir = new File(finalPath);
-								finalDir.getParentFile().mkdirs();
-								
-								// Download the file itself to the temporary directory
-								FileOutputStream fos = null;
-								try {
-									fos = new FileOutputStream(tempPath);
-								} catch (FileNotFoundException e) {
-									e.printStackTrace();
-								}
-								
-								// Read the file from url, CHUNK_SIZE bytes at a time
-								long pos = 0;
-								long read;
-								do {
-									read = fos.getChannel().transferFrom(rbc,
-											pos, CHUNK_SIZE);
-									pos += read;
-									int prog = (int)(((pos * 1.0) / (total * 1.0)) * 100.0);
-									
-									// Update the loading bar progress
-									dm.updateSongDownloadProgress(prog);
-									if (!threadRunning) {
-										fos.close();
-										File f = new File(tempPath);
-										f.delete();
-										return "";
-									}
-										
+							} while (read > 0);
+							
+							// Clean up after ourselves
+							fos.close();
+							
+							File f = new File(tempPath);
+							
+							// Open the downloaded file as an Mp3File for tag editing
+							Mp3File mp3file = new Mp3File(tempPath);
+							mp3file.setId3v2Tag(template);
+							ID3v2 id3v2Tag = mp3file.getId3v2Tag();
 
-								} while (read > 0);
-								
-								// Clean up after ourselves
-								fos.close();
-								
-								File f = new File(tempPath);
-								
-								if (threadRunning) {
-									// Open the downloaded file as an Mp3File for tag editing
-									Mp3File mp3file = new Mp3File(tempPath);
-									mp3file.setId3v2Tag(template);
-									ID3v2 id3v2Tag = mp3file.getId3v2Tag();
-	
-									// If the file name has a parseable title and artist,
-									// update tag with new info
-									if (title.contains(" - ")) {
-										String[] halves = title.split(" - ");
-										if (halves.length == 2) {
-											id3v2Tag.setArtist(halves[0]);
-											id3v2Tag.setTitle(halves[1]);
-										}
-									}
-	
-									// Download artwork from URL if available
-									if (t.getArtworkURL() != null) {
-										URL artworkURL = new URL(t
-												.getArtworkURL().replace("large",
-														"t500x500"));
-	
-										BufferedImage image = ImageIO
-												.read(artworkURL.openStream());
-										
-										// Write the image bytes to the mp3 tag
-										ByteArrayOutputStream out = new ByteArrayOutputStream();
-										ImageIO.write(image, "jpg", out);
-										out.flush();
-										byte[] bytes = out.toByteArray();
-										out.close();
-	
-										ID3Wrapper newId3Wrapper = new ID3Wrapper(
-												new ID3v1Tag(), new ID3v23Tag());
-										newId3Wrapper.setAlbumImage(bytes,
-												"image/jpeg");
-										id3v2Tag.setAlbumImage(bytes, 2,
-												"image/jpeg");
-									}
-									
-									// Embed track id for directory scanning
-									id3v2Tag.setPaymentUrl("" + t.getId());
-	
-									// Save the final file in the download directory
-									mp3file.save(finalPath);
-									
-									downloads++;
+							// If the file name has a parseable title and artist,
+							// update tag with new info
+							if (title.contains(" - ")) {
+								String[] halves = title.split(" - ");
+								if (halves.length == 2) {
+									id3v2Tag.setArtist(halves[0]);
+									id3v2Tag.setTitle(halves[1]);
 								}
-								
-								// Delete the temporary file
-								f.delete();
 							}
+
+							// Download artwork from URL if available
+							if (t.getArtworkURL() != null) {
+								URL artworkURL = new URL(t
+										.getArtworkURL().replace("large",
+												"t500x500"));
+
+								BufferedImage image = ImageIO
+										.read(artworkURL.openStream());
+								
+								// Write the image bytes to the mp3 tag
+								ByteArrayOutputStream out = new ByteArrayOutputStream();
+								ImageIO.write(image, "jpg", out);
+								out.flush();
+								byte[] bytes = out.toByteArray();
+								out.close();
+
+								ID3Wrapper newId3Wrapper = new ID3Wrapper(
+										new ID3v1Tag(), new ID3v23Tag());
+								newId3Wrapper.setAlbumImage(bytes,
+										"image/jpeg");
+								id3v2Tag.setAlbumImage(bytes, 2,
+										"image/jpeg");
+							}
+							
+							// Embed track id for directory scanning
+							id3v2Tag.setPaymentUrl("" + t.getId());
+
+							// Save the final file in the download directory
+							mp3file.save(finalPath);
+							
+							downloads++;
+							
+							// Delete the temporary file
+							f.delete();
 						}
-					}
 					dm.removeTrack(t);
+					}
 				}
 
 				// update the current configuration's history
@@ -344,7 +336,6 @@ public class DownloadLikes {
 			@Override
 			protected void done() {
 				dm.onDownloadsFinished();
-				threadRunning = false;
 			}
 
 			@Override
@@ -353,8 +344,8 @@ public class DownloadLikes {
 			}
 		};
 
-		threadRunning = true;
 		worker.execute();
+		return worker;
 	}
 	
 	private String fuzzTrackTitle(String track, String path) {
@@ -364,15 +355,5 @@ public class DownloadLikes {
 		String finalPath = path + "/"
 				+ track + ".mp3";
 		return finalPath;
-	}
-
-	public Boolean isThreadRunning() {
-		return threadRunning;
-	}
-
-	public void stopThread() {
-		threadRunning = false;
-	}
-
-	
+	}	
 }

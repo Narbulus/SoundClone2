@@ -198,7 +198,6 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 		trackList.add(loading);
 		trackList.add(Box.createGlue());
 
-		revalidate();
 		repaint();
 	}
 

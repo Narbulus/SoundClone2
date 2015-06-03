@@ -12,6 +12,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 
+import javax.swing.SwingWorker;
+
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.components.download.DownloadPanel;
 import com.brassbeluga.launcher.ui.components.songs.SongsInfoPanel;
@@ -49,10 +51,15 @@ public class DownloadManager {
 	
 	private Integer songProgress;
 	
+	SwingWorker<String, TrackInfo> downloadsWorker;
+	SwingWorker<List<TrackInfo>, List<TrackInfo>> likesWorker;
+	
 	public DownloadManager() {
 		tracks = new ArrayList<TrackInfo>();
 		likes = new ArrayList<TrackInfo>();
 		observers = new ArrayList<DownloadsObserver>();
+		downloadsWorker = null;
+		likesWorker = null;
 		loadConfigurationFiles();
 		try {
 			downloader = new DownloadLikes(this);
@@ -163,6 +170,7 @@ public class DownloadManager {
 	}
 	
 	public void onLikesFinished() {
+		likesWorker = null;
 		notifyObservers(DownloadAction.LIKES_FINISHED);
 		updateConfigFile();
 	}
@@ -187,7 +195,14 @@ public class DownloadManager {
 	 * Checks if the downloader is currently downloading.
 	 */
 	public boolean downloadInProgress() {
-		return downloader.isThreadRunning();
+		return downloadsWorker != null;
+	}
+	
+	/**
+	 * Checks if the likes are currently updating.
+	 */
+	public boolean likesUpdateInProgress() {
+		return likesWorker != null;
 	}
 	
 	/**
@@ -195,7 +210,7 @@ public class DownloadManager {
 	 */
 	public void startDownload() {
 		try {
-			downloader.downloadTracks(appDataDir, clientID, tracks);
+			downloadsWorker = downloader.downloadTracks(appDataDir, clientID, tracks);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -209,12 +224,9 @@ public class DownloadManager {
 	public int getSongProgress() {
 		return songProgress;
 	}
-	
-	/**
-	 * Stops the current download in progress.
-	 */
+
 	public void stopDownload() {
-		downloader.stopThread();
+		downloadsWorker.cancel(true);
 	}
 	
 	/**
@@ -266,34 +278,38 @@ public class DownloadManager {
 	 */
 	public void updateUser(String user) {
 		
-		if (!downloadInProgress()) {
-			// Sanitize username input
-			String select = user.trim().replace(".", "-");
-			if (getCurrentUser() == null || (getCurrentUser() != null 
-					&& !getCurrentUser().equals(select))) {
-				try {
-					// Check if a config for this username exists
-					for (Configuration c : configs) {
-						if (c.getUsername().equals(user))
-							currentConfig = c;
-					}
-					
-					// Create a new config if this is a new username
-					if (currentConfig == null || user != currentConfig.getUsername()) {
-						currentConfig = new Configuration(user, defaultDownload, null);
-						configs.add(currentConfig);
-					}
-					
-					// Scan the new download directory for tracks
-					if (currentConfig.getDownloadPath() != null)
-						updateDownloadDirectory();
-					
-					// Download the users likes
-					removeAllLikes();
-					downloader.updateUserLikes(currentConfig, clientID);
-				} catch (Exception e) {
-					e.printStackTrace();
+		// If we are currently downloading likes then stop.
+		if (likesUpdateInProgress()) {
+			likesWorker.cancel(true);
+			removeAllLikes();
+		}
+		
+		// Sanitize username input
+		String select = user.trim().replace(".", "-");
+		if (getCurrentUser() == null || (getCurrentUser() != null 
+				&& !getCurrentUser().equals(select))) {
+			try {
+				// Check if a config for this username exists
+				for (Configuration c : configs) {
+					if (c.getUsername().equals(user))
+						currentConfig = c;
 				}
+				
+				// Create a new config if this is a new username
+				if (currentConfig == null || user != currentConfig.getUsername()) {
+					currentConfig = new Configuration(user, defaultDownload, null);
+					configs.add(currentConfig);
+				}
+				
+				// Scan the new download directory for tracks
+				if (currentConfig.getDownloadPath() != null)
+					updateDownloadDirectory();
+				
+				// Download the users likes
+				removeAllLikes();
+				likesWorker = downloader.updateUserLikes(currentConfig, clientID);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 
@@ -413,6 +429,7 @@ public class DownloadManager {
 	}
 
 	public void onDownloadsFinished() {
+		downloadsWorker = null;
 		notifyObservers(DownloadAction.DOWNLOADS_FINISHED);
 	}
 }
