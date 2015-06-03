@@ -13,6 +13,7 @@ public class LabelProgressBar extends JLabel {
 	private int progress;
 	private int loadWidth;
 	private Color loadColor;
+	private boolean barVisible;
 	
 	public LabelProgressBar(int min, int max, int loadWidth) {
 		super();

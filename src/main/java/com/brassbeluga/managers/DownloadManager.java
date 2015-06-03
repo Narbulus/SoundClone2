@@ -34,6 +34,7 @@ public class DownloadManager {
 	private List<TrackInfo> likes;
 	private List<DownloadsObserver> observers;
 	private DownloadLikes downloader;
+	private int downloadIndex;
 	
 	// Config-universal clientID and max track length
 	private String clientID;
@@ -53,6 +54,7 @@ public class DownloadManager {
 		tracks = new ArrayList<TrackInfo>();
 		likes = new ArrayList<TrackInfo>();
 		observers = new ArrayList<DownloadsObserver>();
+		downloadIndex = -1;
 		loadConfigurationFiles();
 		try {
 			downloader = new DownloadLikes(this);
@@ -414,5 +416,13 @@ public class DownloadManager {
 
 	public void onDownloadsFinished() {
 		notifyObservers(DownloadAction.DOWNLOADS_FINISHED);
+	}
+
+	public void setDownloadIndex(Integer index) {
+		this.downloadIndex = index;
+	}
+	
+	public int getDownloadIndex() {
+		return this.downloadIndex;
 	}
 }
