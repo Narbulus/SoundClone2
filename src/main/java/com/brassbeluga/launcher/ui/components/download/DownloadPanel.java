@@ -350,43 +350,46 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 			@Override 
 			public String doInBackground() {
 				
-				trackList.removeAll();
-				
-				for (TrackInfo t : dm.getDownloadedTracks()) {
-					JLabel label = new JLabel(t.getTitle());
-					label.setBorder(trackBorder);
-					label.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 16));
-					label.setForeground(LauncherFrame.COLOR_GREY_TEXT);
-					trackList.add(label);
-				}
-				
-				// Rebuild the remaining tracks queued for download
-				if (dm.getDownloadsSize() > 0) {
-					TrackInfo curTrack = dm.getTracks().get(0);
-					trackProgress.setText(curTrack.getTitle());
-					trackProgress.setProgress(0);
-					trackList.add(trackProgress);
-					for (int i = 1; i < dm.getTracks().size(); i++) {
-						JLabel label = new JLabel(dm.getTracks().get(i).getTitle());
+				synchronized(trackList) {
+					trackList.removeAll();
+					
+					for (TrackInfo t : dm.getDownloadedTracks()) {
+						JLabel label = new JLabel(t.getTitle());
 						label.setBorder(trackBorder);
 						label.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 16));
-						label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+						label.setForeground(LauncherFrame.COLOR_GREY_TEXT);
 						trackList.add(label);
 					}
+					
+					// Rebuild the remaining tracks queued for download
+					if (dm.getDownloadsSize() > 0) {
+						TrackInfo curTrack = dm.getTracks().get(0);
+						trackProgress.setText(curTrack.getTitle());
+						trackProgress.setProgress(0);
+						trackList.add(trackProgress);
+						for (int i = 1; i < dm.getTracks().size(); i++) {
+							JLabel label = new JLabel(dm.getTracks().get(i).getTitle());
+							label.setBorder(trackBorder);
+							label.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 16));
+							label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+							trackList.add(label);
+						}
+					}
+					
+					
+					if (dm.downloadInProgress()) {
+						overallInfo.setText(dm.getTracks().get(0).getTitle());
+					}else{
+						overallInfo.setText(dm.getDownloadPath());
+					}
+					progressInfo.setText("Downloading track " + (dm.getDownloadedTracks().size() + 1) + " of " + 
+							(dm.getDownloadsSize() + dm.getDownloadedTracks().size()));
+					
+					//trackProgress.scrollRectToVisible(trackProgress.getBounds());
+			
+					trackList.add(Box.createGlue());
 				}
 				
-				
-				if (dm.downloadInProgress()) {
-					overallInfo.setText(dm.getTracks().get(0).getTitle());
-				}else{
-					overallInfo.setText(dm.getDownloadPath());
-				}
-				progressInfo.setText("Downloading track " + (dm.getDownloadedTracks().size() + 1) + " of " + 
-						(dm.getDownloadsSize() + dm.getDownloadedTracks().size()));
-				
-				//trackProgress.scrollRectToVisible(trackProgress.getBounds());
-		
-				trackList.add(Box.createGlue());
 				return "Information";
 			}
 			
