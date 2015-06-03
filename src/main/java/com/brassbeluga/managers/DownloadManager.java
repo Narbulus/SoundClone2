@@ -205,6 +205,15 @@ public class DownloadManager {
 		return likesWorker != null;
 	}
 	
+	public void updateSongDownloadProgress(Integer progress) {
+		songProgress = progress;
+		notifyObservers(DownloadAction.SONG_PROGRESS);
+	}
+	
+	public int getSongProgress() {
+		return songProgress;
+	}
+
 	/**
 	 * Begin the download.
 	 */
@@ -214,15 +223,6 @@ public class DownloadManager {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-	
-	public void updateSongDownloadProgress(Integer progress) {
-		songProgress = progress;
-		notifyObservers(DownloadAction.SONG_PROGRESS);
-	}
-	
-	public int getSongProgress() {
-		return songProgress;
 	}
 
 	public void stopDownload() {
@@ -236,7 +236,7 @@ public class DownloadManager {
 		return Collections.unmodifiableList(tracks);
 	}
 
-	public void setDownloadPath(String downloadPath) {
+	public void updateDownloadPath(String downloadPath) {
 		currentConfig.setDownloadPath(downloadPath);
 		try {
 			updateDownloadDirectory();
@@ -324,7 +324,7 @@ public class DownloadManager {
 	 * @throws InvalidDataException
 	 * @throws IOException
 	 */
-	public void updateDownloadDirectory() throws UnsupportedTagException, InvalidDataException, IOException {
+	public void updateDownloadDirectory() throws Exception {
 		File folder = new File(getDownloadPath());
 		File[] files = folder.listFiles();
 		for (int i=0; i < files.length; i++) {

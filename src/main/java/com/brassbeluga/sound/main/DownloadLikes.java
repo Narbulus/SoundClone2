@@ -148,6 +148,8 @@ public class DownloadLikes {
 							t.setDownload(true);
 					}
 					likes.addAll(newLikes);
+					
+					// Make sure thread wasn't cancelled since we last checked.s
 					if (!isCancelled()) {
 						dm.addNewLikes(likes);
 					}
@@ -190,7 +192,7 @@ public class DownloadLikes {
 				Gson gson = new Gson();
 				TrackStreams tStream;
 				int downloads = 0;
-				while (dm.getDownloadsSize() > 0) {
+				while (dm.getDownloadsSize() > 0 && !isCancelled()) {
 					TrackInfo t = dm.getTracks().get(0);
 					publish(t);
 					tStream = gson.fromJson(
@@ -257,12 +259,12 @@ public class DownloadLikes {
 								// Update the loading bar progress
 								dm.updateSongDownloadProgress(prog);
 								
-								/*if (!downloadThreadRunning) {
+								if (isCancelled()) {
 									fos.close();
 									File f = new File(tempPath);
 									f.delete();
 									return "";
-								}*/
+								}
 									
 
 							} while (read > 0);
