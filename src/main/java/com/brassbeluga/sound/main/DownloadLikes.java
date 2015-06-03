@@ -2,14 +2,17 @@ package com.brassbeluga.sound.main;
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -39,11 +42,7 @@ import com.mpatric.mp3agic.Mp3File;
 public class DownloadLikes {
 
 	private ID3v2 template;
-	private SoundLoader load;
 
-	private String tempDir;
-	private String defaultDownload;
-	private boolean cancelDownload;
 	private DownloadManager dm;
 
 	private static final int TRACK_INFO_REQUEST_SIZE = 50;
@@ -51,30 +50,6 @@ public class DownloadLikes {
 	
 	public DownloadLikes(DownloadManager dm) throws Exception {
 		this.dm = dm;
-		
-		// Create download locations if nonexistent
-		String workingDirectory;
-		String OS = (System.getProperty("os.name")).toUpperCase();
-		if (OS.contains("WIN")) {
-			workingDirectory = System.getenv("AppData");
-		} else if (OS.contains("MAC")) {
-			workingDirectory = System.getProperty("user.home");
-			workingDirectory += "/Library/Application Support";
-		} else if (OS.contains("NIX") || OS.contains("NUX") || OS.contains("AIX")) {
-			workingDirectory = System.getProperty("user.home");
-			workingDirectory += "/.config/";
-		} else {
-			System.out.println("Warning: OS not recognized!");
-			workingDirectory = "";
-		}
-
-		tempDir = workingDirectory + "/SoundClone";
-
-		File tempFile = new File(tempDir);
-		tempFile.mkdirs();
-
-		defaultDownload = System.getProperty("user.home");
-
 
 		// Load the template id3 tag from resource file
 		InputStream is = ResourceManager.getResourceAsStream("tagdata");
@@ -92,13 +67,28 @@ public class DownloadLikes {
 		template = new ID3v22Tag(buffer.toByteArray());
 	}
 	
-	public SwingWorker<List<TrackInfo>, List<TrackInfo>> updateUserLikes(final Configuration currentConfig, final String clientID) throws JsonSyntaxException  {
-		try {
-			load = new SoundLoader(currentConfig, clientID);
-		} catch (IOException e) {
-			e.printStackTrace();
+	public String getResponse(String urlPath) throws Exception {
+		URL url = new URL(urlPath);
+		HttpURLConnection connect = (HttpURLConnection) url.openConnection();
+		connect.setDoOutput(true);
+		connect.setDoInput(true);
+		
+		connect.setRequestMethod("GET");
+		int responseCode = connect.getResponseCode();
+		
+		String line;
+		StringBuffer buffer = new StringBuffer();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(connect.getInputStream()));
+	
+		while ((line = reader.readLine()) != null) {
+			buffer.append(line);
 		}
-
+		
+		return buffer.toString();
+				
+	}
+	
+	public SwingWorker<List<TrackInfo>, List<TrackInfo>> updateUserLikes(final Configuration currentConfig, final String clientID) throws JsonSyntaxException  {
 		// Dispatch worker to download songs in background and update status
 		SwingWorker<List<TrackInfo>, List<TrackInfo>> worker = new SwingWorker<List<TrackInfo>, List<TrackInfo>>() {
 
@@ -107,8 +97,7 @@ public class DownloadLikes {
 					throws JsonSyntaxException, Exception {
 				String redirect = "";
 				try {
-					redirect = load
-							.getResponse("http://api.soundcloud.com/resolve.json?url=http://soundcloud.com/"
+					redirect = getResponse("http://api.soundcloud.com/resolve.json?url=http://soundcloud.com/"
 									+ currentConfig.getUsername() + "&client_id=" + clientID);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -116,19 +105,10 @@ public class DownloadLikes {
 
 				RedirectResponse response = new Gson().fromJson(redirect,
 						RedirectResponse.class);
-				UserInfo info = new Gson().fromJson(
-						load.getResponse(response.getLocation()),
+				UserInfo info = new Gson().fromJson(getResponse(response.getLocation()),
 						UserInfo.class);
-
-				Image image = null;
-				try {
-					URL url = new URL(info.getAvatarURL());
-					image = ImageIO.read(url);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-
-				//panel.changeIcon(image);
+				
+				currentConfig.setUserIcon(info.getAvatarURL());
 
 				Type listType = new TypeToken<ArrayList<TrackInfo>>() {
 				}.getType();
@@ -136,8 +116,7 @@ public class DownloadLikes {
 				List<TrackInfo> likes = new ArrayList<TrackInfo>();
 				int i = 0;
 				while (i < info.getFavoritesCount() && !isCancelled()) {
-					String partLikes = load
-							.getResponse("http://api.soundcloud.com/users/"
+					String partLikes = getResponse("http://api.soundcloud.com/users/"
 									+ info.getId()
 									+ "/favorites.json?client_id=" + clientID
 									+ "&offset=" + i);
@@ -179,23 +158,23 @@ public class DownloadLikes {
 	 * @throws Exception
 	 * @throws JsonSyntaxException
 	 */
-	public SwingWorker<String, TrackInfo> downloadTracks(final String appDataPath, 
+	public SwingWorker<Void, TrackInfo> downloadTracks(final String appDataPath, 
 			final String clientID, final List<TrackInfo> tracks)
 			throws JsonSyntaxException, Exception {
 		// gui.updateStatus("Initializing downloads",
 		// SoundCloneGUI.StatusType.PROCESS);
 		// Dispatch worker to download songs in background and update status
-		SwingWorker<String, TrackInfo> worker = new SwingWorker<String, TrackInfo>() {
+		SwingWorker<Void, TrackInfo> worker = new SwingWorker<Void, TrackInfo>() {
 
 			@Override
-			protected String doInBackground() throws Exception {
+			protected Void doInBackground() throws Exception {
 				Gson gson = new Gson();
 				TrackStreams tStream;
 				int downloads = 0;
 				while (dm.getDownloadsSize() > 0 && !isCancelled()) {
 					TrackInfo t = dm.getTracks().get(0);
 					tStream = gson.fromJson(
-									load.getResponse("https://api.soundcloud.com/i1/tracks/"
+									getResponse("https://api.soundcloud.com/i1/tracks/"
 											+ t.getId()
 											+ "/streams?client_id="
 											+ clientID), TrackStreams.class);
@@ -206,7 +185,7 @@ public class DownloadLikes {
 							// image
 							UserInfo uploader = gson
 									.fromJson(
-											load.getResponse("https://api.soundcloud.com/users/"
+											getResponse("https://api.soundcloud.com/users/"
 													+ t.getUserId()
 													+ ".json?client_id="
 													+ clientID),
@@ -219,8 +198,7 @@ public class DownloadLikes {
 							
 							// Open the url connection
 							URL website = new URL(mediaPath);
-							HttpURLConnection connect = (HttpURLConnection) website
-									.openConnection();
+							HttpURLConnection connect = (HttpURLConnection) website.openConnection();
 							connect.setRequestMethod("HEAD");
 							
 							// Get the total length of the file
@@ -262,7 +240,7 @@ public class DownloadLikes {
 									fos.close();
 									File f = new File(tempPath);
 									f.delete();
-									return "";
+									return null;
 								}
 									
 
@@ -288,29 +266,17 @@ public class DownloadLikes {
 								}
 							}
 
-							// Download artwork from URL if available
-							if (t.getArtworkURL() != null) {
-								URL artworkURL = new URL(t
-										.getArtworkURL().replace("large",
-												"t500x500"));
+							BufferedImage image = downloadArtwork(t.getArtworkURL().replace("large", "t500x500"));
+							// Write the image bytes to the mp3 tag
+							ByteArrayOutputStream out = new ByteArrayOutputStream();
+							ImageIO.write(image, "jpg", out);
+							out.flush();
+							byte[] bytes = out.toByteArray();
+							out.close();
 
-								BufferedImage image = ImageIO
-										.read(artworkURL.openStream());
-								
-								// Write the image bytes to the mp3 tag
-								ByteArrayOutputStream out = new ByteArrayOutputStream();
-								ImageIO.write(image, "jpg", out);
-								out.flush();
-								byte[] bytes = out.toByteArray();
-								out.close();
-
-								ID3Wrapper newId3Wrapper = new ID3Wrapper(
-										new ID3v1Tag(), new ID3v23Tag());
-								newId3Wrapper.setAlbumImage(bytes,
-										"image/jpeg");
-								id3v2Tag.setAlbumImage(bytes, 2,
-										"image/jpeg");
-							}
+							ID3Wrapper newId3Wrapper = new ID3Wrapper(new ID3v1Tag(), new ID3v23Tag());
+							newId3Wrapper.setAlbumImage(bytes, "image/jpeg");
+							id3v2Tag.setAlbumImage(bytes, 2, "image/jpeg");
 							
 							// Embed track id for directory scanning
 							id3v2Tag.setPaymentUrl("" + t.getId());
@@ -326,11 +292,7 @@ public class DownloadLikes {
 					}
 				}
 
-				// update the current configuration's history
-				load.closeHistory();
-
-				//updateConfigFile();
-				return "";
+				return null;
 			}
 
 			@Override
@@ -355,4 +317,19 @@ public class DownloadLikes {
 				+ track + ".mp3";
 		return finalPath;
 	}	
+
+	public BufferedImage downloadArtwork(String url) {
+		// Download artwork from URL if available
+		if (url != null) {
+			URL artworkURL;
+			try {
+				artworkURL = new URL(url);
+				BufferedImage image = ImageIO.read(artworkURL.openStream());
+				return image;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
 }

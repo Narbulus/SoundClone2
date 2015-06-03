@@ -53,6 +53,7 @@ import com.brassbeluga.launcher.ui.components.songs.TracksListPanel;
 import com.brassbeluga.launcher.ui.controls.DownloadHeaderTab;
 import com.brassbeluga.launcher.ui.controls.HeaderTab;
 import com.brassbeluga.managers.DownloadManager;
+import com.brassbeluga.observer.DownloadsObserver;
 import com.brassbeluga.sound.gson.TrackInfo;
 import com.google.gson.JsonSyntaxException;
 
@@ -283,6 +284,7 @@ public class LauncherFrame extends DraggableFrame {
 		tracksPanel = new TracksListPanel(this, this.dm);
 		dm.addObserver(tracksPanel);
 		songsInfoPanel = new SongsInfoPanel(this, this.dm);
+		dm.addObserver((DownloadsObserver) songsInfoPanel);
 		infoSwap.add(songsHost, TAB_SONGS);
 
 		songsHost.setLayout(new BorderLayout());

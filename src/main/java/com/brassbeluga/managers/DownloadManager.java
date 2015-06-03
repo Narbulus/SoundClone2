@@ -1,23 +1,26 @@
 package com.brassbeluga.managers;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.SwingWorker;
 
 import com.brassbeluga.launcher.resources.ResourceManager;
-import com.brassbeluga.launcher.ui.components.download.DownloadPanel;
-import com.brassbeluga.launcher.ui.components.songs.SongsInfoPanel;
-import com.brassbeluga.launcher.ui.components.songs.TracksListPanel;
 import com.brassbeluga.observer.DownloadsObserver;
 import com.brassbeluga.sound.gson.Configuration;
 import com.brassbeluga.sound.gson.TrackInfo;
@@ -52,7 +55,7 @@ public class DownloadManager {
 	
 	private Integer songProgress;
 	
-	SwingWorker<String, TrackInfo> downloadsWorker;
+	SwingWorker<Void, TrackInfo> downloadsWorker;
 	SwingWorker<List<TrackInfo>, List<TrackInfo>> likesWorker;
 	
 	public DownloadManager() {
@@ -142,6 +145,15 @@ public class DownloadManager {
 	
 	public void addAllTracks(List<TrackInfo> trackInfos) {
 		synchronized(tracks) {
+			tracks.addAll(trackInfos);
+		}
+		downloadedTracks.clear();
+		notifyObservers(DownloadAction.TRACKS_CHANGED);
+	}
+	
+	public void replaceAllTracks(List<TrackInfo> trackInfos) {
+		synchronized(tracks) {
+			tracks.clear();
 			tracks.addAll(trackInfos);
 		}
 		downloadedTracks.clear();
@@ -402,6 +414,12 @@ public class DownloadManager {
 		return null;
 	}
 
+	public String getAvatarURL() {
+		if (currentConfig != null)
+			return currentConfig.getUserIcon();
+		return null;
+	}
+	
 	public String getDownloadPath() {
 		if (currentConfig != null)
 			return currentConfig.getDownloadPath();
@@ -449,6 +467,21 @@ public class DownloadManager {
 
 	public void trackDownloaded(TrackInfo trackInfo) {
 		downloadedTracks.add(trackInfo);
+	}
+	
+	public void downloadLabelIcon(final String url, final JLabel label) {
+		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+			
+			@Override
+			protected Void doInBackground() {
+				BufferedImage image = downloader.downloadArtwork(url);
+				label.setIcon(new ImageIcon(image));
+				label.repaint();
+				return null;
+			}
+
+		};
+		worker.execute();
 	}
 	
 	public List<TrackInfo> getDownloadedTracks() {
