@@ -14,6 +14,12 @@ import com.brassbeluga.observer.DownloadsObserver;
 import com.brassbeluga.sound.gson.TrackInfo;
 import com.brassbeluga.sound.main.DownloadLikes;
 
+/**
+ * Manages all the work from retrieving tracks from soundcloud to
+ * storing them on the user's computer.
+ * 
+ * @author Cameron, Spencer
+ */
 public class DownloadManager {
 	// List of tracks to be downloaded.
 	private List<TrackInfo> tracks;
@@ -27,8 +33,10 @@ public class DownloadManager {
 	// Observers of download information to be notified on modification.
 	private List<DownloadsObserver> observers;
 	
+	// Interface with soundcloud and retrieve tracks.
 	private DownloadLikes downloader;
 	
+	// Tie image retrieval jobs to their appropriate labels.
 	private HashMap<JLabel, SwingWorker<Void,Void>> imageLoads;
 	
 	// Configuration info.
@@ -233,6 +241,7 @@ public class DownloadManager {
 		notifyObservers(DownloadAction.DOWNLOAD_PATH_CHANGED);
 	}
 
+
 	/**
 	 * Called when the user either enters or selects a new user to be loaded.
 	 * Loads the tracklist for the user
@@ -304,6 +313,44 @@ public class DownloadManager {
 	 * @param label label to apply icon to
 	 */
 	public void downloadLabelIcon(final String url, final JLabel label) {
+		downloadLabelIcon(url, label, null);
+	}
+	
+	/**
+	 * Downloads an icon for a given label.
+	 * 
+	 * @param url URL to retrieve icon from
+	 * @param replaceSize new size
+	 * @param label label to apply icon to
+	 */
+	public void downloadLabelIcon(TrackInfo t, String replaceSize, final JLabel label) {
+		if (t.getArtworkURL() != null)
+			downloadLabelIcon(t.getArtworkURL().replace("-large", replaceSize), label, null);
+	}
+	
+	/**
+	 * Downloads an icon for a given label.
+	 * 
+	 * @param url URL to retrieve icon from
+	 * @param replaceSize new size
+	 * @param label label to apply icon to
+	 * @param alt Image to be used if artwork cannot be retrieved.
+	 */
+	public void downloadLabelIcon(TrackInfo t, String replaceSize, final JLabel label, final ImageIcon alt) {
+		if (t.getArtworkURL() != null)
+			downloadLabelIcon(t.getArtworkURL().replace("-large", replaceSize), label, alt);
+		else
+			label.setIcon(alt);
+	}
+	
+	/**
+	 * Downloads an icon for a given label.
+	 * 
+	 * @param url URL to retrieve icon from
+	 * @param label label to apply icon to
+	 * @param alt Image to be used if artwork cannot be retrieved.
+	 */
+	public void downloadLabelIcon(final String url, final JLabel label, final ImageIcon alt) {
 		if (imageLoads.containsKey(label)) {
 			imageLoads.get(label).cancel(true);
 			imageLoads.remove(label);
@@ -315,6 +362,9 @@ public class DownloadManager {
 				BufferedImage image = downloader.downloadArtwork(url);
 				if (image != null) {
 					label.setIcon(new ImageIcon(image));
+					label.repaint();
+				}else if (alt != null) {
+					label.setIcon(alt);
 					label.repaint();
 				}
 				return null;

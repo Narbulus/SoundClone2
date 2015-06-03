@@ -184,10 +184,8 @@ public class SongsInfoPanel extends TintablePanel implements DownloadsObserver {
 				trackName.setText(title);
 				trackNameOverflow.setText("");
 			}
-			if (track.getArtworkURL() != null)
-				dm.downloadLabelIcon(track.getArtworkURL().replace("large", "t300x300"), trackArt);
-			else
-				trackArt.setIcon(ResourceManager.getIcon("default_track"));
+			dm.downloadLabelIcon(track, "-t300x300", trackArt, 
+					ResourceManager.getIcon("default_track.png"));
 		}
 	}
 
@@ -199,7 +197,7 @@ public class SongsInfoPanel extends TintablePanel implements DownloadsObserver {
 	@Override
 	public void update(DownloadManager dm, DownloadAction action) {
 		if (action == DownloadAction.USERNAME_CHANGED) {
-			dm.downloadLabelIcon(dm.getConfig().getAvatarURL(), userIcon);
+			dm.downloadLabelIcon(dm.getConfig().getAvatarURL(), userIcon, ResourceManager.getIcon("default_user.png"));
 		}
 	}
 	

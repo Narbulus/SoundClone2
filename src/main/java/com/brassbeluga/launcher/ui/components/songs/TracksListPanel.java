@@ -156,8 +156,8 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 				EventQueue.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						for (TrackEntry t : entries) {
-							t.setDownloadFlag(false);
+						for (int i = 0; i < entries.size(); i++) {
+							entries.get(i).setDownloadFlag(false);
 						}
 						dm.removeAllTracks();
 					}

@@ -414,7 +414,10 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 		button.setText("START");
 		setBrowseInfo();
 		
-		dm.removeAllTracks();
+		if (dm.getDownloadsSize() > 0) {
+			rebuildUI();
+		}
+		
 			
 		progress.setValue(0);
 		
@@ -446,8 +449,12 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 	@Override
 	public void update(DownloadManager dm, DownloadAction action) {
 		if (action == DownloadAction.TRACKS_CHANGED) {
-			if (dm.getDownloadsSize() > 0)
-				dm.downloadLabelIcon(dm.getTracks().get(0).getArtworkURL(), trackIcon);
+			if (dm.getDownloadsSize() > 0) {
+				dm.downloadLabelIcon(dm.getTracks().get(0), "-large", trackIcon, 
+						ResourceManager.getIcon("default_track_small.png"));
+			}else{
+				trackIcon.setIcon(ResourceManager.getIcon("default_track_small.png"));
+			}
 			rebuildUI();
 		}else if (action == DownloadAction.SONG_PROGRESS) {
 			trackProgress.setProgress(dm.getSongProgress());
