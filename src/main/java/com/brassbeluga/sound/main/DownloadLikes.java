@@ -266,7 +266,7 @@ public class DownloadLikes {
 								}
 							}
 
-							BufferedImage image = downloadArtwork(t.getArtworkURL().replace("large", "t500x500"));
+							BufferedImage image = downloadArtwork(t.getArtworkURL().replace("-large", "-t500x500"));
 							// Write the image bytes to the mp3 tag
 							ByteArrayOutputStream out = new ByteArrayOutputStream();
 							ImageIO.write(image, "jpg", out);
