@@ -248,7 +248,7 @@ public class DownloadManager {
 
 	public void stopDownload() {
 		downloadsWorker.cancel(true);
-		//notifyObservers(DownloadAction.DOWNLOADS_FINISHED);
+		notifyObservers(DownloadAction.DOWNLOADS_FINISHED);
 	}
 	
 	/**
