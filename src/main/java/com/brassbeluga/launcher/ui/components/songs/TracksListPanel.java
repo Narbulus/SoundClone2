@@ -200,12 +200,6 @@ public class TracksListPanel extends TintablePanel {
 		repaint();
 	}
 
-	public void selectAll() {
-		for (TrackEntry t : entries) {
-
-		}
-	}
-
 	public void addNewTracks(List<TrackInfo> newTracks) {
 		if (trackList.getComponentCount() > 0)
 			// Remove glue

@@ -48,72 +48,15 @@ import com.mpatric.mp3agic.UnsupportedTagException;
 
 public class DownloadLikes {
 
-	private String clientID;
-	private int maxDuration;
-	private ArrayList<Configuration> configs;
-	private ArrayList<TrackInfo> likes;
-	private Set<Integer> downloaded;
-	private Configuration currentConfig;
 	private ID3v2 template;
 	private SoundLoader load;
 	private Boolean threadRunning;
-	private String tempDir;
-	private String defaultDownload;
-	private boolean cancelDownload;
 
 	private static final int TRACK_INFO_REQUEST_SIZE = 50;
 	protected static final long CHUNK_SIZE = 1000;
 
-	public DownloadLikes() throws Exception {
-		// Create download locations if nonexistent
-		String workingDirectory;
-		String OS = (System.getProperty("os.name")).toUpperCase();
-		if (OS.contains("WIN")) {
-			workingDirectory = System.getenv("AppData");
-		} else if (OS.contains("MAC")) {
-			workingDirectory = System.getProperty("user.home");
-			workingDirectory += "/Library/Application Support";
-		} else if (OS.contains("NIX") || OS.contains("NUX") || OS.contains("AIX")) {
-			workingDirectory = System.getProperty("user.home");
-			workingDirectory += "/.config/";
-		} else {
-			System.out.println("Warning: OS not recognized!");
-			workingDirectory = "";
-		}
-
-		tempDir = workingDirectory + "/SoundClone";
-
-		File tempFile = new File(tempDir);
-		tempFile.mkdirs();
-
-		defaultDownload = System.getProperty("user.home");
-
+	public DownloadLikes() throws Exception {	
 		threadRunning = false;
-		cancelDownload = false;
-		BufferedReader reader = new BufferedReader(new InputStreamReader(
-				ResourceManager.getResourceAsStream("config")));
-		File oldConfig = new File(tempDir + "/config");
-		Scanner config;
-		if (oldConfig.exists())
-			config = new Scanner(oldConfig);
-		else
-			config = new Scanner(reader);
-		clientID = config.nextLine();
-		maxDuration = Integer.parseInt(config.nextLine());
-
-		configs = new ArrayList<Configuration>();
-		currentConfig = null;
-		downloaded = new HashSet<Integer>();
-
-		// Load past configurations from config file's json
-		while (config.hasNext()) {
-			String nextConfig = config.nextLine();
-			Configuration newConfig = new Gson().fromJson(nextConfig,
-					Configuration.class);
-			configs.add(newConfig);
-		}
-
-		config.close();
 
 		// Load the template id3 tag from resource file
 		InputStream is = ResourceManager.getResourceAsStream("tagdata");
@@ -129,66 +72,9 @@ public class DownloadLikes {
 		buffer.flush();
 
 		template = new ID3v22Tag(buffer.toByteArray());
-
-	}
-
-	/**
-	 * Called when the user either enters or selects a new user to be loaded.
-	 * Loads the tracklist for the user
-	 * 
-	 * @param user
-	 *            The new user's username
-	 * @param gui
-	 * @throws Exception
-	 * @throws JsonSyntaxException
-	 * @return Returns a new status for the program
-	 */
-	public void updateUser(final String user) throws JsonSyntaxException,
-			Exception {
-		for (Configuration c : configs) {
-			if (c.getUsername().equals(user))
-				currentConfig = c;
-		}
-
-		if (currentConfig == null || user != currentConfig.getUsername()) {
-			currentConfig = new Configuration(user, defaultDownload, null);
-			configs.add(currentConfig);
-		}
-		
-		if (currentConfig.getDownloadPath() != null)
-			updateDownloadDirectory(currentConfig.getDownloadPath());
-
 	}
 	
-	/**
-	 * Updates the current configuration to the new download directory
-	 * and scans the directory for existing mp3's. If they were downloaded
-	 * by SoundClone, the SoundCloud track id is parsed from the mp3 tag
-	 * @param downloadPath The new download path
-	 * @throws UnsupportedTagException
-	 * @throws InvalidDataException
-	 * @throws IOException
-	 */
-	public void updateDownloadDirectory(String downloadPath) throws UnsupportedTagException, InvalidDataException, IOException {
-		currentConfig.setDownloadPath(downloadPath);
-		
-		File folder = new File(downloadPath);
-		File[] files = folder.listFiles();
-		for (int i=0; i < files.length; i++) {
-			if (files[i].isFile()) {
-				File f = files[i];
-				if (f.getName().contains(".mp3")) {
-					Mp3File mp3file = new Mp3File(f.getAbsolutePath());
-					ID3v2 tag = mp3file.getId3v2Tag();
-					if (tag.getPaymentUrl() != null)
-						downloaded.add(Integer.parseInt(tag.getPaymentUrl()));
-				}
-			}
-		}
-	}
-	
-	public void updateUserLikes(final String user, final SongsInfoPanel panel,
-			final TracksListPanel trackPanel) throws JsonSyntaxException  {
+	public void updateUserLikes(final Configuration currentConfig, final String clientID) throws JsonSyntaxException  {
 		try {
 			load = new SoundLoader(currentConfig, clientID);
 		} catch (IOException e) {
@@ -205,7 +91,7 @@ public class DownloadLikes {
 				try {
 					redirect = load
 							.getResponse("http://api.soundcloud.com/resolve.json?url=http://soundcloud.com/"
-									+ user + "&client_id=" + clientID);
+									+ currentConfig.getUsername() + "&client_id=" + clientID);
 				} catch (Exception e) {
 					threadRunning = false;
 					e.printStackTrace();
@@ -277,11 +163,10 @@ public class DownloadLikes {
 	 * @throws JsonSyntaxException
 	 */
 	public void downloadTracks(String user, final String downloadPath,
-			final List<TrackInfo> tracks, final DownloadPanel downloadPanel)
+			final List<TrackInfo> tracks)
 			throws JsonSyntaxException, Exception {
 		
 		currentConfig.setDownloadPath(downloadPath);
-		downloadPanel.setCurrentUser(getCurrentUser());
 		// gui.updateStatus("Initializing downloads",
 		// SoundCloneGUI.StatusType.PROCESS);
 		// Dispatch worker to download songs in background and update status
@@ -292,7 +177,6 @@ public class DownloadLikes {
 				Gson gson = new Gson();
 				TrackStreams tStream;
 				int downloads = 0;
-				downloadPanel.downloadSize = 0;
 				for (TrackInfo t : tracks) {
 					if (threadRunning) {
 						publish(t);
@@ -327,7 +211,7 @@ public class DownloadLikes {
 								
 								// Get the total length of the file
 								long total = connect.getContentLengthLong();
-								downloadPanel.downloadSize += connect.getContentLengthLong();
+								//downloadPanel.downloadSize += connect.getContentLengthLong();
 								ReadableByteChannel rbc = null;
 								rbc = Channels.newChannel(website.openStream());
 								
@@ -426,25 +310,23 @@ public class DownloadLikes {
 				// update the current configuration's history
 				load.closeHistory();
 
-				updateConfigFile();
+				//updateConfigFile();
 
 				return downloads + " songs downloaded successfully!";
 			}
 
 			@Override
 			protected void done() {
-				downloadPanel.onDownloadFinished();
 				threadRunning = false;
 			}
 
 			@Override
 			protected void process(List<TrackInfo> chunks) {
-				downloadPanel.setCurrentTrack(chunks.get(chunks.size() - 1));
+				//downloadPanel.setCurrentTrack(chunks.get(chunks.size() - 1));
 			}
 		};
 
 		threadRunning = true;
-		worker.addPropertyChangeListener(downloadPanel);
 		worker.execute();
 	}
 	
@@ -457,61 +339,6 @@ public class DownloadLikes {
 		return finalPath;
 	}
 
-	/**
-	 * Checks if the given path conflicts with the download path of the current
-	 * configuration
-	 * 
-	 * @param downloadPath
-	 *            The new download path
-	 * @return true if the downloadPath differs from the configuration's path
-	 */
-	public boolean isNewPath(String downloadPath) {
-		// If a new path is specified, clear history on config so new files are
-		// downloaded
-		return !downloadPath.equals(currentConfig.getDownloadPath())
-				&& load.getHistoryLength() > 0;
-	}
-
-	/**
-	 * Returns the names of the users for which a configuration exists from
-	 * prior runs
-	 * 
-	 * @return
-	 */
-	public String[] getConfigNames() {
-		String[] names = new String[configs.size()];
-		int i = 0;
-		for (Configuration c : configs) {
-			names[i] = c.getUsername();
-			i++;
-		}
-		return names;
-	}
-
-	/**
-	 * Returns the username of the active selected configuration
-	 * 
-	 * @return
-	 */
-	public String getCurrentUser() {
-		if (currentConfig != null)
-			return currentConfig.getUsername();
-		return null;
-	}
-	
-	public String getLastUser() {
-		if (configs.size() > 0){
-			return configs.get(0).getUsername();
-		}
-		return null;
-	}
-
-	public String getDownloadPath() {
-		if (currentConfig != null)
-			return currentConfig.getDownloadPath();
-		return defaultDownload;
-	}
-
 	public Boolean isThreadRunning() {
 		return threadRunning;
 	}
@@ -520,32 +347,5 @@ public class DownloadLikes {
 		threadRunning = false;
 	}
 
-	public void toggleDownload(int index) {
-		likes.get(index).setDownload(!likes.get(index).getDownload());
-	}
-
-	private void updateConfigFile() throws FileNotFoundException {
-		// write the configurations to file
-		PrintStream output = new PrintStream(tempDir + "/config");
-
-		output.println(clientID);
-		output.println(maxDuration);
-
-		Gson gson = new Gson();
-		
-		for (Configuration c : configs) {
-			output.println(gson.toJson(c));
-		}
-
-		output.flush();
-		output.close();
-	}
-
-	public List<String> getPreviousUsers() {
-		List<String> users = new ArrayList<String>();
-		for (Configuration c : configs) {
-			users.add(c.getUsername());
-		}
-		return users;
-	}
+	
 }

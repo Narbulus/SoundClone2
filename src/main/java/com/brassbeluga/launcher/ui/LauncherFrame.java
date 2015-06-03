@@ -381,7 +381,7 @@ public class LauncherFrame extends DraggableFrame {
 
 	public String downloadButtonPressed(String path) throws Exception {
 		if (!dm.downloadInProgress() && dm.getDownloadsSize() > 0) {
-			dm.startDownload(downloadPanel);
+			dm.startDownload();
 			downloadPanel.updateInfo();
 			return "CANCEL";
 		} else {
