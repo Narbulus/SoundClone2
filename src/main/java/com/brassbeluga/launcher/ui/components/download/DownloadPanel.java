@@ -173,6 +173,7 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 					String path = browse.getCurrentDirectory().getAbsolutePath();
 					if (browse.getSelectedFile() != null)
 						path = browse.getSelectedFile().getAbsolutePath();
+					dm.updateDownloadPath(path);
 					
 					String buttonText = "";
 					if (!dm.downloadInProgress() && dm.getDownloadsSize() > 0) {
@@ -338,7 +339,7 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 		String downloadPath = browse.getCurrentDirectory().getAbsolutePath();
 		if (browse.getSelectedFile() != null) {
 			downloadPath = browse.getSelectedFile().getAbsolutePath();
-			dm.setDownloadPath(downloadPath);
+			dm.updateDownloadPath(downloadPath);
 		}
 		overallInfo.setText(downloadPath);
 	}
