@@ -54,8 +54,6 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 	private JLabel progressInfo;
 	private JLabel overallInfo;
 	
-	private List<String> downloadedTracks;
-	
 	private LabelProgressBar trackProgress;
 
 	private JPanel trackList;
@@ -79,7 +77,6 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 		this.dm = dm;
 		this.dp = this;
 		
-		downloadedTracks = new ArrayList<String>();
 		try {
 			
 			URL whatismyip = new URL("http://checkip.amazonaws.com");
@@ -450,6 +447,8 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 	@Override
 	public void update(DownloadManager dm, DownloadAction action) {
 		if (action == DownloadAction.TRACKS_CHANGED) {
+			if (dm.getDownloadsSize() > 0)
+				dm.downloadLabelIcon(dm.getTracks().get(0).getArtworkURL(), trackIcon);
 			rebuildUI();
 		}else if (action == DownloadAction.SONG_PROGRESS) {
 			trackProgress.setProgress(dm.getSongProgress());

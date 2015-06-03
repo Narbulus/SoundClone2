@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 
@@ -26,20 +27,22 @@ import net.technicpack.ui.controls.WatermarkTextField;
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.Autocomplete;
 import com.brassbeluga.launcher.ui.LauncherFrame;
+import com.brassbeluga.managers.DownloadAction;
 import com.brassbeluga.managers.DownloadManager;
+import com.brassbeluga.observer.DownloadsObserver;
 import com.brassbeluga.sound.gson.TrackInfo;
 
 @SuppressWarnings("serial")
-public class SongsInfoPanel extends TintablePanel {
+public class SongsInfoPanel extends TintablePanel implements DownloadsObserver {
 	
 	private JPanel userInfo;
 	private JPanel trackInfo;
 	private JTextField usernameField;
-	private JButton userIcon;
+	private JLabel userIcon;
 	private JLabel trackName;
 	private JLabel trackNameOverflow;
 	private JLabel trackArtist;
-	private JButton trackArt;
+	private JLabel trackArt;
 	
 	private TrackInfo selected;
 
@@ -115,10 +118,8 @@ public class SongsInfoPanel extends TintablePanel {
 		});
 
 		ImageIcon userDefaultImg = ResourceManager.getIcon("default_user.png");
-		userIcon = new JButton(userDefaultImg);
+		userIcon = new JLabel(userDefaultImg);
 		userIcon.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
-		userIcon.setContentAreaFilled(false);
-		userIcon.setFocusPainted(false);
 
 		JPanel usernameContainer = new JPanel();
 		usernameContainer.setBorder(BorderFactory.createEmptyBorder(40, 0, 50,
@@ -154,11 +155,9 @@ public class SongsInfoPanel extends TintablePanel {
 		trackInfo.add(Box.createVerticalGlue());
 		trackInfo.add(trackArtist);
 		trackInfo.add(Box.createVerticalGlue());
-		trackArt = new JButton(ResourceManager.getIcon("default_track.png"));
+		trackArt = new JLabel(ResourceManager.getIcon("default_track.png"));
 		trackArt.setBorder(BorderFactory.createEmptyBorder());
 		trackArt.setAlignmentX(CENTER_ALIGNMENT);
-		trackArt.setContentAreaFilled(false);
-		trackArt.setFocusPainted(false);
 		trackInfo.add(trackArt);
 
 	}
@@ -185,42 +184,20 @@ public class SongsInfoPanel extends TintablePanel {
 				trackName.setText(title);
 				trackNameOverflow.setText("");
 			}
-			SwingWorker<String, String> worker = new SwingWorker<String, String>() {
-	
-				@Override
-				protected String doInBackground() {
-					Image image = null;
-					try {
-						URL url = new URL(track.getArtworkURL().replace("-large",
-								"-t300x300"));
-						image = ImageIO.read(url);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					trackArt.setIcon(new ImageIcon(image));
-					return "";
-				}
-	
-				@Override
-				protected void done() {
-					revalidate();
-					repaint();
-				}
-			};
-			worker.execute();
+			dm.downloadLabelIcon(track.getArtworkURL().replace("large", "t300x300"), trackArt);
 		}
-	}
-
-	public void changeIcon(final Image icon) {
-		ImageIcon imgIcon = new ImageIcon(icon);
-		userIcon.setIcon(imgIcon);
-		revalidate();
-		repaint();
 	}
 
 	public void setUsername(String username) {
 		usernameField.setText(username);
 		dm.updateUser(username);
+	}
+
+	@Override
+	public void update(DownloadManager dm, DownloadAction action) {
+		if (action == DownloadAction.USERNAME_CHANGED) {
+			dm.downloadLabelIcon(dm.getAvatarURL(), userIcon);
+		}
 	}
 	
 }

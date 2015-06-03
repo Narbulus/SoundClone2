@@ -115,8 +115,7 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 							}
 						}
 						
-						dm.removeAllTracks();
-						dm.addAllTracks(selectTracks);
+						dm.replaceAllTracks(selectTracks);
 					}
 				});
 
@@ -224,19 +223,13 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 		revalidate();
 	}
 
-	public void onFinishedLoading() {
-		trackList.remove(0);
-
-		revalidate();
-		repaint();
-	}
-
 	@Override
 	public void update(DownloadManager dm, DownloadAction action) {
 		switch (action) {
 			case TRACKS_CHANGED:
 				List<TrackInfo> infos = dm.getTracks();
-				for (TrackEntry entry : entries) {
+				for (int i = 0 ; i < entries.size(); i++) {
+					TrackEntry entry = entries.get(i);
 					if (infos.contains(entry.getInfo())) {
 						entry.setDownloadFlag(true);
 					} else {
