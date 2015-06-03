@@ -22,11 +22,13 @@ import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.LauncherFrame;
+import com.brassbeluga.managers.DownloadAction;
 import com.brassbeluga.managers.DownloadManager;
+import com.brassbeluga.observer.DownloadsObserver;
 import com.brassbeluga.sound.gson.TrackInfo;
 
 @SuppressWarnings("serial")
-public class TracksListPanel extends TintablePanel {
+public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 
 	private JPanel trackList;
 	private JLabel loading;
@@ -234,6 +236,20 @@ public class TracksListPanel extends TintablePanel {
 
 		revalidate();
 		repaint();
+	}
+
+	@Override
+	public void update(DownloadManager dm, DownloadAction action) {
+		if (action == DownloadAction.TRACKS_CHANGED) {
+			List<TrackInfo> infos = dm.getTracks();
+			for (TrackEntry entry : entries) {
+				if (infos.contains(entry.getInfo())) {
+					entry.setDownloadFlag(true);
+				} else {
+					entry.setDownloadFlag(false);
+				}
+			}
+		}
 	}
 
 }

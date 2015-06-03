@@ -22,7 +22,7 @@ public class DownloadManager {
 		observers = new ArrayList<DownloadsObserver>();
 		downloadPath = null;
 		try {
-			downloader = new DownloadLikes();
+			downloader = new DownloadLikes(this);
 		} catch (Exception e) {
 			downloader = null;
 			e.printStackTrace();
@@ -103,8 +103,7 @@ public class DownloadManager {
 	 */
 	public void startDownload(DownloadPanel downloadPanel) {
 		try {
-			downloader.downloadTracks("narbulus",downloadPath,
-					tracks, downloadPanel);
+			downloader.downloadTracks("narbulus",downloadPath, downloadPanel);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

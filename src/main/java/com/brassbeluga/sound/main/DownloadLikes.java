@@ -29,6 +29,7 @@ import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.components.download.DownloadPanel;
 import com.brassbeluga.launcher.ui.components.songs.SongsInfoPanel;
 import com.brassbeluga.launcher.ui.components.songs.TracksListPanel;
+import com.brassbeluga.managers.DownloadManager;
 import com.brassbeluga.sound.gson.Configuration;
 import com.brassbeluga.sound.gson.RedirectResponse;
 import com.brassbeluga.sound.gson.TrackInfo;
@@ -60,11 +61,14 @@ public class DownloadLikes {
 	private String tempDir;
 	private String defaultDownload;
 	private boolean cancelDownload;
+	private DownloadManager dm;
 
 	private static final int TRACK_INFO_REQUEST_SIZE = 50;
 	protected static final long CHUNK_SIZE = 1000;
 
-	public DownloadLikes() throws Exception {
+	public DownloadLikes(DownloadManager dm) throws Exception {
+		this.dm = dm;
+		
 		// Create download locations if nonexistent
 		String workingDirectory;
 		String OS = (System.getProperty("os.name")).toUpperCase();
@@ -279,7 +283,7 @@ public class DownloadLikes {
 	 * @throws JsonSyntaxException
 	 */
 	public void downloadTracks(String user, final String downloadPath,
-			final List<TrackInfo> tracks, final DownloadPanel downloadPanel)
+			final DownloadPanel downloadPanel)
 			throws JsonSyntaxException, Exception {
 		
 		currentConfig.setDownloadPath(downloadPath);
@@ -295,7 +299,8 @@ public class DownloadLikes {
 				TrackStreams tStream;
 				int downloads = 0;
 				downloadPanel.downloadSize = 0;
-				for (TrackInfo t : tracks) {
+				while (dm.getDownloadsSize() > 0) {
+					TrackInfo t = dm.getTracks().get(0);
 					if (threadRunning) {
 						publish(t);
 						tStream = gson.fromJson(
@@ -423,14 +428,14 @@ public class DownloadLikes {
 							}
 						}
 					}
+					dm.removeTrack(t);
 				}
 
 				// update the current configuration's history
 				load.closeHistory();
 
 				updateConfigFile();
-
-				return downloads + " songs downloaded successfully!";
+				return "";
 			}
 
 			@Override

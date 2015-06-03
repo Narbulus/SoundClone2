@@ -291,6 +291,7 @@ public class LauncherFrame extends DraggableFrame {
 
 		JPanel songsHost = new JPanel();
 		tracksPanel = new TracksListPanel(this, this.dm);
+		dm.addObserver(tracksPanel);
 		songsInfoPanel = new SongsInfoPanel(this, this.dm);
 		infoSwap.add(songsHost, TAB_SONGS);
 
