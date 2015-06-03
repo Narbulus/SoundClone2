@@ -463,8 +463,10 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener, Dow
 
 	@Override
 	public void update(DownloadManager dm, DownloadAction action) {
-		rebuildUI();
-		progressInfo.setText(dm.getDownloadsSize() + " tracks ready to download");
+		if (action == DownloadAction.TRACKS_CHANGED) {
+			rebuildUI();
+			progressInfo.setText(dm.getDownloadsSize() + " tracks ready to download");
+		}
 	}
 
 }
