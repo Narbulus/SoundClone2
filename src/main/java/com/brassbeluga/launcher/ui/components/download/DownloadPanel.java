@@ -6,8 +6,6 @@ import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -15,8 +13,6 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -43,11 +39,9 @@ import com.brassbeluga.observer.DownloadsObserver;
 import com.brassbeluga.sound.gson.TrackInfo;
 
 @SuppressWarnings("serial")
-public class DownloadPanel extends JPanel implements PropertyChangeListener, DownloadsObserver {
+public class DownloadPanel extends JPanel implements DownloadsObserver {
 
 	public static final int DOWNLOAD_HEIGHT = 200;
-
-	private LauncherFrame parent;
 
 	private JPanel infoPanel;
 	private JLabel trackIcon;
@@ -78,8 +72,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener, Dow
 
 	private DownloadManager dm;
 
-	public DownloadPanel(LauncherFrame parent, SoundCloneDB db, DownloadManager dm) {
-		this.parent = parent;
+	public DownloadPanel(SoundCloneDB db, DownloadManager dm) {
 		this.db = db;
 		this.dm = dm;
 		this.dp = this;
@@ -444,15 +437,6 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener, Dow
 		repaint();
 	}
 
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		if ("progress" == evt.getPropertyName()) {
-            int progressAmt = (Integer) evt.getNewValue();
-            trackProgress.setProgress(progressAmt);
-            progress.setValue((int) (downloadIndex / (dm.getDownloadsSize() * 1.0) * 100 + (progressAmt / (dm.getDownloadsSize() * 1.0))));
-        } 
-	}
-
 	public String getCurrentUser() {
 		return currentUser;
 	}
@@ -466,6 +450,9 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener, Dow
 		if (action == DownloadAction.TRACKS_CHANGED) {
 			rebuildUI();
 			progressInfo.setText(dm.getDownloadsSize() + " tracks ready to download");
+		}else if (action == DownloadAction.SONG_PROGRESS) {
+			trackProgress.setProgress(dm.getSongProgress());
+            progress.setValue((int) (downloadIndex / (dm.getDownloadsSize() * 1.0) * 100 + (dm.getSongProgress() / (dm.getDownloadsSize() * 1.0))));
 		}
 	}
 

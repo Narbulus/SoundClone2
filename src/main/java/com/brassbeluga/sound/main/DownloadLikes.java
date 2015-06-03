@@ -261,7 +261,7 @@ public class DownloadLikes {
 									int prog = (int)(((pos * 1.0) / (total * 1.0)) * 100.0);
 									
 									// Update the loading bar progress
-									setProgress(prog);
+									dm.updateSongDownloadProgress(prog);
 
 								} while (read > 0  && threadRunning);
 								

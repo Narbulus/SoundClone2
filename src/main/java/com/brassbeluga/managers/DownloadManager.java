@@ -47,6 +47,7 @@ public class DownloadManager {
 	private Configuration currentConfig;
 	// Track id's of already downloaded tracks
 	private HashSet<Integer> downloaded;
+	private Integer songProgress;
 	
 	public DownloadManager() {
 		tracks = new ArrayList<TrackInfo>();
@@ -200,6 +201,17 @@ public class DownloadManager {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void updateSongDownloadProgress(Integer progress) {
+		synchronized (songProgress) {
+			songProgress = progress;
+		}
+		notifyObservers(DownloadAction.SONG_PROGRESS);
+	}
+	
+	public int getSongProgress() {
+		return this.songProgress;
 	}
 	
 	/**

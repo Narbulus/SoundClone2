@@ -291,7 +291,7 @@ public class LauncherFrame extends DraggableFrame {
 
 		JPanel downloadHost = new JPanel();
 		downloadHost.setBackground(COLOR_CENTRAL_BACK_OPAQUE);
-		downloadPanel = new DownloadPanel(this, db, this.dm);
+		downloadPanel = new DownloadPanel(db, this.dm);
 		dm.addObserver(downloadPanel);
 
 		infoSwap.add(downloadPanel, TAB_DOWNLOAD);
