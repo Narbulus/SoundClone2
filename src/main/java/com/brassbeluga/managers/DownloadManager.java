@@ -46,6 +46,7 @@ public class DownloadManager {
 	private Configuration currentConfig;
 	// Track id's of already downloaded tracks
 	private HashSet<Integer> downloaded;
+	
 	private Integer songProgress;
 	
 	public DownloadManager() {
@@ -201,14 +202,12 @@ public class DownloadManager {
 	}
 	
 	public void updateSongDownloadProgress(Integer progress) {
-		synchronized (songProgress) {
-			songProgress = progress;
-		}
+		songProgress = progress;
 		notifyObservers(DownloadAction.SONG_PROGRESS);
 	}
 	
 	public int getSongProgress() {
-		return this.songProgress;
+		return songProgress;
 	}
 	
 	/**
