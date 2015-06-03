@@ -19,14 +19,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingWorker;
-import javax.swing.text.AbstractDocument;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.DocumentFilter;
 
 import net.technicpack.ui.controls.TintablePanel;
 import net.technicpack.ui.controls.WatermarkTextField;
-import net.technicpack.ui.lang.ResourceLoader;
 
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.Autocomplete;
@@ -34,10 +29,9 @@ import com.brassbeluga.launcher.ui.LauncherFrame;
 import com.brassbeluga.managers.DownloadManager;
 import com.brassbeluga.sound.gson.TrackInfo;
 
+@SuppressWarnings("serial")
 public class SongsInfoPanel extends TintablePanel {
 	
-	private ResourceLoader resources;
-	private JPanel songsInfoContainer;
 	private JPanel userInfo;
 	private JPanel trackInfo;
 	private JTextField usernameField;
@@ -54,7 +48,6 @@ public class SongsInfoPanel extends TintablePanel {
 
 	public static final int SONGS_INFO_WIDTH = 400;
 	public static final int SONGS_INFO_HEIGHT = 140;
-	private static final int MAX_SEARCH_STRING = 90;
 	private static final int MAX_TITLE_LENGTH = 42;
 	
 	private static final String COMMIT_ACTION = "commit";
@@ -229,7 +222,6 @@ public class SongsInfoPanel extends TintablePanel {
 	}
 
 	public void setUsername(String username) {
-		System.out.println(username);
 		usernameField.setText(username);
 		parent.onUserChanged(username);
 	}

@@ -29,6 +29,7 @@ import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.components.download.DownloadPanel;
 import com.brassbeluga.launcher.ui.components.songs.SongsInfoPanel;
 import com.brassbeluga.launcher.ui.components.songs.TracksListPanel;
+import com.brassbeluga.managers.DownloadManager;
 import com.brassbeluga.sound.gson.Configuration;
 import com.brassbeluga.sound.gson.RedirectResponse;
 import com.brassbeluga.sound.gson.TrackInfo;
@@ -54,8 +55,11 @@ public class DownloadLikes {
 
 	private static final int TRACK_INFO_REQUEST_SIZE = 50;
 	protected static final long CHUNK_SIZE = 1000;
+	
+	private DownloadManager dm;
 
-	public DownloadLikes() throws Exception {	
+	public DownloadLikes(DownloadManager dm) throws Exception {	
+		this.dm = dm;
 		threadRunning = false;
 
 		// Load the template id3 tag from resource file
@@ -111,12 +115,12 @@ public class DownloadLikes {
 					e.printStackTrace();
 				}
 
-				panel.changeIcon(image);
+				//panel.changeIcon(image);
 
 				Type listType = new TypeToken<ArrayList<TrackInfo>>() {
 				}.getType();
 
-				likes = new ArrayList<>();
+				List<TrackInfo> likes = new ArrayList<TrackInfo>();
 
 				for (int i = 0; i < info.getFavoritesCount(); i += TRACK_INFO_REQUEST_SIZE) {
 					String partLikes = load
@@ -127,25 +131,26 @@ public class DownloadLikes {
 					List<TrackInfo> newLikes = new Gson().fromJson(partLikes,
 							listType);
 					for (TrackInfo t : newLikes) {
-						if (downloaded.contains(t.getId()))
+						if (dm.isTrackDownloaded(t.getId()))
 							t.setDownload(true);
 					}
+					dm.addNewLikes(newLikes);
 					likes.addAll(newLikes);
 					publish(newLikes);
 				}
-
+				
 				return likes;
+
 			}
 
 			@Override
 			protected void done() {
-				trackPanel.onFinishedLoading();
 				threadRunning = false;
 			}
 
 			@Override
 			protected void process(List<List<TrackInfo>> tracks) {
-				trackPanel.addNewTracks(tracks.get(tracks.size() - 1));
+				//trackPanel.addNewTracks(tracks.get(tracks.size() - 1));
 			}
 
 		};
@@ -162,11 +167,9 @@ public class DownloadLikes {
 	 * @throws Exception
 	 * @throws JsonSyntaxException
 	 */
-	public void downloadTracks(String user, final String downloadPath,
-			final List<TrackInfo> tracks)
+	public void downloadTracks(final String downloadPath, final String appDataPath, 
+			final String clientID, final List<TrackInfo> tracks)
 			throws JsonSyntaxException, Exception {
-		
-		currentConfig.setDownloadPath(downloadPath);
 		// gui.updateStatus("Initializing downloads",
 		// SoundCloneGUI.StatusType.PROCESS);
 		// Dispatch worker to download songs in background and update status
@@ -218,7 +221,7 @@ public class DownloadLikes {
 								// Format track name to a valid file path name
 								String title = t.getTitle();
 								String finalPath = fuzzTrackTitle(title, downloadPath);
-								String tempPath = fuzzTrackTitle(title, tempDir);
+								String tempPath = fuzzTrackTitle(title, appDataPath);
 								
 								// Create all the necessary directories for file download
 								File finalDir = new File(finalPath);

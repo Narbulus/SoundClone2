@@ -50,11 +50,12 @@ public class DownloadManager {
 	
 	public DownloadManager() {
 		tracks = new ArrayList<TrackInfo>();
+		likes = new ArrayList<TrackInfo>();
 		observers = new ArrayList<DownloadsObserver>();
 		loadConfigurationFiles();
 		downloadPath = null;
 		try {
-			downloader = new DownloadLikes();
+			downloader = new DownloadLikes(this);
 		} catch (Exception e) {
 			downloader = null;
 			e.printStackTrace();
@@ -122,7 +123,7 @@ public class DownloadManager {
 		synchronized(tracks) {
 			if (!tracks.contains(trackInfo)) {
 				tracks.add(trackInfo);
-				notifyObservers();
+				notifyObservers(DownloadAction.TRACKS_CHANGED);
 			}
 		}
 	}
@@ -131,7 +132,7 @@ public class DownloadManager {
 		synchronized(tracks) {
 			tracks.addAll(trackInfos);
 		}
-		notifyObservers();
+		notifyObservers(DownloadAction.TRACKS_CHANGED);
 	}
 	
 	public boolean removeTrack(TrackInfo trackInfo) {
@@ -139,7 +140,7 @@ public class DownloadManager {
 		synchronized(tracks) {
 			removed = tracks.remove(trackInfo);
 		}
-		notifyObservers();
+		notifyObservers(DownloadAction.TRACKS_CHANGED);
 		return removed;
 	}
 	
@@ -147,7 +148,7 @@ public class DownloadManager {
 		synchronized(tracks) {
 			tracks.clear();
 		}
-		notifyObservers();
+		notifyObservers(DownloadAction.TRACKS_CHANGED);
 	}
 	
 	public int getDownloadsSize() {
@@ -160,8 +161,15 @@ public class DownloadManager {
 		downloader.updateUserLikes(currentConfig, clientID);
 	}
 	
-	public void addNewTrackInfo(List<TrackInfo> newTracks) {
-		
+	public void addNewLikes(List<TrackInfo> newTracks) {
+		synchronized(likes) {
+			likes.addAll(newTracks);
+		}
+		notifyObservers(DownloadAction.LIKES_CHANGED);
+	}
+	
+	public boolean isTrackDownloaded(int id) {
+		return downloaded.contains(id);
 	}
 	
 	/**
@@ -176,7 +184,8 @@ public class DownloadManager {
 	 */
 	public void startDownload() {
 		try {
-			downloader.downloadTracks("narbulus", downloadPath,  tracks);
+			currentConfig.setDownloadPath(downloadPath);
+			downloader.downloadTracks(downloadPath, appDataDir, clientID, tracks);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -203,7 +212,7 @@ public class DownloadManager {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		notifyObservers();
+		notifyObservers(DownloadAction.DOWNLOAD_PATH_CHANGED);
 	}
 
 	/**
@@ -219,9 +228,9 @@ public class DownloadManager {
 	/**
 	 * Notify all observers that the tracks to be downloaded has changed
 	 */
-	private void notifyObservers() {
+	private void notifyObservers(DownloadAction action) {
 		for (DownloadsObserver observer : observers) {
-			observer.update(this);
+			observer.update(this, action);
 		}
 	}
 	

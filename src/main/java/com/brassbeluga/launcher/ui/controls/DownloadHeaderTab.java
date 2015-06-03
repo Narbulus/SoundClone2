@@ -10,6 +10,7 @@ import javax.swing.Timer;
 
 import com.brassbeluga.launcher.ui.LauncherFrame;
 import com.brassbeluga.launcher.ui.listeners.TabFlashListener;
+import com.brassbeluga.managers.DownloadAction;
 import com.brassbeluga.managers.DownloadManager;
 import com.brassbeluga.observer.DownloadsObserver;
 
@@ -53,7 +54,7 @@ public class DownloadHeaderTab extends HeaderTab implements DownloadsObserver {
 	}
 	
 	@Override
-	public void update(DownloadManager dm) {
+	public void update(DownloadManager dm, DownloadAction action) {
 		// Only flash when the downloads are added not removed.
 		if (downloadsQueued < dm.getTracks().size()) {
 			beginDownloadTabFlash();
