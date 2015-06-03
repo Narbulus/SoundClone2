@@ -26,11 +26,8 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Frame;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.util.List;
 import java.util.Random;
 
 import javax.swing.BorderFactory;
@@ -41,7 +38,6 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.Timer;
 import javax.swing.WindowConstants;
 
 import net.technicpack.ui.controls.DraggableFrame;
@@ -56,13 +52,9 @@ import com.brassbeluga.launcher.ui.components.songs.SongsInfoPanel;
 import com.brassbeluga.launcher.ui.components.songs.TracksListPanel;
 import com.brassbeluga.launcher.ui.controls.DownloadHeaderTab;
 import com.brassbeluga.launcher.ui.controls.HeaderTab;
-import com.brassbeluga.launcher.ui.listeners.TabFlashListener;
 import com.brassbeluga.managers.DownloadManager;
 import com.brassbeluga.sound.gson.TrackInfo;
-import com.brassbeluga.sound.main.DownloadLikes;
 import com.google.gson.JsonSyntaxException;
-import com.mpatric.mp3agic.InvalidDataException;
-import com.mpatric.mp3agic.UnsupportedTagException;
 
 public class LauncherFrame extends DraggableFrame {
 	private static final long serialVersionUID = -5667136239041080648L;
@@ -111,8 +103,6 @@ public class LauncherFrame extends DraggableFrame {
 	private DownloadPanel downloadPanel;
 
 	private String currentTabName;
-	private Timer tabFlashTimer;
-	private TabFlashListener tabFlashListener;
 	private JLabel warnings;
 	
 	private SoundCloneDB db;
@@ -291,6 +281,7 @@ public class LauncherFrame extends DraggableFrame {
 
 		JPanel songsHost = new JPanel();
 		tracksPanel = new TracksListPanel(this, this.dm);
+		dm.addObserver(tracksPanel);
 		songsInfoPanel = new SongsInfoPanel(this, this.dm);
 		infoSwap.add(songsHost, TAB_SONGS);
 
@@ -350,27 +341,6 @@ public class LauncherFrame extends DraggableFrame {
 
 		this.add(footer, BorderLayout.PAGE_END);
 
-	}
-
-	public void onUserChanged(String user) {
-		if (!dm.downloadInProgress()) {
-			String select = user.trim().replace(".", "-");
-			String curUser = dm.getCurrentUser();
-			if (curUser == null
-					|| (curUser != null && !dm.getCurrentUser().equals(
-							select))) {
-				try {
-					dm.updateUser(select);
-					if (dm.getDownloadPath() != null) {
-						downloadPanel.setBrowseInfo(dm.getDownloadPath());
-					}
-					dm.updateUserLikes(select, songsInfoPanel, tracksPanel);
-					tracksPanel.startUpdateTracks();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
 	}
 
 	public void selectTrack(TrackInfo track) {

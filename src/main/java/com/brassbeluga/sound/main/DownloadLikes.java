@@ -2,33 +2,24 @@ package com.brassbeluga.sound.main;
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Scanner;
-import java.util.Set;
 
 import javax.imageio.ImageIO;
 import javax.swing.SwingWorker;
 
 import com.brassbeluga.launcher.resources.ResourceManager;
-import com.brassbeluga.launcher.ui.components.download.DownloadPanel;
-import com.brassbeluga.launcher.ui.components.songs.SongsInfoPanel;
-import com.brassbeluga.launcher.ui.components.songs.TracksListPanel;
 import com.brassbeluga.managers.DownloadManager;
 import com.brassbeluga.sound.gson.Configuration;
 import com.brassbeluga.sound.gson.RedirectResponse;
@@ -43,9 +34,7 @@ import com.mpatric.mp3agic.ID3v1Tag;
 import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.ID3v22Tag;
 import com.mpatric.mp3agic.ID3v23Tag;
-import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
-import com.mpatric.mp3agic.UnsupportedTagException;
 
 public class DownloadLikes {
 
@@ -53,13 +42,40 @@ public class DownloadLikes {
 	private SoundLoader load;
 	private Boolean threadRunning;
 
+	private String tempDir;
+	private String defaultDownload;
+	private boolean cancelDownload;
+	private DownloadManager dm;
+
 	private static final int TRACK_INFO_REQUEST_SIZE = 50;
 	protected static final long CHUNK_SIZE = 1000;
 	
-	private DownloadManager dm;
-
-	public DownloadLikes(DownloadManager dm) throws Exception {	
+	public DownloadLikes(DownloadManager dm) throws Exception {
 		this.dm = dm;
+		
+		// Create download locations if nonexistent
+		String workingDirectory;
+		String OS = (System.getProperty("os.name")).toUpperCase();
+		if (OS.contains("WIN")) {
+			workingDirectory = System.getenv("AppData");
+		} else if (OS.contains("MAC")) {
+			workingDirectory = System.getProperty("user.home");
+			workingDirectory += "/Library/Application Support";
+		} else if (OS.contains("NIX") || OS.contains("NUX") || OS.contains("AIX")) {
+			workingDirectory = System.getProperty("user.home");
+			workingDirectory += "/.config/";
+		} else {
+			System.out.println("Warning: OS not recognized!");
+			workingDirectory = "";
+		}
+
+		tempDir = workingDirectory + "/SoundClone";
+
+		File tempFile = new File(tempDir);
+		tempFile.mkdirs();
+
+		defaultDownload = System.getProperty("user.home");
+
 		threadRunning = false;
 
 		// Load the template id3 tag from resource file
@@ -121,7 +137,6 @@ public class DownloadLikes {
 				}.getType();
 
 				List<TrackInfo> likes = new ArrayList<TrackInfo>();
-
 				for (int i = 0; i < info.getFavoritesCount(); i += TRACK_INFO_REQUEST_SIZE) {
 					String partLikes = load
 							.getResponse("http://api.soundcloud.com/users/"
@@ -134,7 +149,6 @@ public class DownloadLikes {
 						if (dm.isTrackDownloaded(t.getId()))
 							t.setDownload(true);
 					}
-					dm.addNewLikes(newLikes);
 					likes.addAll(newLikes);
 					publish(newLikes);
 				}
@@ -145,12 +159,13 @@ public class DownloadLikes {
 
 			@Override
 			protected void done() {
+				dm.onLikesFinished();
 				threadRunning = false;
 			}
 
 			@Override
 			protected void process(List<List<TrackInfo>> tracks) {
-				//trackPanel.addNewTracks(tracks.get(tracks.size() - 1));
+				dm.addNewLikes(tracks.get(tracks.size() - 1));
 			}
 
 		};
@@ -180,7 +195,8 @@ public class DownloadLikes {
 				Gson gson = new Gson();
 				TrackStreams tStream;
 				int downloads = 0;
-				for (TrackInfo t : tracks) {
+				while (dm.getDownloadsSize() > 0) {
+					TrackInfo t = dm.getTracks().get(0);
 					if (threadRunning) {
 						publish(t);
 						tStream = gson.fromJson(
@@ -308,14 +324,14 @@ public class DownloadLikes {
 							}
 						}
 					}
+					dm.removeTrack(t);
 				}
 
 				// update the current configuration's history
 				load.closeHistory();
 
 				//updateConfigFile();
-
-				return downloads + " songs downloaded successfully!";
+				return "";
 			}
 
 			@Override

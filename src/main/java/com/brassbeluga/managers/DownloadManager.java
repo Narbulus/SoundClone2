@@ -38,7 +38,7 @@ public class DownloadManager {
 	
 	// Config-universal clientID and max track length
 	private String clientID;
-	private int maxLength;
+	private String maxLength;
 	
 	// Configuration information
 	private List<Configuration> configs;
@@ -102,7 +102,7 @@ public class DownloadManager {
 		}
 		
 		clientID = config.nextLine();
-		maxLength = config.nextInt();
+		maxLength = config.nextLine();
 
 		configs = new ArrayList<Configuration>();
 		currentConfig = null;
@@ -111,6 +111,7 @@ public class DownloadManager {
 		// Load past configurations from config file's json
 		while (config.hasNext()) {
 			String nextConfig = config.nextLine();
+			System.out.println("loaded config: " + nextConfig);
 			Configuration newConfig = new Gson().fromJson(nextConfig,
 					Configuration.class);
 			configs.add(newConfig);
@@ -144,7 +145,7 @@ public class DownloadManager {
 		return removed;
 	}
 	
-	public void removeAllTracks() {
+	public synchronized void removeAllTracks() {
 		synchronized(tracks) {
 			tracks.clear();
 		}
@@ -157,8 +158,13 @@ public class DownloadManager {
 		}
 	}
 	
-	public void updateUserLikes(String user, SongsInfoPanel siPanel, TracksListPanel tlPanel) {
-		downloader.updateUserLikes(currentConfig, clientID);
+	public synchronized List<TrackInfo> getLikes() {
+		return Collections.unmodifiableList(likes);
+	}
+	
+	public void onLikesFinished() {
+		notifyObservers(DownloadAction.LIKES_FINISHED);
+		updateConfigFile();
 	}
 	
 	public void addNewLikes(List<TrackInfo> newTracks) {
@@ -166,6 +172,11 @@ public class DownloadManager {
 			likes.addAll(newTracks);
 		}
 		notifyObservers(DownloadAction.LIKES_CHANGED);
+	}
+	
+	public synchronized void removeAllLikes() {
+		likes.clear();
+		notifyObservers(DownloadAction.LIKES_CLEARED);
 	}
 	
 	public boolean isTrackDownloaded(int id) {
@@ -245,20 +256,38 @@ public class DownloadManager {
 	 * @throws JsonSyntaxException
 	 * @return Returns a new status for the program
 	 */
-	public void updateUser(final String user) throws JsonSyntaxException,
-			Exception {
-		for (Configuration c : configs) {
-			if (c.getUsername().equals(user))
-				currentConfig = c;
-		}
-
-		if (currentConfig == null || user != currentConfig.getUsername()) {
-			currentConfig = new Configuration(user, defaultDownload, null);
-			configs.add(currentConfig);
-		}
+	public void updateUser(String user) {
 		
-		if (currentConfig.getDownloadPath() != null)
-			updateDownloadDirectory(currentConfig.getDownloadPath());
+		if (!downloadInProgress()) {
+			// Sanitize username input
+			String select = user.trim().replace(".", "-");
+			if (getCurrentUser() == null || (getCurrentUser() != null 
+					&& !getCurrentUser().equals(select))) {
+				try {
+					// Check if a config for this username exists
+					for (Configuration c : configs) {
+						if (c.getUsername().equals(user))
+							currentConfig = c;
+					}
+					
+					// Create a new config if this is a new username
+					if (currentConfig == null || user != currentConfig.getUsername()) {
+						currentConfig = new Configuration(user, defaultDownload, null);
+						configs.add(currentConfig);
+					}
+					
+					// Scan the new download directory for tracks
+					if (currentConfig.getDownloadPath() != null)
+						updateDownloadDirectory(currentConfig.getDownloadPath());
+					
+					// Download the users likes
+					removeAllLikes();
+					downloader.updateUserLikes(currentConfig, clientID);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
 
 	}
 	
@@ -282,7 +311,7 @@ public class DownloadManager {
 				if (f.getName().contains(".mp3")) {
 					Mp3File mp3file = new Mp3File(f.getAbsolutePath());
 					ID3v2 tag = mp3file.getId3v2Tag();
-					if (tag.getPaymentUrl() != null)
+					if (tag != null && tag.getPaymentUrl() != null)
 						downloaded.add(Integer.parseInt(tag.getPaymentUrl()));
 				}
 			}
@@ -355,9 +384,14 @@ public class DownloadManager {
 		return users;
 	}
 	
-	private void updateConfigFile() throws FileNotFoundException {
+	private void updateConfigFile() {
 		// write the configurations to file
-		PrintStream output = new PrintStream(appDataDir + "/config");
+		PrintStream output = null;
+		try {
+			output = new PrintStream(appDataDir + "/config");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 
 		output.println(clientID);
 		output.println(maxLength);

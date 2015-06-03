@@ -103,8 +103,9 @@ public class SongsInfoPanel extends TintablePanel {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER)
-					detectNameChanges();
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					dm.updateUser(usernameField.getText());
+				}
 			}
 
 			@Override
@@ -217,13 +218,9 @@ public class SongsInfoPanel extends TintablePanel {
 		repaint();
 	}
 
-	protected void detectNameChanges() {
-		parent.onUserChanged(usernameField.getText());
-	}
-
 	public void setUsername(String username) {
 		usernameField.setText(username);
-		parent.onUserChanged(username);
+		dm.updateUser(username);
 	}
 	
 }
