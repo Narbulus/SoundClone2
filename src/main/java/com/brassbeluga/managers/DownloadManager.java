@@ -11,6 +11,7 @@ import java.io.PrintStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
@@ -41,6 +42,8 @@ public class DownloadManager {
 	private List<DownloadsObserver> observers;
 	private DownloadLikes downloader;
 	
+	private HashMap<JLabel, SwingWorker> imageLoads;
+	
 	// Config-universal clientID and max track length
 	private String clientID;
 	private String maxLength;
@@ -63,6 +66,7 @@ public class DownloadManager {
 		likes = new ArrayList<TrackInfo>();
 		downloadedTracks = new ArrayList<TrackInfo>();
 		observers = new ArrayList<DownloadsObserver>();
+		imageLoads = new HashMap<JLabel, SwingWorker>();
 
 		downloadsWorker = null;
 		likesWorker = null;
@@ -468,17 +472,29 @@ public class DownloadManager {
 	}
 	
 	public void downloadLabelIcon(final String url, final JLabel label) {
+		if (imageLoads.containsKey(label)) {
+			imageLoads.get(label).cancel(true);
+			imageLoads.remove(label);
+		}
 		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
 			
 			@Override
 			protected Void doInBackground() {
 				BufferedImage image = downloader.downloadArtwork(url);
-				label.setIcon(new ImageIcon(image));
-				label.repaint();
+				if (image != null) {
+					label.setIcon(new ImageIcon(image));
+					label.repaint();
+				}
 				return null;
+			}
+			
+			@Override
+			protected void done() {
+				imageLoads.remove(label);
 			}
 
 		};
+		imageLoads.put(label, worker);
 		worker.execute();
 	}
 	
