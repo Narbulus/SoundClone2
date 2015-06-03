@@ -472,6 +472,22 @@ public class DownloadManager {
 	}
 	
 	public void downloadLabelIcon(final String url, final JLabel label) {
+		downloadLabelIcon(url, label, null);
+	}
+	
+	public void downloadLabelIcon(TrackInfo t, String replaceSize, final JLabel label) {
+		if (t.getArtworkURL() != null)
+			downloadLabelIcon(t.getArtworkURL().replace("-large", replaceSize), label, null);
+	}
+	
+	public void downloadLabelIcon(TrackInfo t, String replaceSize, final JLabel label, final ImageIcon alt) {
+		if (t.getArtworkURL() != null)
+			downloadLabelIcon(t.getArtworkURL().replace("-large", replaceSize), label, alt);
+		else
+			label.setIcon(alt);
+	}
+	
+	public void downloadLabelIcon(final String url, final JLabel label, final ImageIcon alt) {
 		if (imageLoads.containsKey(label)) {
 			imageLoads.get(label).cancel(true);
 			imageLoads.remove(label);
@@ -483,6 +499,9 @@ public class DownloadManager {
 				BufferedImage image = downloader.downloadArtwork(url);
 				if (image != null) {
 					label.setIcon(new ImageIcon(image));
+					label.repaint();
+				}else if (alt != null) {
+					label.setIcon(alt);
 					label.repaint();
 				}
 				return null;
