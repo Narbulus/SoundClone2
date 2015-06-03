@@ -296,16 +296,17 @@ public class DownloadManager {
 		if (getCurrentUser() == null || (getCurrentUser() != null 
 				&& !getCurrentUser().equals(select))) {
 			try {
+				currentConfig = null;
+				
 				// Check if a config for this username exists
 				for (Configuration c : configs) {
 					if (c.getUsername().equals(select)) {
 						currentConfig = c;
-						System.out.println(currentConfig.getDownloadPath());
 					}
 				}
 				
 				// Create a new config if this is a new username
-				if (currentConfig == null || user != currentConfig.getUsername()) {
+				if (currentConfig == null) {
 					currentConfig = new Configuration(select, defaultDownload, null);
 					configs.add(currentConfig);
 				}

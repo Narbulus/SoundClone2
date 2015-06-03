@@ -258,6 +258,7 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 			case LIKES_FINISHED:
 				trackList.remove(0);
 				repaint();
+				revalidate();
 				break;
 			default:
 				break;
