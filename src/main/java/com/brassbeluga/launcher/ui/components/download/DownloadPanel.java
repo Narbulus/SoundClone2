@@ -388,13 +388,14 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 					//trackProgress.scrollRectToVisible(trackProgress.getBounds());
 			
 					trackList.add(Box.createGlue());
-				}
+				
 				
 				updateInfo();
 				
 				//trackProgress.scrollRectToVisible(trackProgress.getBounds());
 		
 				trackList.add(Box.createGlue());
+				}
 
 				return "Information";
 			}
