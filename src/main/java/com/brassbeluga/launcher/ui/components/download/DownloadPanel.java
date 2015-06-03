@@ -13,6 +13,8 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -52,6 +54,8 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 	private JLabel progressInfo;
 	private JLabel overallInfo;
 	
+	private List<String> downloadedTracks;
+	
 	private LabelProgressBar trackProgress;
 
 	private JPanel trackList;
@@ -75,6 +79,7 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 		this.dm = dm;
 		this.dp = this;
 		
+		downloadedTracks = new ArrayList<String>();
 		try {
 			
 			URL whatismyip = new URL("http://checkip.amazonaws.com");
@@ -219,8 +224,10 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				browse.showOpenDialog(browseButton);
-				setBrowseInfo();
+				if (!dm.downloadInProgress()) {
+					browse.showOpenDialog(browseButton);
+					setBrowseInfo();
+				}
 			}
 
 			@Override
@@ -327,11 +334,6 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 		setBrowseInfo();
 	}
 	
-	public void setBrowseInfo(String s) {
-		browse.setCurrentDirectory(new File(s));
-		setBrowseInfo();
-	}
-	
 	private void setBrowseInfo() {
 		String downloadPath = browse.getCurrentDirectory().getAbsolutePath();
 		if (browse.getSelectedFile() != null) {
@@ -347,65 +349,39 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 			@Override 
 			public String doInBackground() {
 				
-				int downloadIndex = dm.getDownloadIndex();
+				trackList.removeAll();
 				
-				if (downloadIndex >= 0) {
-					// Grey out all the downloaded tracks and remove undownloaded tracks
-					for (int i = 0; i < dm.getTracks().size() - 1; i++) {
-						if (i <= dm.getDownloadIndex())
-							trackList.getComponents()[i].setForeground(LauncherFrame.COLOR_GREY_TEXT);
-						else
-							trackList.remove(downloadIndex + 1);
-					}
-					
-					// Create a plain label to replace last downloaded track
-					JLabel label = new JLabel(trackProgress.getText());
+				for (TrackInfo t : dm.getDownloadedTracks()) {
+					JLabel label = new JLabel(t.getTitle());
 					label.setBorder(trackBorder);
 					label.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 16));
 					label.setForeground(LauncherFrame.COLOR_GREY_TEXT);
-					
-					// Remove the progress bar and add the last downloaded track label
-					trackList.remove(trackProgress);
 					trackList.add(label);
-				}else{
-					trackList.removeAll();
 				}
 				
 				// Rebuild the remaining tracks queued for download
-				if (dm.getDownloadsSize() >= 0) {
-					TrackInfo currentTrack = dm.getTracks().get(0);
-					// Load artwork
-					if (currentTrack.getArtworkURL() != null) {
-						Image image = null;
-				        try {
-				            URL url = new URL(currentTrack.getArtworkURL());
-				            image = ImageIO.read(url);
-				        } catch (Exception e) {
-				        	e.printStackTrace();
-				        }
-				        trackIcon.setIcon(new ImageIcon(image));
-					}
-					
-					// Update the progress bar and add to the table
-					trackProgress.setText(currentTrack.getTitle());
+				if (dm.getDownloadsSize() > 0) {
+					TrackInfo curTrack = dm.getTracks().get(0);
+					trackProgress.setText(curTrack.getTitle());
 					trackProgress.setProgress(0);
 					trackList.add(trackProgress);
-					
-					// Add all remaining labels
-					for (int i = 1 ; i < dm.getTracks().size(); i++) {
-						TrackInfo t = dm.getTracks().get(i);
-						JLabel nextTrack = new JLabel(t.getTitle());
-						nextTrack.setBorder(trackBorder);
-						nextTrack.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 16));
-						nextTrack.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-						trackList.add(nextTrack);
+					for (int i = 1; i < dm.getTracks().size(); i++) {
+						JLabel label = new JLabel(dm.getTracks().get(i).getTitle());
+						label.setBorder(trackBorder);
+						label.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 16));
+						label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+						trackList.add(label);
 					}
 				}
 				
 				
-				
-				overallInfo.setText(dm.getTracks().get(downloadIndex).getTitle());
-				progressInfo.setText("Downloading track " + (downloadIndex + 1) + " of " + dm.getDownloadsSize());
+				if (dm.downloadInProgress()) {
+					overallInfo.setText(dm.getTracks().get(0).getTitle());
+				}else{
+					overallInfo.setText(dm.getDownloadPath());
+				}
+				progressInfo.setText("Downloading track " + (dm.getDownloadedTracks().size() + 1) + " of " + 
+						(dm.getDownloadsSize() + dm.getDownloadedTracks().size()));
 				
 				//trackProgress.scrollRectToVisible(trackProgress.getBounds());
 		
@@ -455,9 +431,14 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 			progressInfo.setText(dm.getDownloadsSize() + " tracks ready to download");
 		}else if (action == DownloadAction.SONG_PROGRESS) {
 			trackProgress.setProgress(dm.getSongProgress());
-            progress.setValue(50);
+			int totalSize = dm.getDownloadsSize() + dm.getDownloadedTracks().size();
+            progress.setValue((int)(((dm.getDownloadedTracks().size() * 1.0 + (dm.getSongProgress() / 100.0)) / (totalSize * 1.0)) * 100));;
 		}else if (action == DownloadAction.DOWNLOADS_FINISHED) {
 			onDownloadFinished();
+		}else if (action == DownloadAction.USERNAME_CHANGED) {
+			if (dm.getDownloadPath() != null) {
+				overallInfo.setText(dm.getDownloadPath());
+			}
 		}
 	}
 
