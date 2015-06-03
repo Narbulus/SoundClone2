@@ -124,14 +124,20 @@ public class ConfigurationManager {
 	 * @throws InvalidDataException
 	 * @throws IOException
 	 */
-	public void updateDownloadDirectory() throws Exception {
+	public void updateDownloadDirectory() {
 		File folder = new File(currentConfig.getDownloadPath());
 		File[] files = folder.listFiles();
 		for (int i=0; i < files.length; i++) {
 			if (files[i].isFile()) {
 				File f = files[i];
 				if (f.getName().contains(".mp3")) {
-					Mp3File mp3file = new Mp3File(f.getAbsolutePath());
+					Mp3File mp3file;
+					try {
+						mp3file = new Mp3File(f.getAbsolutePath());
+					} catch (Exception e) {
+						mp3file = null;
+						e.printStackTrace();
+					}
 					ID3v2 tag = mp3file.getId3v2Tag();
 					if (tag != null && tag.getPaymentUrl() != null)
 						oldDownloads.add(Integer.parseInt(tag.getPaymentUrl()));
@@ -171,7 +177,6 @@ public class ConfigurationManager {
 	
 	/**
 	 * Called when the user either enters or selects a new user to be loaded.
-	 * Loads the tracklist for the user
 	 * 
 	 * @param user the new user's username
 	 * @param gui
@@ -183,8 +188,7 @@ public class ConfigurationManager {
 		
 		// Sanitize username input
 		String select = user.trim().replace(".", "-");
-		if (getCurrentUser() == null || (getCurrentUser() != null 
-				&& !getCurrentUser().equals(select))) {
+		if (getCurrentUser() == null) {
 			try {
 				currentConfig = null;
 				
@@ -300,13 +304,6 @@ public class ConfigurationManager {
 	 */
 	public String getAppDataDir() {
 		return appDataDir;
-	}
-
-	/**
-	 * @return the defaultDownload
-	 */
-	public String getDefaultDownload() {
-		return defaultDownload;
 	}
 
 	/**

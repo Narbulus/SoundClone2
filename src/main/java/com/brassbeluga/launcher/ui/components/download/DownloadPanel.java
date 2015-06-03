@@ -271,7 +271,7 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				try {
-					Desktop.getDesktop().open(new File(browse.getCurrentDirectory().getAbsolutePath()));
+					Desktop.getDesktop().open(new File(dm.getConfig().getDownloadPath()));
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
@@ -466,6 +466,7 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 			if (config.getDownloadPath() != null) {
 				overallInfo.setText(config.getDownloadPath());
 			}
+			browse.setCurrentDirectory(new File(dm.getConfig().getDownloadPath()));
 		}
 	}
 

@@ -267,7 +267,7 @@ public class DownloadManager {
 	/**
 	 * Gets the configuration manager for this download session.
 	 * DO NOT make state changes directly to configuration manager,
-	 * leave that to the download manager.
+	 * leave that to the DownloadManager.
 	 * Read-only.
 	 */
 	public ConfigurationManager getConfig() {
@@ -295,6 +295,11 @@ public class DownloadManager {
 	 */
 	public void onDownloadsFinished() {
 		downloadsWorker = null;
+		
+		// Some new tracks will be need to be flagged as having already
+		// been downloaded.
+		//cm.updateDownloadDirectory();
+		
 		notifyObservers(DownloadAction.DOWNLOADS_FINISHED);
 	}
 
