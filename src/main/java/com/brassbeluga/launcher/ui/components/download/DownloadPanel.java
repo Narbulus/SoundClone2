@@ -178,13 +178,13 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 					String buttonText = "";
 					if (!dm.downloadInProgress() && dm.getDownloadsSize() > 0) {
 						dm.startDownload();
-						buttonText = "CANCEL";
+						updateInfo();
+						button.setText("CANCEL");
 					} else {
 						if (dm.downloadInProgress())
 							dm.stopDownload();
-						buttonText = "START";
+						button.setText("START");
 					}
-					button.setText(buttonText);
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
@@ -350,45 +350,52 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 			@Override 
 			public String doInBackground() {
 				
-				trackList.removeAll();
-				
-				for (TrackInfo t : dm.getDownloadedTracks()) {
-					JLabel label = new JLabel(t.getTitle());
-					label.setBorder(trackBorder);
-					label.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 16));
-					label.setForeground(LauncherFrame.COLOR_GREY_TEXT);
-					trackList.add(label);
-				}
-				
-				// Rebuild the remaining tracks queued for download
-				if (dm.getDownloadsSize() > 0) {
-					TrackInfo curTrack = dm.getTracks().get(0);
-					trackProgress.setText(curTrack.getTitle());
-					trackProgress.setProgress(0);
-					trackList.add(trackProgress);
-					for (int i = 1; i < dm.getTracks().size(); i++) {
-						JLabel label = new JLabel(dm.getTracks().get(i).getTitle());
+				synchronized(trackList) {
+					trackList.removeAll();
+					
+					for (TrackInfo t : dm.getDownloadedTracks()) {
+						JLabel label = new JLabel(t.getTitle());
 						label.setBorder(trackBorder);
 						label.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 16));
-						label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+						label.setForeground(LauncherFrame.COLOR_GREY_TEXT);
 						trackList.add(label);
 					}
-				}
-				
-				
-				if (dm.downloadInProgress()) {
-					overallInfo.setText(dm.getTracks().get(0).getTitle());
+					
+					// Rebuild the remaining tracks queued for download
+					if (dm.getDownloadsSize() > 0) {
+						TrackInfo curTrack = dm.getTracks().get(0);
+						trackProgress.setText(curTrack.getTitle());
+						trackProgress.setProgress(0);
+						trackList.add(trackProgress);
+						for (int i = 1; i < dm.getTracks().size(); i++) {
+							JLabel label = new JLabel(dm.getTracks().get(i).getTitle());
+							label.setBorder(trackBorder);
+							label.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 16));
+							label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+							trackList.add(label);
+						}
+					}
+					
+					
+					if (dm.downloadInProgress()) {
+						overallInfo.setText(dm.getTracks().get(0).getTitle());
+					}else{
+						overallInfo.setText(dm.getDownloadPath());
+					}
 					progressInfo.setText("Downloading track " + (dm.getDownloadedTracks().size() + 1) + " of " + 
 							(dm.getDownloadsSize() + dm.getDownloadedTracks().size()));
-				}else{
-					overallInfo.setText(dm.getDownloadPath());
-					if (dm.getDownloadedTracks().size() <= 0)
-						progressInfo.setText("Ready to download " + dm.getDownloadsSize() + " tracks");
+					
+					//trackProgress.scrollRectToVisible(trackProgress.getBounds());
+			
+					trackList.add(Box.createGlue());
 				}
+				
+				updateInfo();
 				
 				//trackProgress.scrollRectToVisible(trackProgress.getBounds());
 		
 				trackList.add(Box.createGlue());
+
 				return "Information";
 			}
 			
@@ -409,16 +416,26 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 		db.submitDownload(getCurrentUser(), macAddr, ipAddr, downloadSize, dm.getDownloadsSize());
 
 		setBrowseInfo();
-		overallInfo.setText(dm.getDownloadPath());
-		progressInfo.setText(dm.getDownloadedTracks().size() + " tracks downloaded!");
-			
-		button.setText("START");
+		
 		dm.removeAllTracks();
-		trackList.removeAll();
+			
 		progress.setValue(0);
 		
-		revalidate();
 		repaint();
+	}
+	
+	private void updateInfo() {
+		if (dm.downloadInProgress()) {
+			overallInfo.setText(dm.getTracks().get(0).getTitle());
+			progressInfo.setText("Downloading track " + (dm.getDownloadedTracks().size() + 1) + " of " + 
+					(dm.getDownloadsSize() + dm.getDownloadedTracks().size()));
+		}else{
+			overallInfo.setText(dm.getDownloadPath());
+			if (dm.getDownloadedTracks().size() <= 0)
+				progressInfo.setText("Ready to download " + dm.getDownloadsSize() + " tracks");
+			else
+				progressInfo.setText(dm.getDownloadedTracks().size() + " tracks downloaded!");
+		}
 	}
 
 	public String getCurrentUser() {

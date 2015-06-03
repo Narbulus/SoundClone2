@@ -232,7 +232,7 @@ public class DownloadManager {
 
 	public void stopDownload() {
 		downloadsWorker.cancel(true);
-		notifyObservers(DownloadAction.DOWNLOADS_FINISHED);
+		//notifyObservers(DownloadAction.DOWNLOADS_FINISHED);
 	}
 	
 	/**
@@ -267,6 +267,8 @@ public class DownloadManager {
 	 * Notify all observers that the tracks to be downloaded has changed
 	 */
 	private void notifyObservers(DownloadAction action) {
+		if (action != DownloadAction.SONG_PROGRESS)
+			System.out.println(action.name());
 		for (DownloadsObserver observer : observers) {
 			observer.update(this, action);
 		}
