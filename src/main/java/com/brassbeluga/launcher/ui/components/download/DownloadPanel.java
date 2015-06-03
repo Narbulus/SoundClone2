@@ -446,6 +446,8 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 			if (dm.getDownloadsSize() > 0) {
 				dm.downloadLabelIcon(dm.getTracks().get(0), "-large", trackIcon, 
 						ResourceManager.getIcon("default_track_small.png"));
+			}else{
+				trackIcon.setIcon(ResourceManager.getIcon("default_track_small.png"));
 			}
 			rebuildUI();
 		}else if (action == DownloadAction.SONG_PROGRESS) {
