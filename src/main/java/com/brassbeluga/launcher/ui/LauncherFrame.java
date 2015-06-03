@@ -368,8 +368,6 @@ public class LauncherFrame extends DraggableFrame {
 					tracksPanel.startUpdateTracks();
 				} catch (JsonSyntaxException e) {
 					e.printStackTrace();
-				} catch (Exception e) {
-					e.printStackTrace();
 				}
 			}
 		}
@@ -377,22 +375,6 @@ public class LauncherFrame extends DraggableFrame {
 
 	public void selectTrack(TrackInfo track) {
 		songsInfoPanel.updateTrack(track);
-	}
-
-	public String downloadButtonPressed(String path) throws Exception {
-		if (!dm.downloadInProgress() && dm.getDownloadsSize() > 0) {
-			dm.startDownload(downloadPanel);
-			downloadPanel.updateInfo();
-			return "CANCEL";
-		} else {
-			if (dm.downloadInProgress())
-				dm.stopDownload();
-			return "START";
-		}
-	}
-
-	public void onDownloadFinished() {
-		downloadPanel.onDownloadFinished();
 	}
 
 	public void relocalize() {

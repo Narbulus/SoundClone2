@@ -202,7 +202,7 @@ public class TracksListPanel extends TintablePanel {
 
 	public void selectAll() {
 		for (TrackEntry t : entries) {
-
+			// Nothing
 		}
 	}
 

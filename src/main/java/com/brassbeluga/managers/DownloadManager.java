@@ -33,7 +33,7 @@ public class DownloadManager {
 		synchronized(tracks) {
 			if (!tracks.contains(trackInfo)) {
 				tracks.add(trackInfo);
-				notifyObservers();
+				notifyObservers(DownloadAction.TRACKS_CHANGED);
 			}
 		}
 	}
@@ -42,7 +42,7 @@ public class DownloadManager {
 		synchronized(tracks) {
 			tracks.addAll(trackInfos);
 		}
-		notifyObservers();
+		notifyObservers(DownloadAction.TRACKS_CHANGED);
 	}
 	
 	public boolean removeTrack(TrackInfo trackInfo) {
@@ -50,7 +50,7 @@ public class DownloadManager {
 		synchronized(tracks) {
 			removed = tracks.remove(trackInfo);
 		}
-		notifyObservers();
+		notifyObservers(DownloadAction.TRACKS_CHANGED);
 		return removed;
 	}
 	
@@ -58,7 +58,7 @@ public class DownloadManager {
 		synchronized(tracks) {
 			tracks.clear();
 		}
-		notifyObservers();
+		notifyObservers(DownloadAction.TRACKS_CHANGED);
 	}
 	
 	public int getDownloadsSize() {
@@ -135,7 +135,7 @@ public class DownloadManager {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		notifyObservers();
+		notifyObservers(DownloadAction.DOWNLOAD_PATH_CHANGED);
 	}
 
 	/**
@@ -151,9 +151,9 @@ public class DownloadManager {
 	/**
 	 * Notify all observers that the tracks to be downloaded has changed
 	 */
-	private void notifyObservers() {
+	private void notifyObservers(DownloadAction action) {
 		for (DownloadsObserver observer : observers) {
-			observer.update(this);
+			observer.update(this, action);
 		}
 	}
 	

@@ -37,6 +37,7 @@ import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 import com.brassbeluga.database.SoundCloneDB;
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.LauncherFrame;
+import com.brassbeluga.managers.DownloadAction;
 import com.brassbeluga.managers.DownloadManager;
 import com.brassbeluga.observer.DownloadsObserver;
 import com.brassbeluga.sound.gson.TrackInfo;
@@ -69,6 +70,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener, Dow
 	private JButton openButton;
 	
 	private SoundCloneDB db;
+	private DownloadPanel dp;
 	private String macAddr;
 	private String ipAddr;
 	private String currentUser;
@@ -80,6 +82,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener, Dow
 		this.parent = parent;
 		this.db = db;
 		this.dm = dm;
+		this.dp = this;
 		downloadIndex = 0;
 		
 		try {
@@ -175,7 +178,18 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener, Dow
 					String path = browse.getCurrentDirectory().getAbsolutePath();
 					if (browse.getSelectedFile() != null)
 						path = browse.getSelectedFile().getAbsolutePath();
-					button.setText(parent.downloadButtonPressed(path));
+					
+					String buttonText = "";
+					if (!dm.downloadInProgress() && dm.getDownloadsSize() > 0) {
+						dm.startDownload(dp);
+						dp.updateInfo();
+						buttonText = "CANCEL";
+					} else {
+						if (dm.downloadInProgress())
+							dm.stopDownload();
+						buttonText = "START";
+					}
+					button.setText(buttonText);
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
@@ -448,7 +462,7 @@ public class DownloadPanel extends JPanel implements PropertyChangeListener, Dow
 	}
 
 	@Override
-	public void update(DownloadManager dm) {
+	public void update(DownloadManager dm, DownloadAction action) {
 		rebuildUI();
 		progressInfo.setText(dm.getDownloadsSize() + " tracks ready to download");
 	}
