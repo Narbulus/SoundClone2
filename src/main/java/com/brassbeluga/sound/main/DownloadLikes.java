@@ -182,7 +182,7 @@ public class DownloadLikes {
 	 * @throws Exception
 	 * @throws JsonSyntaxException
 	 */
-	public void downloadTracks(final String downloadPath, final String appDataPath, 
+	public void downloadTracks(final String appDataPath, 
 			final String clientID, final List<TrackInfo> tracks)
 			throws JsonSyntaxException, Exception {
 		// gui.updateStatus("Initializing downloads",
@@ -236,7 +236,7 @@ public class DownloadLikes {
 								
 								// Format track name to a valid file path name
 								String title = t.getTitle();
-								String finalPath = fuzzTrackTitle(title, downloadPath);
+								String finalPath = fuzzTrackTitle(title, dm.getDownloadPath());
 								String tempPath = fuzzTrackTitle(title, appDataPath);
 								
 								// Create all the necessary directories for file download

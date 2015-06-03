@@ -33,7 +33,6 @@ public class DownloadManager {
 	// List of current user's likes
 	private List<TrackInfo> likes;
 	private List<DownloadsObserver> observers;
-	private String downloadPath;
 	private DownloadLikes downloader;
 	
 	// Config-universal clientID and max track length
@@ -54,7 +53,6 @@ public class DownloadManager {
 		likes = new ArrayList<TrackInfo>();
 		observers = new ArrayList<DownloadsObserver>();
 		loadConfigurationFiles();
-		downloadPath = null;
 		try {
 			downloader = new DownloadLikes(this);
 		} catch (Exception e) {
@@ -196,8 +194,7 @@ public class DownloadManager {
 	 */
 	public void startDownload() {
 		try {
-			currentConfig.setDownloadPath(downloadPath);
-			downloader.downloadTracks(downloadPath, appDataDir, clientID, tracks);
+			downloader.downloadTracks(appDataDir, clientID, tracks);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -229,7 +226,7 @@ public class DownloadManager {
 	}
 
 	public void setDownloadPath(String downloadPath) {
-		this.downloadPath = downloadPath;
+		currentConfig.setDownloadPath(downloadPath);
 		try {
 			updateDownloadDirectory();
 		} catch (Exception e) {
@@ -313,7 +310,7 @@ public class DownloadManager {
 	 * @throws IOException
 	 */
 	public void updateDownloadDirectory() throws UnsupportedTagException, InvalidDataException, IOException {
-		File folder = new File(downloadPath);
+		File folder = new File(getDownloadPath());
 		File[] files = folder.listFiles();
 		for (int i=0; i < files.length; i++) {
 			if (files[i].isFile()) {
