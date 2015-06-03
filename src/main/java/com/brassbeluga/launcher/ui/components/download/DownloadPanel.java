@@ -35,6 +35,7 @@ import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 import com.brassbeluga.database.SoundCloneDB;
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.LauncherFrame;
+import com.brassbeluga.managers.ConfigurationManager;
 import com.brassbeluga.managers.DownloadAction;
 import com.brassbeluga.managers.DownloadManager;
 import com.brassbeluga.observer.DownloadsObserver;
@@ -71,11 +72,13 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 	public long downloadSize;
 
 	private DownloadManager dm;
+	private ConfigurationManager config;
 
 	public DownloadPanel(SoundCloneDB db, DownloadManager dm) {
 		this.db = db;
 		this.dm = dm;
 		this.dp = this;
+		this.config = dm.getConfig();
 		
 		try {
 			
@@ -372,7 +375,7 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 					if (dm.downloadInProgress()) {
 						overallInfo.setText(dm.getTracks().get(0).getTitle());
 					}else{
-						overallInfo.setText(dm.getDownloadPath());
+						overallInfo.setText(config.getDownloadPath());
 					}
 					progressInfo.setText("Downloading track " + (dm.getDownloadedTracks().size() + 1) + " of " + 
 							(dm.getDownloadsSize() + dm.getDownloadedTracks().size()));
@@ -424,7 +427,7 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 			progressInfo.setText("Downloading track " + (dm.getDownloadedTracks().size() + 1) + " of " + 
 					(dm.getDownloadsSize() + dm.getDownloadedTracks().size()));
 		}else{
-			overallInfo.setText(dm.getDownloadPath());
+			overallInfo.setText(config.getDownloadPath());
 			if (dm.getDownloadedTracks().size() <= 0)
 				progressInfo.setText("Ready to download " + dm.getDownloadsSize() + " tracks");
 			else
@@ -453,8 +456,8 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 		}else if (action == DownloadAction.DOWNLOADS_FINISHED) {
 			onDownloadFinished();
 		}else if (action == DownloadAction.USERNAME_CHANGED) {
-			if (dm.getDownloadPath() != null) {
-				overallInfo.setText(dm.getDownloadPath());
+			if (config.getDownloadPath() != null) {
+				overallInfo.setText(config.getDownloadPath());
 			}
 		}
 	}

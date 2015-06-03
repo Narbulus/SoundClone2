@@ -323,8 +323,8 @@ public class LauncherFrame extends DraggableFrame {
 		installProgressPlaceholder = Box.createHorizontalGlue();
 		footer.add(installProgressPlaceholder);
 		
-		if (dm.getLastUser() != null) {
-			songsInfoPanel.setUsername(dm.getLastUser());
+		if (dm.getConfig().getLastUser() != null) {
+			songsInfoPanel.setUsername(dm.getConfig().getLastUser());
 		}
 
 		String[] names = { "TuneZip", "Zipmeister", "Zip Zop", "SoundZip",

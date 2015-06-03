@@ -115,7 +115,8 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 							}
 						}
 						
-						dm.replaceAllTracks(selectTracks);
+						dm.removeAllTracks();
+						dm.addAllTracks(selectTracks);
 					}
 				});
 

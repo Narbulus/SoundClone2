@@ -90,8 +90,8 @@ public class SongsInfoPanel extends TintablePanel implements DownloadsObserver {
 		usernameField.setCaretColor(LauncherFrame.COLOR_WHITE_TEXT);
 		usernameField.setPreferredSize(new Dimension(200, 40));
 		// Initialize the new autocomplete document listener
-		System.out.println(dm.getPreviousUsers().toString());
-		Autocomplete autocomplete = new Autocomplete(usernameField, dm.getPreviousUsers());
+		System.out.println(dm.getConfig().getPreviousUsers().toString());
+		Autocomplete autocomplete = new Autocomplete(usernameField, dm.getConfig().getPreviousUsers());
 		// Assign it to the username field's document
 		usernameField.getDocument().addDocumentListener(autocomplete);
 		// Assign the tab keystroke to the complete action
@@ -199,7 +199,7 @@ public class SongsInfoPanel extends TintablePanel implements DownloadsObserver {
 	@Override
 	public void update(DownloadManager dm, DownloadAction action) {
 		if (action == DownloadAction.USERNAME_CHANGED) {
-			dm.downloadLabelIcon(dm.getAvatarURL(), userIcon);
+			dm.downloadLabelIcon(dm.getConfig().getAvatarURL(), userIcon);
 		}
 	}
 	

@@ -123,7 +123,7 @@ public class DownloadLikes {
 					List<TrackInfo> newLikes = new Gson().fromJson(partLikes,
 							listType);
 					for (TrackInfo t : newLikes) {
-						if (dm.isTrackDownloaded(t.getId()))
+						if (dm.getConfig().isTrackDownloaded(t.getId()))
 							t.setDownload(true);
 					}
 					likes.addAll(newLikes);
@@ -209,7 +209,7 @@ public class DownloadLikes {
 							
 							// Format track name to a valid file path name
 							String title = t.getTitle();
-							String finalPath = fuzzTrackTitle(title, dm.getDownloadPath());
+							String finalPath = fuzzTrackTitle(title, dm.getConfig().getDownloadPath());
 							String tempPath = fuzzTrackTitle(title, appDataPath);
 							
 							// Create all the necessary directories for file download
@@ -288,7 +288,6 @@ public class DownloadLikes {
 							f.delete();
 						}
 					dm.trackDownloaded(t);
-					dm.removeTrack(t);
 					}
 				}
 

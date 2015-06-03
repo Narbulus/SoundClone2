@@ -1,63 +1,43 @@
 package com.brassbeluga.managers;
 
-import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Scanner;
 
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.SwingWorker;
 
-import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.observer.DownloadsObserver;
-import com.brassbeluga.sound.gson.Configuration;
 import com.brassbeluga.sound.gson.TrackInfo;
 import com.brassbeluga.sound.main.DownloadLikes;
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import com.mpatric.mp3agic.ID3v2;
-import com.mpatric.mp3agic.InvalidDataException;
-import com.mpatric.mp3agic.Mp3File;
-import com.mpatric.mp3agic.UnsupportedTagException;
 
 public class DownloadManager {
-	// List of tracks to be downloaded
+	// List of tracks to be downloaded.
 	private List<TrackInfo> tracks;
-	// List of current user's likes
+	
+	// List of current user's likes.
 	private List<TrackInfo> likes;
+	
+	// List of already downloaded tracks in current download session.
 	private List<TrackInfo> downloadedTracks;
+	
+	// Observers of download information to be notified on modification.
 	private List<DownloadsObserver> observers;
+	
 	private DownloadLikes downloader;
 	
-	private HashMap<JLabel, SwingWorker> imageLoads;
+	private HashMap<JLabel, SwingWorker<Void,Void>> imageLoads;
 	
-	// Config-universal clientID and max track length
-	private String clientID;
-	private String maxLength;
+	// Configuration info.
+	private ConfigurationManager cm;
 	
-	// Configuration information
-	private List<Configuration> configs;
-	private String appDataDir;
-	private String defaultDownload;
-	private Configuration currentConfig;
-	// Track id's of already downloaded tracks
-	private HashSet<Integer> downloaded;
-	
+	// 0-100 value representing download progress on current song.
 	private Integer songProgress;
 	
+	// Handles to track likes and track downloads threads.
 	SwingWorker<Void, TrackInfo> downloadsWorker;
 	SwingWorker<List<TrackInfo>, List<TrackInfo>> likesWorker;
 	
@@ -66,11 +46,11 @@ public class DownloadManager {
 		likes = new ArrayList<TrackInfo>();
 		downloadedTracks = new ArrayList<TrackInfo>();
 		observers = new ArrayList<DownloadsObserver>();
-		imageLoads = new HashMap<JLabel, SwingWorker>();
-
+		imageLoads = new HashMap<JLabel, SwingWorker<Void,Void>>();
+		cm = new ConfigurationManager();
+		
 		downloadsWorker = null;
 		likesWorker = null;
-		loadConfigurationFiles();
 		try {
 			downloader = new DownloadLikes(this);
 		} catch (Exception e) {
@@ -79,91 +59,49 @@ public class DownloadManager {
 		}
 	}
 	
-	private void loadConfigurationFiles() {
-		// Create download locations if nonexistent
-		String workingDirectory;
-		String OS = (System.getProperty("os.name")).toUpperCase();
-		if (OS.contains("WIN")) {
-			workingDirectory = System.getenv("AppData");
-		} else if (OS.contains("MAC")) {
-			workingDirectory = System.getProperty("user.home");
-			workingDirectory += "/Library/Application Support";
-		} else if (OS.contains("NIX") || OS.contains("NUX") || OS.contains("AIX")) {
-			workingDirectory = System.getProperty("user.home");
-			workingDirectory += "/.config/";
-		} else {
-			System.out.println("Warning: OS not recognized!");
-			workingDirectory = "";
-		}
-
-		appDataDir = workingDirectory + "/SoundClone";
-
-		File tempFile = new File(appDataDir);
-		tempFile.mkdirs();
-
-		defaultDownload = System.getProperty("user.home");
-
-		BufferedReader reader = new BufferedReader(new InputStreamReader(
-				ResourceManager.getResourceAsStream("config")));
-		File oldConfig = new File(appDataDir + "/config");
-		Scanner config = null;
-		
-		if (oldConfig.exists()) {
-			try {
-				config = new Scanner(oldConfig);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
-		} else {
-			config = new Scanner(reader);
-		}
-		
-		clientID = config.nextLine();
-		maxLength = config.nextLine();
-
-		configs = new ArrayList<Configuration>();
-		currentConfig = null;
-		downloaded = new HashSet<Integer>();
-
-		// Load past configurations from config file's json
-		while (config.hasNext()) {
-			String nextConfig = config.nextLine();
-			System.out.println("loaded config: " + nextConfig);
-			Configuration newConfig = new Gson().fromJson(nextConfig,
-					Configuration.class);
-			configs.add(newConfig);
-		}
-
-		config.close();
-	}
-	
+	/**
+	 * Adds a track to the list of tracks to be downloaded. If
+	 * the track is already added then nothing happens.
+	 * 
+	 * @param trackInfo Track to be downloaded
+	 */
 	public void addTrack(TrackInfo trackInfo) {
+		boolean added = false;
 		synchronized(tracks) {
 			if (!tracks.contains(trackInfo)) {
 				tracks.add(trackInfo);
 				downloadedTracks.clear();
-				notifyObservers(DownloadAction.TRACKS_CHANGED);
+				added = true;
 			}
+		}
+		
+		// If a modification was made, let observers know.
+		if (added) {
+			notifyObservers(DownloadAction.TRACKS_CHANGED);
 		}
 	}
 	
+	/**
+	 * Adds all tracks. WILL ADD DUPLICATES!
+	 * 
+	 * @param trackInfos Tracks to be added to download queue
+	 */
 	public void addAllTracks(List<TrackInfo> trackInfos) {
 		synchronized(tracks) {
 			tracks.addAll(trackInfos);
 		}
-		downloadedTracks.clear();
-		notifyObservers(DownloadAction.TRACKS_CHANGED);
-	}
-	
-	public void replaceAllTracks(List<TrackInfo> trackInfos) {
-		synchronized(tracks) {
-			tracks.clear();
-			tracks.addAll(trackInfos);
+		synchronized (downloadedTracks) {
+			downloadedTracks.clear();
 		}
-		downloadedTracks.clear();
 		notifyObservers(DownloadAction.TRACKS_CHANGED);
 	}
 	
+	/**
+	 * Removes a track from the download queue.
+	 * 
+	 * @param trackInfo Track to be removed
+	 * @return true if track was removed and false otherwise.
+	 */
 	public boolean removeTrack(TrackInfo trackInfo) {
 		boolean removed;
 		synchronized(tracks) {
@@ -173,6 +111,9 @@ public class DownloadManager {
 		return removed;
 	}
 	
+	/**
+	 * Removes all tracks from the download queue.
+	 */
 	public void removeAllTracks() {
 		synchronized(tracks) {
 			tracks.clear();
@@ -180,22 +121,43 @@ public class DownloadManager {
 		notifyObservers(DownloadAction.TRACKS_CHANGED);
 	}
 	
+	/**
+	 * Gets the number of tracks queued for download
+	 */
 	public int getDownloadsSize() {
+		int trackSize;
 		synchronized(tracks) {
-			return tracks.size();
+			trackSize = tracks.size();
 		}
+		return trackSize;
 	}
 	
+	/**
+	 * Gets a read-only copy of the tracks list.
+	 */
+	public synchronized List<TrackInfo> getTracks() {
+		return Collections.unmodifiableList(tracks);
+	}
+	
+	/**
+	 * Gets a read-only copy of the likes list.
+	 */
 	public synchronized List<TrackInfo> getLikes() {
 		return Collections.unmodifiableList(likes);
 	}
 	
-	public void onLikesFinished() {
-		likesWorker = null;
-		notifyObservers(DownloadAction.LIKES_FINISHED);
-		updateConfigFile();
+	/**
+	 * Gets a read-only copy of the already downloaded tracks list.
+	 */
+	public List<TrackInfo> getDownloadedTracks() {
+		return Collections.unmodifiableList(downloadedTracks);
 	}
 	
+	/**
+	 * Adds a new like track.
+	 * 
+	 * @param newTracks Track to be added to likes
+	 */
 	public void addNewLikes(List<TrackInfo> newTracks) {
 		synchronized(likes) {
 			likes.addAll(newTracks);
@@ -203,13 +165,14 @@ public class DownloadManager {
 		notifyObservers(DownloadAction.LIKES_CHANGED);
 	}
 	
-	public synchronized void removeAllLikes() {
-		likes.clear();
+	/**
+	 * Removes all tracks from the likes.
+	 */
+	public void removeAllLikes() {
+		synchronized(likes) {
+			likes.clear();
+		}
 		notifyObservers(DownloadAction.LIKES_CLEARED);
-	}
-	
-	public boolean isTrackDownloaded(int id) {
-		return downloaded.contains(id);
 	}
 	
 	/**
@@ -226,11 +189,17 @@ public class DownloadManager {
 		return likesWorker != null;
 	}
 	
+	/**
+	 * Updates the progress for the current song in download.
+	 */
 	public void updateSongDownloadProgress(Integer progress) {
 		songProgress = progress;
 		notifyObservers(DownloadAction.SONG_PROGRESS);
 	}
 	
+	/**
+	 * Gets the progress for the current song in download.
+	 */
 	public int getSongProgress() {
 		return songProgress;
 	}
@@ -240,237 +209,100 @@ public class DownloadManager {
 	 */
 	public void startDownload() {
 		try {
-			downloadsWorker = downloader.downloadTracks(appDataDir, clientID, tracks);
+			downloadsWorker = downloader.downloadTracks(cm.getAppDataDir(), cm.getClientID(), tracks);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
+	/**
+	 * Stop the tracks being downloaded.
+	 */
 	public void stopDownload() {
 		downloadsWorker.cancel(true);
 		notifyObservers(DownloadAction.DOWNLOADS_FINISHED);
 	}
-	
-	/**
-	 * Gets a read-only copy of the tracks list.
-	 */
-	public synchronized List<TrackInfo> getTracks() {
-		return Collections.unmodifiableList(tracks);
-	}
 
+	/**
+	 * Updates the configs download path.
+	 * 
+	 * @param downloadPath Path to be updated to
+	 */
 	public void updateDownloadPath(String downloadPath) {
-		currentConfig.setDownloadPath(downloadPath);
-		try {
-			updateDownloadDirectory();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		updateConfigFile();
+		cm.updateDownloadPath(downloadPath);
 		notifyObservers(DownloadAction.DOWNLOAD_PATH_CHANGED);
 	}
 
 	/**
-	 * Add an observer to be notified when the underlying list of
-	 * tracks to be downloaded is changed.
-	 * 
-	 * @param observer Observer to be notified
-	 */
-	public void addObserver(DownloadsObserver observer) {
-		observers.add(observer);
-	}
-	
-	/**
-	 * Notify all observers that the tracks to be downloaded has changed
-	 */
-	private void notifyObservers(DownloadAction action) {
-		for (DownloadsObserver observer : observers) {
-			observer.update(this, action);
-		}
-	}
-	
-	/**
 	 * Called when the user either enters or selects a new user to be loaded.
 	 * Loads the tracklist for the user
 	 * 
-	 * @param user
-	 *            The new user's username
-	 * @param gui
-	 * @throws Exception
-	 * @throws JsonSyntaxException
-	 * @return Returns a new status for the program
+	 * @param user the new user's username
 	 */
 	public void updateUser(String user) {
-		
 		// If we are currently downloading likes then stop.
 		if (likesUpdateInProgress()) {
 			likesWorker.cancel(true);
 			removeAllLikes();
 		}
 		
-		// Sanitize username input
-		String select = user.trim().replace(".", "-");
-		if (getCurrentUser() == null || (getCurrentUser() != null 
-				&& !getCurrentUser().equals(select))) {
-			try {
-				currentConfig = null;
-				
-				// Check if a config for this username exists
-				for (Configuration c : configs) {
-					if (c.getUsername().equals(select)) {
-						currentConfig = c;
-					}
-				}
-				
-				// Create a new config if this is a new username
-				if (currentConfig == null) {
-					currentConfig = new Configuration(select, defaultDownload, null);
-					configs.add(currentConfig);
-				}
-				
-				// Scan the new download directory for tracks
-				if (currentConfig.getDownloadPath() != null)
-					updateDownloadDirectory();
-				
-				// Download the users likes
-				removeAllLikes();
-				likesWorker = downloader.updateUserLikes(currentConfig, clientID);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+		cm.updateUser(user);
+		
+		// Download the users likes
+		removeAllLikes();
+		likesWorker = downloader.updateUserLikes(cm.getCurrentConfig(), cm.getClientID());
 		
 		notifyObservers(DownloadAction.USERNAME_CHANGED);
-
 	}
 	
 	/**
-	 * Updates the current configuration to the new download directory
-	 * and scans the directory for existing mp3's. If they were downloaded
-	 * by SoundClone, the SoundCloud track id is parsed from the mp3 tag
-	 * @param downloadPath The new download path
-	 * @throws UnsupportedTagException
-	 * @throws InvalidDataException
-	 * @throws IOException
+	 * Gets the configuration manager for this download session.
+	 * DO NOT make state changes directly to configuration manager,
+	 * leave that to the download manager.
+	 * Read-only.
 	 */
-	public void updateDownloadDirectory() throws Exception {
-		File folder = new File(getDownloadPath());
-		File[] files = folder.listFiles();
-		for (int i=0; i < files.length; i++) {
-			if (files[i].isFile()) {
-				File f = files[i];
-				if (f.getName().contains(".mp3")) {
-					Mp3File mp3file = new Mp3File(f.getAbsolutePath());
-					ID3v2 tag = mp3file.getId3v2Tag();
-					if (tag != null && tag.getPaymentUrl() != null)
-						downloaded.add(Integer.parseInt(tag.getPaymentUrl()));
-				}
-			}
-		}
+	public ConfigurationManager getConfig() {
+		return cm;
 	}
 	
 	/**
-	 * Checks if the given path conflicts with the download path of the current
-	 * configuration
-	 * 
-	 * @param downloadPath
-	 *            The new download path
-	 * @return true if the downloadPath differs from the configuration's path
+	 * Toggles the download flag on a track at index.
 	 */
-	public boolean isNewPath(String downloadPath) {
-		// If a new path is specified, clear history on config so new files are
-		// downloaded
-		return !downloadPath.equals(currentConfig.getDownloadPath());
-	}
-
-	/**
-	 * Returns the names of the users for which a configuration exists from
-	 * prior runs
-	 * 
-	 * @return
-	 */
-	public String[] getConfigNames() {
-		String[] names = new String[configs.size()];
-		int i = 0;
-		for (Configuration c : configs) {
-			names[i] = c.getUsername();
-			i++;
-		}
-		return names;
-	}
-
-	/**
-	 * Returns the username of the active selected configuration
-	 * 
-	 * @return
-	 */
-	public String getCurrentUser() {
-		if (currentConfig != null)
-			return currentConfig.getUsername();
-		return null;
-	}
-	
-	public String getLastUser() {
-		if (configs.size() > 0){
-			return configs.get(0).getUsername();
-		}
-		return null;
-	}
-
-	public String getAvatarURL() {
-		if (currentConfig != null)
-			return currentConfig.getUserIcon();
-		return null;
-	}
-	
-	public String getDownloadPath() {
-		if (currentConfig != null)
-			return currentConfig.getDownloadPath();
-		return defaultDownload;
-	}
-	
 	public void toggleDownload(int index) {
 		tracks.get(index).setDownload(!tracks.get(index).getDownload());
 	}
-	
-	public List<String> getPreviousUsers() {
-		List<String> users = new ArrayList<String>();
-		for (Configuration c : configs) {
-			users.add(c.getUsername());
-		}
-		return users;
-	}
-	
-	private void updateConfigFile() {
-		// write the configurations to file
-		PrintStream output = null;
-		try {
-			output = new PrintStream(appDataDir + "/config");
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
 
-		output.println(clientID);
-		output.println(maxLength);
-
-		Gson gson = new Gson();
-		
-		for (Configuration c : configs) {
-			output.println(gson.toJson(c));
-		}
-
-		output.flush();
-		output.close();
+	/**
+	 * To be called when the track likes worker has completed.
+	 */
+	public void onLikesFinished() {
+		likesWorker = null;
+		notifyObservers(DownloadAction.LIKES_FINISHED);
+		cm.updateConfigFile();
 	}
 
+	/**
+	 * To be called when the track downloads worker has completed.
+	 */
 	public void onDownloadsFinished() {
 		downloadsWorker = null;
 		notifyObservers(DownloadAction.DOWNLOADS_FINISHED);
 	}
 
+	/**
+	 * Called once a given track has been downloaded.
+	 */
 	public void trackDownloaded(TrackInfo trackInfo) {
 		downloadedTracks.add(trackInfo);
+		removeTrack(trackInfo);
 	}
 	
+	/**
+	 * Downloads an icon for a given label.
+	 * 
+	 * @param url URL to retrieve icon from
+	 * @param label label to apply icon to
+	 */
 	public void downloadLabelIcon(final String url, final JLabel label) {
 		if (imageLoads.containsKey(label)) {
 			imageLoads.get(label).cancel(true);
@@ -497,8 +329,23 @@ public class DownloadManager {
 		imageLoads.put(label, worker);
 		worker.execute();
 	}
-	
-	public List<TrackInfo> getDownloadedTracks() {
-		return downloadedTracks;
+
+	/**
+	 * Add an observer to be notified when changes are made.
+	 * 
+	 * @param observer Observer to be notified
+	 */
+	public void addObserver(DownloadsObserver observer) {
+		observers.add(observer);
+	}
+
+
+	/**
+	 * Notify all observers that something has changed.
+	 */
+	private void notifyObservers(DownloadAction action) {
+		for (DownloadsObserver observer : observers) {
+			observer.update(this, action);
+		}
 	}
 }
