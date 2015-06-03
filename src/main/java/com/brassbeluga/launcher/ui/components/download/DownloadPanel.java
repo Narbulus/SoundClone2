@@ -167,11 +167,6 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				try {
-					String path = browse.getCurrentDirectory().getAbsolutePath();
-					if (browse.getSelectedFile() != null)
-						path = browse.getSelectedFile().getAbsolutePath();
-					dm.updateDownloadPath(path);
-					
 					String buttonText = "";
 					if (!dm.downloadInProgress() && dm.getDownloadsSize() > 0) {
 						dm.startDownload();
@@ -411,8 +406,9 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 	public void onDownloadFinished() {
 
 		// Notify remote db of successful download.
-		db.submitDownload(getCurrentUser(), macAddr, ipAddr, downloadSize, dm.getDownloadsSize());
+		// db.submitDownload(getCurrentUser(), macAddr, ipAddr, downloadSize, dm.getDownloadsSize());
 
+		button.setText("START");
 		setBrowseInfo();
 		
 		dm.removeAllTracks();
