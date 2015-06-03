@@ -378,11 +378,12 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 				
 				if (dm.downloadInProgress()) {
 					overallInfo.setText(dm.getTracks().get(0).getTitle());
+					progressInfo.setText("Downloading track " + (dm.getDownloadedTracks().size() + 1) + " of " + 
+							(dm.getDownloadsSize() + dm.getDownloadedTracks().size()));
 				}else{
 					overallInfo.setText(dm.getDownloadPath());
+					progressInfo.setText("Ready to download " + dm.getDownloadsSize() + " tracks");
 				}
-				progressInfo.setText("Downloading track " + (dm.getDownloadedTracks().size() + 1) + " of " + 
-						(dm.getDownloadsSize() + dm.getDownloadedTracks().size()));
 				
 				//trackProgress.scrollRectToVisible(trackProgress.getBounds());
 		
@@ -407,6 +408,8 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 		db.submitDownload(getCurrentUser(), macAddr, ipAddr, downloadSize, dm.getDownloadsSize());
 
 		setBrowseInfo();
+		overallInfo.setText(dm.getDownloadPath());
+		progressInfo.setText(dm.getDownloadedTracks().size() + " tracks downloaded!");
 			
 		button.setText("START");
 		dm.removeAllTracks();
