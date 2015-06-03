@@ -186,6 +186,8 @@ public class SongsInfoPanel extends TintablePanel implements DownloadsObserver {
 			}
 			if (track.getArtworkURL() != null)
 				dm.downloadLabelIcon(track.getArtworkURL().replace("large", "t300x300"), trackArt);
+			else
+				trackArt.setIcon(ResourceManager.getIcon("default_track"));
 		}
 	}
 
