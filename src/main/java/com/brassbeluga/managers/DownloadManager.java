@@ -231,7 +231,7 @@ public class DownloadManager {
 	public void setDownloadPath(String downloadPath) {
 		this.downloadPath = downloadPath;
 		try {
-			updateDownloadDirectory(downloadPath);
+			updateDownloadDirectory();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -290,7 +290,7 @@ public class DownloadManager {
 					
 					// Scan the new download directory for tracks
 					if (currentConfig.getDownloadPath() != null)
-						updateDownloadDirectory(currentConfig.getDownloadPath());
+						updateDownloadDirectory();
 					
 					// Download the users likes
 					removeAllLikes();
@@ -312,9 +312,7 @@ public class DownloadManager {
 	 * @throws InvalidDataException
 	 * @throws IOException
 	 */
-	public void updateDownloadDirectory(String downloadPath) throws UnsupportedTagException, InvalidDataException, IOException {
-		currentConfig.setDownloadPath(downloadPath);
-		
+	public void updateDownloadDirectory() throws UnsupportedTagException, InvalidDataException, IOException {
 		File folder = new File(downloadPath);
 		File[] files = folder.listFiles();
 		for (int i=0; i < files.length; i++) {
