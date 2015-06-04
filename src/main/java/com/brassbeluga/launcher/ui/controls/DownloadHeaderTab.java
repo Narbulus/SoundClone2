@@ -71,7 +71,6 @@ public class DownloadHeaderTab extends HeaderTab implements DownloadsObserver {
 	@Override
 	protected void paintComponent(Graphics g) {
 		char[] arr = Integer.toString(downloadsQueued).toCharArray();
-		super.paintComponent(g);
 		// Draw one frame of some text to initialize the font renderer
 		// AND KILL THE FLASH LAG
 		if (clearFontLag) {
@@ -81,6 +80,7 @@ public class DownloadHeaderTab extends HeaderTab implements DownloadsObserver {
 			g2d.setFont(new Font(f.getName(), Font.PLAIN, (int)(f.getSize() * .5)));
 			g2d.drawChars(arr, 0, arr.length, 10, this.getSize().height - 8);
 		}
+		super.paintComponent(g);
 		if (downloadsQueued > 0) {
 			Graphics2D g2d = (Graphics2D) g;
 			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

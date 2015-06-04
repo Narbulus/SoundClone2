@@ -104,6 +104,7 @@ public class DownloadLikes {
 				UserInfo info = new Gson().fromJson(getResponse(response.getLocation()), UserInfo.class);
 				
 				currentConfig.setUserIcon(info.getAvatarURL());
+				dm.onUserArtworkLoaded();
 
 				Type listType = new TypeToken<ArrayList<TrackInfo>>() {
 				}.getType();

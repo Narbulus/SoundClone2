@@ -188,7 +188,7 @@ public class ConfigurationManager {
 		
 		// Sanitize username input
 		String select = user.trim().replace(".", "-");
-		if (getCurrentUser() == null) {
+		if (getCurrentUser() == null || !getCurrentUser().equals(select)) {
 			try {
 				currentConfig = null;
 				
@@ -208,6 +208,7 @@ public class ConfigurationManager {
 				// Scan the new download directory for tracks
 				if (currentConfig.getDownloadPath() != null)
 					updateDownloadDirectory();
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

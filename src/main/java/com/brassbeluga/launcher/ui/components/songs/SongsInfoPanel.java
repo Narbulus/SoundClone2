@@ -189,7 +189,7 @@ public class SongsInfoPanel extends TintablePanel implements DownloadsObserver {
 
 	@Override
 	public void update(DownloadManager dm, DownloadAction action) {
-		if (action == DownloadAction.USERNAME_CHANGED) {
+		if (action == DownloadAction.USER_ARTWORK_LOADED) {
 			dm.downloadLabelIcon(dm.getConfig().getAvatarURL(), userIcon, ResourceManager.getIcon("default_user.png"));
 		}
 	}
