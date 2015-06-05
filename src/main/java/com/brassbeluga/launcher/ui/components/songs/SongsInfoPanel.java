@@ -159,7 +159,7 @@ public class SongsInfoPanel extends TintablePanel implements DownloadsObserver {
 		if (selected != track) {
 			selected = track;
 			String title = track.getTitle();
-			String[] split = title.split(" - ");
+			String[] split = title.split("-|~");
 			if (split.length > 1) {
 				trackArtist.setText(split[0]);
 				title = split[1];

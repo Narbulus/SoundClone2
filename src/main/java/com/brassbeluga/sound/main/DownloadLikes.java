@@ -273,13 +273,13 @@ public class DownloadLikes {
 		// update tag with new info
 		String title = t.getTitle();
 		if (title.contains(" - ")) {
-			String[] halves = title.split(" - ");
+			String[] halves = title.split("-|~");
 			if (halves.length == 2) {
-				tag.setArtist(halves[0]);
-				tag.setTitle(halves[1]);
+				tag.setArtist(halves[0].trim());
+				tag.setTitle(halves[1].trim());
 			}
 		} else {
-			tag.setTitle(title);
+			tag.setTitle(title.trim());
 			tag.setArtist("");
 		}
 
