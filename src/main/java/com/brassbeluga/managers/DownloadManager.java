@@ -1,5 +1,6 @@
 package com.brassbeluga.managers;
 
+import java.awt.Frame;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -138,6 +139,17 @@ public class DownloadManager {
 			trackSize = tracks.size();
 		}
 		return trackSize;
+	}
+	
+	/**
+	 * Gets the number of tracks downloaded this session
+	 */
+	public int getDownloadedSize() {
+		int downloadedSize;
+		synchronized(downloadedTracks) {
+			downloadedSize = downloadedTracks.size();
+		}
+		return downloadedSize;
 	}
 	
 	/**
@@ -409,5 +421,14 @@ public class DownloadManager {
 		for (DownloadsObserver observer : observers) {
 			observer.update(this, action);
 		}
+	}
+
+	/**
+	 * Returns the next track queued for download
+	 */
+	public TrackInfo getNextTrack() {
+		if (tracks.size() > 0)
+			return tracks.get(0);
+		return null;
 	}
 }

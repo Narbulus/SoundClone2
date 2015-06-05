@@ -358,7 +358,7 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 					
 					// Rebuild the remaining tracks queued for download
 					if (dm.getDownloadsSize() > 0) {
-						TrackInfo curTrack = dm.getTracks().get(0);
+						TrackInfo curTrack = dm.getNextTrack();
 						trackProgress.setText(curTrack.getTitle());
 						trackProgress.setProgress(0);
 						trackList.add(trackProgress);
@@ -373,12 +373,12 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 					
 					
 					if (dm.downloadInProgress()) {
-						overallInfo.setText(dm.getTracks().get(0).getTitle());
+						overallInfo.setText(dm.getNextTrack().getTitle());
 					}else{
 						overallInfo.setText(config.getDownloadPath());
 					}
-					progressInfo.setText("Downloading track " + (dm.getDownloadedTracks().size() + 1) + " of " + 
-							(dm.getDownloadsSize() + dm.getDownloadedTracks().size()));
+					progressInfo.setText("Downloading track " + (dm.getDownloadedSize() + 1) + " of " + 
+							(dm.getDownloadsSize() + dm.getDownloadedSize()));
 					
 					//trackProgress.scrollRectToVisible(trackProgress.getBounds());
 			
@@ -416,6 +416,8 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 		
 		if (dm.getDownloadsSize() > 0) {
 			rebuildUI();
+		}else{
+			progressInfo.setText(dm.getDownloadedSize() + " tracks successfully downloaded!");
 		}
 		
 			
@@ -426,15 +428,15 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 	
 	private void updateInfo() {
 		if (dm.downloadInProgress()) {
-			overallInfo.setText(dm.getTracks().get(0).getTitle());
-			progressInfo.setText("Downloading track " + (dm.getDownloadedTracks().size() + 1) + " of " + 
-					(dm.getDownloadsSize() + dm.getDownloadedTracks().size()));
+			overallInfo.setText(dm.getNextTrack().getTitle());
+			progressInfo.setText("Downloading track " + (dm.getDownloadedSize() + 1) + " of " + 
+					(dm.getDownloadsSize() + dm.getDownloadedSize()));
 		}else{
 			overallInfo.setText(config.getDownloadPath());
-			if (dm.getDownloadedTracks().size() <= 0)
+			if (dm.getDownloadedSize() <= 0)
 				progressInfo.setText("Ready to download " + dm.getDownloadsSize() + " tracks");
 			else
-				progressInfo.setText(dm.getDownloadedTracks().size() + " tracks downloaded!");
+				progressInfo.setText(dm.getDownloadedSize() + " tracks downloaded!");
 		}
 	}
 
@@ -450,7 +452,7 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 	public void update(DownloadManager dm, DownloadAction action) {
 		if (action == DownloadAction.TRACKS_CHANGED) {
 			if (dm.getDownloadsSize() > 0) {
-				dm.downloadLabelIcon(dm.getTracks().get(0), "-large", trackIcon, 
+				dm.downloadLabelIcon(dm.getNextTrack(), "-large", trackIcon, 
 						ResourceManager.getIcon("default_track_small.png"));
 			}else{
 				trackIcon.setIcon(ResourceManager.getIcon("default_track_small.png"));
@@ -458,8 +460,9 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 			rebuildUI();
 		}else if (action == DownloadAction.SONG_PROGRESS) {
 			trackProgress.setProgress(dm.getSongProgress());
-			int totalSize = dm.getDownloadsSize() + dm.getDownloadedTracks().size();
-            progress.setValue((int)(((dm.getDownloadedTracks().size() * 1.0 + (dm.getSongProgress() / 100.0)) / (totalSize * 1.0)) * 100));;
+			overallInfo.setText(dm.getNextTrack().getTitle() + " " + dm.getSongProgress() + "%");
+			int totalSize = dm.getDownloadsSize() + dm.getDownloadedSize();
+            progress.setValue((int)(((dm.getDownloadedSize() * 1.0 + (dm.getSongProgress() / 100.0)) / (totalSize * 1.0)) * 100));;
 		}else if (action == DownloadAction.DOWNLOADS_FINISHED) {
 			onDownloadFinished();
 		}else if (action == DownloadAction.USERNAME_CHANGED) {

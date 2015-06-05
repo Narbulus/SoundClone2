@@ -164,7 +164,7 @@ public class DownloadLikes {
 				Gson gson = new Gson();
 				TrackStreams tStream;
 				while (dm.getDownloadsSize() > 0 && !isCancelled()) {
-					TrackInfo t = dm.getTracks().get(0);
+					TrackInfo t = dm.getNextTrack();
 					
 					String trackStreamUrl = "https://api.soundcloud.com/i1/tracks/" + t.getId() + 
 							"/streams?client_id=" + clientID;
