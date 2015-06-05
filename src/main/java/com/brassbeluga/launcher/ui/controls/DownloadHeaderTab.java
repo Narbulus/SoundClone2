@@ -78,7 +78,6 @@ public class DownloadHeaderTab extends HeaderTab implements DownloadsObserver {
 			Graphics2D g2d = (Graphics2D) g;
 			Font f = g2d.getFont();
 			g2d.setFont(new Font(f.getName(), Font.PLAIN, (int)(f.getSize() * .5)));
-			g2d.drawChars(arr, 0, arr.length, 10, this.getSize().height - 8);
 		}
 		super.paintComponent(g);
 		if (downloadsQueued > 0) {
