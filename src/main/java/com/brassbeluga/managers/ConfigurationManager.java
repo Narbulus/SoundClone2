@@ -139,7 +139,8 @@ public class ConfigurationManager {
 						e.printStackTrace();
 					}
 					ID3v2 tag = mp3file.getId3v2Tag();
-					if (tag != null && tag.getPaymentUrl() != null)
+					if (tag != null && tag.getPaymentUrl() != null && 
+							!oldDownloads.contains(Integer.parseInt(tag.getPaymentUrl())))
 						oldDownloads.add(Integer.parseInt(tag.getPaymentUrl()));
 				}
 			}

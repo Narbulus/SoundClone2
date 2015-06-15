@@ -70,6 +70,10 @@ public class TrackEntry extends JPanel {
 		downloadFlag = flagValue;
 	}
 	
+	public void updateWarningStatus() {
+		warning.setVisible(info.getDownload());
+	}
+	
 	public void initComponents() {
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 8));

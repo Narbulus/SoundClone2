@@ -68,6 +68,8 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 	private DownloadManager dm;
 	private ConfigurationManager config;
 
+	private JLabel pathLabel;
+
 	public DownloadPanel(SoundCloneDB db, DownloadManager dm) {
 		this.db = db;
 		this.dm = dm;
@@ -246,6 +248,7 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 		overallInfo.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 		Dimension d = overallInfo.getPreferredSize();
 		overallInfo.setPreferredSize(new Dimension(220, d.height));
+		overallInfo.setText(" ");
 		
 		openButton = new JButton("OPEN");
 		openButton.setContentAreaFilled(false);
@@ -254,7 +257,7 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 		// openButton.setBorder(new LineBorder(new Color(0, 0, 0, 50)));
 		openButton.setOpaque(true);
 		openButton.setBackground(LauncherFrame.COLOR_BLUE);
-		openButton.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 22));
+		openButton.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 34));
 		openButton.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 		openButton.addMouseListener(new MouseListener() {
 
@@ -290,8 +293,15 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 		browseInfo.setLayout(new BoxLayout(browseInfo, BoxLayout.X_AXIS));
 		browseInfo.setOpaque(false);
 		browseInfo.add(overallInfo);
-		browseInfo.add(Box.createRigidArea(new Dimension(16, 0)));
-		browseInfo.add(openButton);
+		
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+		buttonPanel.setOpaque(false);
+		buttonPanel.add(button);
+		buttonPanel.add(Box.createRigidArea(new Dimension(16, 0)));
+		buttonPanel.add(browseButton);
+		buttonPanel.add(Box.createRigidArea(new Dimension(16, 0)));
+		buttonPanel.add(openButton);
 		
 		JPanel loadInfo = new JPanel();
 		loadInfo.setOpaque(false);
@@ -301,14 +311,30 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 		loadInfo.add(progress);
 		loadInfo.add(Box.createRigidArea(new Dimension(0, 16)));
 		loadInfo.add(browseInfo);
+		
+		JPanel infoButtons = new JPanel();
+		infoButtons.add(Box.createRigidArea(new Dimension(0, 42)));
+		infoButtons.setLayout(new BoxLayout(infoButtons, BoxLayout.Y_AXIS));
+		infoButtons.setOpaque(false);
+		infoButtons.add(buttonPanel);
+		infoButtons.add(Box.createRigidArea(new Dimension(0, 16)));
+		
+		pathLabel = new JLabel();
+		pathLabel.setAlignmentX(CENTER_ALIGNMENT);
+		pathLabel.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 22));
+		pathLabel.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+		Dimension d2 = overallInfo.getPreferredSize();
+		pathLabel.setPreferredSize(new Dimension(220, d2.height));
+		
+		infoButtons.add(pathLabel);
+		pathLabel.setText("Download path here");
+			
 
 		infoPanel.add(trackIcon);
 		infoPanel.add(Box.createHorizontalGlue());
 		infoPanel.add(loadInfo);
 		infoPanel.add(Box.createHorizontalGlue());
-		infoPanel.add(button);
-		infoPanel.add(Box.createRigidArea(new Dimension(16, 0)));
-		infoPanel.add(browseButton);
+		infoPanel.add(infoButtons);
 		
 		trackProgress = new LabelProgressBar(0, 100, 400);
 		trackProgress.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 26));
@@ -330,7 +356,6 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 			downloadPath = browse.getSelectedFile().getAbsolutePath();
 			dm.updateDownloadPath(downloadPath);
 		}
-		overallInfo.setText(downloadPath);
 	}
 	
 	private void rebuildUI() {
@@ -366,11 +391,7 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 					}
 					
 					
-					if (dm.downloadInProgress()) {
-						overallInfo.setText(dm.getNextTrack().getTitle());
-					}else{
-						overallInfo.setText(config.getDownloadPath());
-					}
+					overallInfo.setText(dm.getNextTrack().getTitle());
 					progressInfo.setText("Downloading track " + (dm.getDownloadedSize() + 1) + " of " + 
 							(dm.getDownloadsSize() + dm.getDownloadedSize()));
 					
@@ -414,19 +435,18 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 			progressInfo.setText(dm.getDownloadedSize() + " tracks successfully downloaded!");
 		}
 		
-			
+		overallInfo.setText(" ");
 		progress.setValue(0);
 		
 		repaint();
 	}
 	
 	private void updateInfo() {
+		overallInfo.setText(dm.getNextTrack().getTitle());
 		if (dm.downloadInProgress()) {
-			overallInfo.setText(dm.getNextTrack().getTitle());
 			progressInfo.setText("Downloading track " + (dm.getDownloadedSize() + 1) + " of " + 
 					(dm.getDownloadsSize() + dm.getDownloadedSize()));
 		}else{
-			overallInfo.setText(config.getDownloadPath());
 			if (dm.getDownloadedSize() <= 0)
 				progressInfo.setText("Ready to download " + dm.getDownloadsSize() + " tracks");
 			else
@@ -461,9 +481,13 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 			onDownloadFinished();
 		}else if (action == DownloadAction.USERNAME_CHANGED) {
 			if (config.getDownloadPath() != null) {
-				overallInfo.setText(config.getDownloadPath());
+				pathLabel.setText(config.getDownloadPath());
 			}
 			browse.setCurrentDirectory(new File(dm.getConfig().getDownloadPath()));
+		}else if (action == DownloadAction.DOWNLOAD_PATH_CHANGED) {
+			if (config.getDownloadPath() != null) {
+				pathLabel.setText(config.getDownloadPath());
+			}
 		}
 	}
 

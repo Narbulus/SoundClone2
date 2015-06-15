@@ -240,6 +240,8 @@ public class DownloadManager {
 	 */
 	public void stopDownload() {
 		downloadsWorker.cancel(true);
+		
+		updateTrackDownloadedFlags();
 		notifyObservers(DownloadAction.DOWNLOADS_FINISHED);
 	}
 
@@ -308,6 +310,15 @@ public class DownloadManager {
 		notifyObservers(DownloadAction.LIKES_FINISHED);
 		cm.updateConfigFile();
 	}
+	
+	public void updateTrackDownloadedFlags() {
+		cm.updateDownloadDirectory();
+		for ( TrackInfo t : tracks ) {
+			if (cm.isTrackDownloaded(t.getId())) {
+				t.setDownload(true);
+			}
+		}
+	}
 
 	/**
 	 * To be called when the track downloads worker has completed.
@@ -317,7 +328,7 @@ public class DownloadManager {
 		
 		// Some new tracks will be need to be flagged as having already
 		// been downloaded.
-		//cm.updateDownloadDirectory();
+		updateTrackDownloadedFlags();
 		
 		notifyObservers(DownloadAction.DOWNLOADS_FINISHED);
 	}

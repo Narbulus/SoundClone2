@@ -252,6 +252,12 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 				repaint();
 				revalidate();
 				break;
+			case DOWNLOADS_FINISHED:
+				for (TrackEntry t : entries) {
+					t.updateWarningStatus();
+				}
+				repaint();
+				break;
 			default:
 				break;
 		}
