@@ -30,13 +30,13 @@ public class LauncherMain {
 	}
 
 	private static void startLauncher() {
-		try {
+		/*try {
 			Runtime.getRuntime().exec("java -jar soundclone-1.0-0.jar");
 			System.exit(0);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 		// Start the launcher!
 		new LauncherFrame();
 	}
