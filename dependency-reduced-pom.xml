@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.brassbeluga</groupId>
-  <artifactId>dog</artifactId>
+  <artifactId>soundclone</artifactId>
   <name>ZipDog</name>
   <version>1.0-${buildNumber}</version>
   <description>Zippin and Songs</description>
@@ -176,8 +176,8 @@
                 <configuration>
                   <headerType>gui</headerType>
                   <stayAlive>false</stayAlive>
-                  <jar>C:\Users\Spencer\Projects\ZipClone\SoundClone2\target/dog-1.0-0.jar</jar>
-                  <outfile>C:\Users\Spencer\Projects\ZipClone\SoundClone2\target/dog-1.0-0.exe</outfile>
+                  <jar>D:\Development\SoundClone\SoundClone\SoundClone2\target/soundclone-1.0-0.jar</jar>
+                  <outfile>D:\Development\SoundClone\SoundClone\SoundClone2\target/soundclone-1.0-0.exe</outfile>
                   <classPath>
                     <mainClass>com.brassbeluga.launcher.LauncherMain</mainClass>
                     <addDependencies>false</addDependencies>
@@ -191,7 +191,7 @@
                       <opt>-Dswing.aatext=true</opt>
                     </opts>
                   </jre>
-                  <icon>C:\Users\Spencer\Projects\ZipClone\SoundClone2/src/main/resources/exe/icon.ico</icon>
+                  <icon>D:\Development\SoundClone\SoundClone\SoundClone2/src/main/resources/exe/icon.ico</icon>
                   <versionInfo>
                     <fileVersion>4.0.0.0</fileVersion>
                     <txtFileVersion>4.0.0.0</txtFileVersion>
@@ -201,8 +201,8 @@
                     <productName>ZipDog</productName>
                     <copyright>Syndicate, LLC,
 											http://www.technicpack.net</copyright>
-                    <internalName>dog</internalName>
-                    <originalFilename>dog.exe</originalFilename>
+                    <internalName>soundclone</internalName>
+                    <originalFilename>soundclone.exe</originalFilename>
                   </versionInfo>
                 </configuration>
               </execution>
