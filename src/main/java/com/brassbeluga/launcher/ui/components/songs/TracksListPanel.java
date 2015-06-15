@@ -197,29 +197,26 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 		trackList.removeAll();
 		tracks.clear();
 		entries.clear();
-
+		
 		trackList.add(loading);
-		trackList.add(Box.createGlue());
-
+		trackList.add(trackGlue);
+		
 		repaint();
 	}
 
 	public void addNewTracks(List<TrackInfo> newTracks) {
-		trackList.remove(trackGlue);
 
 		tracks.addAll(newTracks);
-
+		
 		int i = tracks.size();
 		for (TrackInfo t : newTracks) {
 			if (i == newTracks.size())
 				dm.selectTrack(t);
 			TrackEntry track = new TrackEntry(t, i, this, dm);
-			trackList.add(track);
+			trackList.add(track, trackList.getComponentCount() - 1);
 			entries.add(track);
 			i++;
 		}
-
-		trackList.add(trackGlue);
 
 		repaint();
 		revalidate();
@@ -252,6 +249,7 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 				break;
 			case LIKES_FINISHED:
 				trackList.remove(loading);
+				revalidate();
 				repaint();
 				break;
 			case DOWNLOADS_FINISHED:
