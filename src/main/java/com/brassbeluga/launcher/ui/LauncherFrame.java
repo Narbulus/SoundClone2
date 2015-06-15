@@ -106,7 +106,6 @@ public class LauncherFrame extends DraggableFrame implements DownloadsObserver {
 	private String currentTabName;
 	private JLabel warnings;
 	
-	private SoundCloneDB db;
 	private DownloadManager dm;
 	private TintablePanel songsHost;
 
@@ -117,7 +116,6 @@ public class LauncherFrame extends DraggableFrame implements DownloadsObserver {
 		//this.downloader = downloader;
 		
 		this.downloadSize = 0;
-		this.db = new SoundCloneDB();
 		this.dm = new DownloadManager();
 		dm.addObserver(this);
 		
@@ -291,7 +289,7 @@ public class LauncherFrame extends DraggableFrame implements DownloadsObserver {
 
 		JPanel downloadHost = new JPanel();
 		downloadHost.setBackground(COLOR_CENTRAL_BACK_OPAQUE);
-		downloadPanel = new DownloadPanel(db, this.dm);
+		downloadPanel = new DownloadPanel(this.dm);
 		dm.addObserver(downloadPanel);
 
 		infoSwap.add(downloadPanel, TAB_DOWNLOAD);

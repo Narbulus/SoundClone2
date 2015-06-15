@@ -58,7 +58,6 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 
 	private JButton openButton;
 	
-	private SoundCloneDB db;
 	private DownloadPanel dp;
 	private String macAddr;
 	private String ipAddr;
@@ -70,37 +69,10 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 
 	private JLabel pathLabel;
 
-	public DownloadPanel(SoundCloneDB db, DownloadManager dm) {
-		this.db = db;
+	public DownloadPanel(DownloadManager dm) {
 		this.dm = dm;
 		this.dp = this;
 		this.config = dm.getConfig();
-		
-		try {
-			
-			URL whatismyip = new URL("http://checkip.amazonaws.com");
-			BufferedReader in = new BufferedReader(new InputStreamReader(
-			                whatismyip.openStream()));
-
-			ipAddr = in.readLine(); //you get the external IP as a String
-			
-			// Get the MAC address now.
-			InetAddress ip = InetAddress.getLocalHost();
-	        NetworkInterface network = NetworkInterface.getByInetAddress(ip);
-	        byte[] mac = network.getHardwareAddress();
-
-	
-	        StringBuilder sb = new StringBuilder();
-	        for (int i = 0; i < mac.length; i++) {
-	            sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));        
-	        }
-	        
-	        macAddr = sb.toString();
-        
-		} catch (Exception e) {
-			macAddr = "N/A";
-			ipAddr = "N/A";
-		}
 
 		initComponents();
 	}

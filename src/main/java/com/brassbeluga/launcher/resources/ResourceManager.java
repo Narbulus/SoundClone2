@@ -15,7 +15,7 @@ import javax.swing.ImageIcon;
 public class ResourceManager {
 	
 	// True if launching soundcloud from the IDE, false if packaging into jar
-	public static final boolean IS_DEVBUILD = true;
+	public static final boolean IS_DEVBUILD = false;
 	public static final String FONT_RALEWAY = "fonts/Raleway-Light.ttf";
 	public static final String FONT_OPENSANS = "fonts/OpenSans-Regular.ttf";
 	

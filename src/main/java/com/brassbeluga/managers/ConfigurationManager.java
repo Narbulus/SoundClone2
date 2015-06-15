@@ -181,7 +181,6 @@ public class ConfigurationManager {
 	 * Called when the user either enters or selects a new user to be loaded.
 	 * 
 	 * @param user the new user's username
-	 * @param gui
 	 * @throws Exception
 	 * @throws JsonSyntaxException
 	 * @return Returns a new status for the program
@@ -198,6 +197,7 @@ public class ConfigurationManager {
 				for (Configuration c : configs) {
 					if (c.getUsername().equals(select)) {
 						currentConfig = c;
+						break;
 					}
 				}
 				
@@ -205,7 +205,14 @@ public class ConfigurationManager {
 				if (currentConfig == null) {
 					currentConfig = new Configuration(select, defaultDownload, null);
 					configs.add(currentConfig);
+				} else {
+					// Move the user to the bottom of the list so it will be loaded
+					// initially next time as the last user searched.
+					configs.remove(currentConfig);
+					configs.add(currentConfig);
 				}
+				
+				updateConfigFile();
 				
 				// Scan the new download directory for tracks
 				if (currentConfig.getDownloadPath() != null)
@@ -267,7 +274,7 @@ public class ConfigurationManager {
 	 */
 	public String getLastUser() {
 		if (configs.size() > 0){
-			return configs.get(0).getUsername();
+			return configs.get(configs.size() - 1).getUsername();
 		}
 		return null;
 	}
