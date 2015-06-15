@@ -269,37 +269,45 @@ public class DownloadLikes {
 	}
 	
 	private void formatMp3Tag(ID3v2 tag, TrackInfo t) {
+		// Reset tag info.
+		tag.setArtist(" ");
+		tag.clearAlbumImage();
+		tag.setTitle(" ");
+		
 		// If the file name has a parseable title and artist,
 		// update tag with new info
 		String title = t.getTitle();
 		if (title.contains(" - ")) {
 			String[] halves = title.split("-|~");
 			if (halves.length == 2) {
-				tag.setArtist(halves[0].trim());
+				tag.setArtist(halves[0].trim()); 
 				tag.setTitle(halves[1].trim());
 			}
 		} else {
 			tag.setTitle(title.trim());
-			tag.setArtist("");
 		}
 
 		BufferedImage image = downloadArtwork(t.getArtworkURL().replace("-large", "-t500x500"));
-		// Write the image bytes to the mp3 tag
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		byte[] bytes = null;
 		
-		try {
-			ImageIO.write(image, "jpg", out);
-			out.flush();
-			bytes = out.toByteArray();
-			out.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
 		ID3Wrapper newId3Wrapper = new ID3Wrapper(new ID3v1Tag(), new ID3v23Tag());
-		newId3Wrapper.setAlbumImage(bytes, "image/jpeg");
-		tag.setAlbumImage(bytes, "image/jpeg");
+		
+		if (image != null) {
+			// Write the image bytes to the mp3 tag (if a valid image exists)
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			byte[] bytes = null;
+			
+			try {
+				ImageIO.write(image, "jpg", out);
+				out.flush();
+				bytes = out.toByteArray();
+				out.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+	
+			newId3Wrapper.setAlbumImage(bytes, "image/jpeg");
+			tag.setAlbumImage(bytes, "image/jpeg");
+		}
 		
 		// Embed track id for directory scanning
 		tag.setPaymentUrl("" + t.getId());
