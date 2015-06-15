@@ -1,5 +1,7 @@
 package com.brassbeluga.launcher.ui.components.songs;
 
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.MouseEvent;
@@ -34,6 +36,7 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 	private JScrollPane scrollPane;
 	private List<TrackInfo> tracks;
 	private List<TrackEntry> entries;
+	private boolean isLocked;
 
 	private LauncherFrame parent;
 	private DownloadManager dm;
@@ -41,6 +44,7 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 	public TracksListPanel(LauncherFrame parent, DownloadManager dm) {
 		this.parent = parent;
 		this.dm = dm;
+		this.isLocked = false;
 
 		initComponents();
 	}
@@ -117,7 +121,6 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 						dm.addAllTracks(selectTracks);
 					}
 				});
-
 			}
 
 			@Override
@@ -209,8 +212,8 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 		int i = tracks.size();
 		for (TrackInfo t : newTracks) {
 			if (i == newTracks.size())
-				parent.selectTrack(t);
-			TrackEntry track = new TrackEntry(t, i, parent, dm);
+				dm.selectTrack(t);
+			TrackEntry track = new TrackEntry(t, i, this, dm);
 			trackList.add(track);
 			entries.add(track);
 			i++;
@@ -250,17 +253,26 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 			case LIKES_FINISHED:
 				trackList.remove(loading);
 				repaint();
-				revalidate();
 				break;
 			case DOWNLOADS_FINISHED:
 				for (TrackEntry t : entries) {
 					t.updateWarningStatus();
 				}
+				dm.setWarningMessage("");
+				isLocked = false;
 				repaint();
+				break;
+			case DOWNLOADS_START:
+				dm.setWarningMessage("Cannot select tracks while downloading");
+				isLocked = true;
 				break;
 			default:
 				break;
 		}
+	}
+
+	public boolean isLocked() {
+		return isLocked;
 	}
 
 }

@@ -83,8 +83,9 @@ public class TintablePanel extends JPanel {
     @Override
     public void paint(Graphics graphics) {
         super.paint(graphics);
-
+    
         if (tintActive) {
+        	System.out.println("TINT");
             graphics.setColor(getTintColor());
             graphics.fillRect(0,0,getWidth(),getHeight());
         }

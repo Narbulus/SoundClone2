@@ -125,6 +125,7 @@ public class ConfigurationManager {
 	 * @throws IOException
 	 */
 	public void updateDownloadDirectory() {
+		oldDownloads.clear();
 		File folder = new File(currentConfig.getDownloadPath());
 		File[] files = folder.listFiles();
 		for (int i=0; i < files.length; i++) {
@@ -139,9 +140,9 @@ public class ConfigurationManager {
 						e.printStackTrace();
 					}
 					ID3v2 tag = mp3file.getId3v2Tag();
-					if (tag != null && tag.getPaymentUrl() != null && 
-							!oldDownloads.contains(Integer.parseInt(tag.getPaymentUrl())))
+					if (tag != null && tag.getPaymentUrl() != null) {
 						oldDownloads.add(Integer.parseInt(tag.getPaymentUrl()));
+					}
 				}
 			}
 		}

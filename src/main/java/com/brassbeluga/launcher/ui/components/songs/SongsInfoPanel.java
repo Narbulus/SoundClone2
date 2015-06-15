@@ -201,6 +201,8 @@ public class SongsInfoPanel extends TintablePanel implements DownloadsObserver {
 			dm.downloadLabelIcon(dm.getConfig().getAvatarURL(), userIcon, ResourceManager.getIcon("default_user.png"));
 		}else if (action == DownloadAction.USERNAME_CHANGED) {
 			clearSongInfo();
+		}else if (action == DownloadAction.SELECT_TRACK) {
+			updateTrack(dm.getSelectedTrack());
 		}
 	}
 	

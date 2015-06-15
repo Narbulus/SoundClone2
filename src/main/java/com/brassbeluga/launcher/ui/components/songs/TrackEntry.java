@@ -25,7 +25,7 @@ public class TrackEntry extends JPanel {
 	private TrackInfo info;
 	private boolean downloadFlag;
 	
-	private LauncherFrame parent;
+	private TracksListPanel parent;
 	private Color backColor;
 	private Color altColor;
 	
@@ -35,7 +35,7 @@ public class TrackEntry extends JPanel {
 	private int index;
 	private DownloadManager dm;
 	
-	public TrackEntry(TrackInfo info, int index, LauncherFrame parent, DownloadManager dm) {
+	public TrackEntry(TrackInfo info, int index, TracksListPanel parent, DownloadManager dm) {
 		this.info = info;
 		this.downloadFlag = false;
 		this.index = index;
@@ -86,7 +86,7 @@ public class TrackEntry extends JPanel {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				parent.selectTrack(info);
+				dm.selectTrack(info);
 			}
 
 			@Override
@@ -177,12 +177,12 @@ public class TrackEntry extends JPanel {
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				parent.onWarningHoverEnter();
+				dm.setWarningMessage("This track has already been downloaded");;
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				parent.onWarningHoverExit();
+				dm.setWarningMessage("");;
 			}
 		});
 

@@ -26,6 +26,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Frame;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Random;
@@ -50,11 +51,11 @@ import com.brassbeluga.launcher.ui.controls.DraggableFrame;
 import com.brassbeluga.launcher.ui.controls.HeaderTab;
 import com.brassbeluga.launcher.ui.controls.ProgressBar;
 import com.brassbeluga.launcher.ui.controls.TintablePanel;
+import com.brassbeluga.managers.DownloadAction;
 import com.brassbeluga.managers.DownloadManager;
 import com.brassbeluga.observer.DownloadsObserver;
-import com.brassbeluga.sound.gson.TrackInfo;
 
-public class LauncherFrame extends DraggableFrame {
+public class LauncherFrame extends DraggableFrame implements DownloadsObserver {
 	private static final long serialVersionUID = -5667136239041080648L;
 	private static final int FRAME_WIDTH = 1194;
 	private static final int FRAME_HEIGHT = 718;
@@ -84,6 +85,8 @@ public class LauncherFrame extends DraggableFrame {
 	public static final String DOWNLOAD_TRACK_COMMAND = "download_track";
 	
 	public long downloadSize;
+	
+	private GlassLockPane pane;
 
 	private HeaderTab songsTab;
 	private HeaderTab downloadTab;
@@ -105,6 +108,7 @@ public class LauncherFrame extends DraggableFrame {
 	
 	private SoundCloneDB db;
 	private DownloadManager dm;
+	private TintablePanel songsHost;
 
 	public LauncherFrame() {
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
@@ -115,6 +119,7 @@ public class LauncherFrame extends DraggableFrame {
 		this.downloadSize = 0;
 		this.db = new SoundCloneDB();
 		this.dm = new DownloadManager();
+		dm.addObserver(this);
 		
 		// Handles rebuilding the frame, so use it to build the frame in the
 		// first place
@@ -137,8 +142,11 @@ public class LauncherFrame extends DraggableFrame {
 		downloadTab.setIsActive(false);
 
 		if (tabName.equalsIgnoreCase(TAB_SONGS)) {
+			if (dm.downloadInProgress())
+				showLock();
 			songsTab.setIsActive(true);
 		} else if (tabName.equalsIgnoreCase(TAB_DOWNLOAD)) {
+			hideLock();
 			downloadTab.setIsActive(true);
 		}
 
@@ -270,7 +278,7 @@ public class LauncherFrame extends DraggableFrame {
 		infoSwap.add(modpackHost, "modpacks");
 		centralPanel.add(infoSwap, BorderLayout.CENTER);
 
-		JPanel songsHost = new JPanel();
+		songsHost = new TintablePanel();
 		tracksPanel = new TracksListPanel(this, this.dm);
 		dm.addObserver(tracksPanel);
 		songsInfoPanel = new SongsInfoPanel(this, this.dm);
@@ -332,11 +340,25 @@ public class LauncherFrame extends DraggableFrame {
 		footer.add(buildCtrl);
 
 		this.add(footer, BorderLayout.PAGE_END);
-
+		
 	}
-
-	public void selectTrack(TrackInfo track) {
-		songsInfoPanel.updateTrack(track);
+	
+	private void showLock() {
+		Rectangle bounds = infoSwap.getBounds();
+		bounds.y += downloadTab.getHeight();
+		pane = new GlassLockPane(bounds, new Color(20, 20, 20, 120));
+		this.setGlassPane(pane);
+		pane.setVisible(true);
+		pane.setOpaque(false);
+	}
+	
+	private void hideLock() {
+		Rectangle bounds = infoSwap.getBounds();
+		bounds.y += downloadTab.getHeight();
+		pane = new GlassLockPane(bounds, new Color(20, 20, 20, 120));
+		this.setGlassPane(pane);
+		pane.setVisible(false);
+		pane.setOpaque(false);
 	}
 
 	public void relocalize() {
@@ -360,25 +382,18 @@ public class LauncherFrame extends DraggableFrame {
 			}
 		});
 	}
-	
-	/*
-	public Point getAbsolutePosition(Component component) {
-		int x = 0;
-		int y = 0;
-		do {
-			x += component.getX();
-			y += component.getY();
-			component = component.getParent();
-		} while (component != this);
 
-		return new Point(x, y);
-	}*/
-
-	public void onWarningHoverEnter() {
-		warnings.setText("This track has already been downloaded");
+	@Override
+	public void update(DownloadManager dm, DownloadAction action) {
+		if (action == DownloadAction.WARNING_MESSAGE_CHANGED) {
+			warnings.setText(dm.getWarningMessage());
+		}else if (action == DownloadAction.DOWNLOADS_START) {
+			if (currentTabName.equals(TAB_SONGS))
+				showLock();
+		}else if (action == DownloadAction.DOWNLOADS_FINISHED) {
+			hideLock();
+		}
+		songsHost.repaint();
 	}
 
-	public void onWarningHoverExit() {
-		warnings.setText("");
-	}
 }

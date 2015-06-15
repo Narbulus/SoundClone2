@@ -25,6 +25,12 @@ public class DownloadManager {
 	// List of tracks to be downloaded.
 	private List<TrackInfo> tracks;
 	
+	// Currently selected track in the likes panel
+	private TrackInfo selectedTrack;
+	
+	// Text for the warnings bar on the bottom of the screen
+	private String warningMessage;
+	
 	// List of current user's likes.
 	private List<TrackInfo> likes;
 	
@@ -233,6 +239,12 @@ public class DownloadManager {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		notifyObservers(DownloadAction.DOWNLOADS_START);
+	}
+	
+	public void selectTrack(TrackInfo track) {
+		this.selectedTrack = track;
+		notifyObservers(DownloadAction.SELECT_TRACK);
 	}
 
 	/**
@@ -285,6 +297,11 @@ public class DownloadManager {
 		notifyObservers(DownloadAction.USER_ARTWORK_LOADED);
 	}
 	
+	public void setWarningMessage(String message) {
+		warningMessage = message;
+		notifyObservers(DownloadAction.WARNING_MESSAGE_CHANGED);
+	}
+	
 	/**
 	 * Gets the configuration manager for this download session.
 	 * DO NOT make state changes directly to configuration manager,
@@ -313,7 +330,7 @@ public class DownloadManager {
 	
 	public void updateTrackDownloadedFlags() {
 		cm.updateDownloadDirectory();
-		for ( TrackInfo t : tracks ) {
+		for ( TrackInfo t : likes ) {
 			if (cm.isTrackDownloaded(t.getId())) {
 				t.setDownload(true);
 			}
@@ -441,5 +458,13 @@ public class DownloadManager {
 		if (tracks.size() > 0)
 			return tracks.get(0);
 		return null;
+	}
+
+	public String getWarningMessage() {
+		return warningMessage;
+	}
+
+	public TrackInfo getSelectedTrack() {
+		return selectedTrack;
 	}
 }
