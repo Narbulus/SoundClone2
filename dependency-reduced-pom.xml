@@ -176,8 +176,8 @@
                 <configuration>
                   <headerType>gui</headerType>
                   <stayAlive>false</stayAlive>
-                  <jar>D:\Development\SoundClone\SoundClone\SoundClone2\target/soundclone-1.0-0.jar</jar>
-                  <outfile>D:\Development\SoundClone\SoundClone\SoundClone2\target/soundclone-1.0-0.exe</outfile>
+                  <jar>C:\Users\Spencer\Projects\ZipClone\SoundClone2\target/soundclone-1.0-0.jar</jar>
+                  <outfile>C:\Users\Spencer\Projects\ZipClone\SoundClone2\target/soundclone-1.0-0.exe</outfile>
                   <classPath>
                     <mainClass>com.brassbeluga.launcher.LauncherMain</mainClass>
                     <addDependencies>false</addDependencies>
@@ -191,7 +191,7 @@
                       <opt>-Dswing.aatext=true</opt>
                     </opts>
                   </jre>
-                  <icon>D:\Development\SoundClone\SoundClone\SoundClone2/src/main/resources/exe/icon.ico</icon>
+                  <icon>C:\Users\Spencer\Projects\ZipClone\SoundClone2/src/main/resources/exe/icon.ico</icon>
                   <versionInfo>
                     <fileVersion>4.0.0.0</fileVersion>
                     <txtFileVersion>4.0.0.0</txtFileVersion>

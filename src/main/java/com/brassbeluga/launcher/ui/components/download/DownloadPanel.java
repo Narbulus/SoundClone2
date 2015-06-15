@@ -50,6 +50,7 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 	private JPanel trackList;
 	private JFileChooser browse;
 
+	private SimpleScrollbarUI scroll;
 	private JScrollPane scrollPane;
 
 	private JButton openButton;
@@ -92,9 +93,9 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 		scrollPane.setOpaque(false);
 		scrollPane.setBorder(BorderFactory.createEmptyBorder());
 		scrollPane.getViewport().setOpaque(false);
-		scrollPane.getVerticalScrollBar().setUI(
-				new SimpleScrollbarUI(LauncherFrame.COLOR_SCROLL_TRACK,
-						LauncherFrame.COLOR_WHITE_TEXT));
+		scroll = new SimpleScrollbarUI(LauncherFrame.COLOR_SCROLL_TRACK,
+				LauncherFrame.COLOR_WHITE_TEXT);
+		scrollPane.getVerticalScrollBar().setUI(scroll);
 		scrollPane.getVerticalScrollBar().setPreferredSize(
 				new Dimension(10, 10));
 		scrollPane.getVerticalScrollBar().setUnitIncrement(12);
@@ -370,7 +371,10 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 					
 					// Make the progress bar visible on the current row
 					trackProgress = ((LabelProgressBar)trackList.getComponent(i));
-					trackProgress.setBarVisible(true);				
+					trackProgress.setBarVisible(true);	
+					
+					scroll.updateCurrentPosition((i * 1.0) / panelTracks.size(), 
+							trackProgress.getHeight() / (trackList.getHeight() * 1.0));
 					
 					overallInfo.setText(dm.getNextTrack().getTitle());
 					progressInfo.setText("Downloading track " + (dm.getDownloadedSize() + 1) + " of " + 
@@ -453,7 +457,7 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 			rebuildUI();
 		}else if (action == DownloadAction.SONG_PROGRESS) {
 			trackProgress.setProgress(dm.getSongProgress());
-			overallInfo.setText(dm.getNextTrack().getTitle() + " " + dm.getSongProgress() + "%");
+			//overallInfo.setText(dm.getNextTrack().getTitle() + " " + dm.getSongProgress() + "%");
 			int totalSize = dm.getDownloadsSize() + dm.getDownloadedSize();
             progress.setValue((int)(((dm.getDownloadedSize() * 1.0 + (dm.getSongProgress() / 100.0)) / (totalSize * 1.0)) * 100));;
 		}else if (action == DownloadAction.DOWNLOADS_FINISHED) {
