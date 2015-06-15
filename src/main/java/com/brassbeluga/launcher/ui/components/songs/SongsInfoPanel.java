@@ -82,7 +82,6 @@ public class SongsInfoPanel extends TintablePanel implements DownloadsObserver {
 		usernameField.setCaretColor(LauncherFrame.COLOR_WHITE_TEXT);
 		usernameField.setPreferredSize(new Dimension(200, 40));
 		// Initialize the new autocomplete document listener
-		System.out.println(dm.getConfig().getPreviousUsers().toString());
 		Autocomplete autocomplete = new Autocomplete(usernameField, dm.getConfig().getPreviousUsers());
 		// Assign it to the username field's document
 		usernameField.getDocument().addDocumentListener(autocomplete);

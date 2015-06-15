@@ -45,7 +45,6 @@ public class LockScreenMouseListener extends MouseInputAdapter {
 
 	// A basic implementation of redispatching events.
 	private void redispatchMouseEvent(MouseEvent e, boolean repaint) {
-		System.out.println(e.getPoint().toString());
 		if (redirect.getBounds().contains(e.getPoint())) {
 			redirect.dispatchEvent(e);
 		}

@@ -78,12 +78,13 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 				new Dimension(10, 10));
 		scrollPane.getVerticalScrollBar().setUnitIncrement(12);
 
-		loading = new JLabel("Loading user's likes...");
+		loading = new JLabel();
+		loading.setIcon(ResourceManager.getIcon("gears.gif"));
 		loading.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY,
 				20));
 		loading.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
 		loading.setPreferredSize(new Dimension(
-				loading.getPreferredSize().width, 40));
+				loading.getPreferredSize().width, loading.getPreferredSize().height + 12));
 		loading.setAlignmentX(CENTER_ALIGNMENT);
 
 		trackControls = new JPanel();

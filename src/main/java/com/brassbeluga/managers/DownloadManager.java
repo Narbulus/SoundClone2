@@ -283,9 +283,6 @@ public class DownloadManager {
 		
 		cm.updateUser(user);
 		
-		System.out.println(user);
-		System.out.println(cm.getCurrentUser());
-		
 		// Download the users likes
 		removeAllLikes();
 		likesWorker = downloader.updateUserLikes(cm.getCurrentConfig(), cm.getClientID());

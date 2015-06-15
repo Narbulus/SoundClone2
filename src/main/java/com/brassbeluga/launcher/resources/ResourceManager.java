@@ -71,7 +71,6 @@ public class ResourceManager {
 			InputStream stream = cl.getResourceAsStream(RESOURCE_JAR_URL + imageName);
 			return ImageIO.read(stream);
 		} catch (IOException e) {
-			System.out.println("Hey");
 			e.printStackTrace();
 			return null;
 		}

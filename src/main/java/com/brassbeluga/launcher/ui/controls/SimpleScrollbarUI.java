@@ -29,20 +29,37 @@ import javax.swing.JComponent;
 import javax.swing.JScrollBar;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 
+import com.brassbeluga.launcher.ui.LauncherFrame;
+
 public class SimpleScrollbarUI extends BasicScrollBarUI {
 
     private Color trackColor;
     private Color thumbColor;
+    private double posY;
+    private double percY;
 
     public SimpleScrollbarUI(Color trackColor, Color thumbColor) {
         this.trackColor = trackColor;
         this.thumbColor = thumbColor;
+        posY = 0;
+        percY = 0;
+    }
+    
+    public void updateCurrentPosition(double posY, double percY) {
+    	this.posY = posY;
+    	this.percY = percY;
     }
 
     @Override
     protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {
         g.setColor(trackColor);
         g.fillRect(trackBounds.x, trackBounds.y, trackBounds.width, trackBounds.height);
+        if (this.percY > 0) {
+	        g.setColor(LauncherFrame.COLOR_GREEN);
+	        int barHeight = (int) (trackBounds.height * percY);
+	        if (barHeight <= 6) barHeight = 6;
+	        g.fillRect(trackBounds.x, (int)(trackBounds.height * this.posY), trackBounds.width, barHeight);
+        }
     }
 
     @Override
