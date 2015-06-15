@@ -32,6 +32,7 @@
         </includes>
       </resource>
       <resource>
+        <targetPath>net/technicpack/launcher/resources</targetPath>
         <directory>${project.basedir}/src/main/resources</directory>
         <includes>
           <include>**/*</include>
@@ -42,6 +43,7 @@
         </excludes>
       </resource>
       <resource>
+        <targetPath>net/technicpack/launcher/resources</targetPath>
         <filtering>true</filtering>
         <directory>${project.basedir}/src/main/resources</directory>
         <includes>
@@ -94,7 +96,7 @@
                   </includes>
                 </filter>
                 <filter>
-                  <artifact>net.technicpack:*</artifact>
+                  <artifact>com.brassbeluga:*</artifact>
                   <includes>
                     <include>**</include>
                   </includes>
