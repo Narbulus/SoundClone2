@@ -14,12 +14,11 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
-import net.technicpack.ui.controls.TintablePanel;
-import net.technicpack.ui.controls.WatermarkTextField;
-
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.Autocomplete;
 import com.brassbeluga.launcher.ui.LauncherFrame;
+import com.brassbeluga.launcher.ui.controls.TintablePanel;
+import com.brassbeluga.launcher.ui.controls.WatermarkTextField;
 import com.brassbeluga.managers.DownloadAction;
 import com.brassbeluga.managers.DownloadManager;
 import com.brassbeluga.observer.DownloadsObserver;
@@ -154,6 +153,15 @@ public class SongsInfoPanel extends TintablePanel implements DownloadsObserver {
 		trackInfo.add(trackArt);
 
 	}
+	
+	public void clearSongInfo() {
+		selected = null;
+		trackArtist.setText("");
+		trackName.setText("");
+		trackNameOverflow.setText("");
+		trackArt.setIcon(ResourceManager.getIcon("default_track.png"));
+		userIcon.setIcon(ResourceManager.getIcon("default_user.png"));
+	}
 
 	public void updateTrack(final TrackInfo track) {
 		if (selected != track) {
@@ -191,6 +199,8 @@ public class SongsInfoPanel extends TintablePanel implements DownloadsObserver {
 	public void update(DownloadManager dm, DownloadAction action) {
 		if (action == DownloadAction.USER_ARTWORK_LOADED) {
 			dm.downloadLabelIcon(dm.getConfig().getAvatarURL(), userIcon, ResourceManager.getIcon("default_user.png"));
+		}else if (action == DownloadAction.USERNAME_CHANGED) {
+			clearSongInfo();
 		}
 	}
 	

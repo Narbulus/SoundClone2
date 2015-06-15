@@ -14,14 +14,12 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.SwingWorker;
 import javax.swing.border.MatteBorder;
-
-import net.technicpack.ui.controls.TintablePanel;
-import net.technicpack.ui.controls.list.SimpleScrollbarUI;
 
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.LauncherFrame;
+import com.brassbeluga.launcher.ui.controls.SimpleScrollbarUI;
+import com.brassbeluga.launcher.ui.controls.TintablePanel;
 import com.brassbeluga.managers.DownloadAction;
 import com.brassbeluga.managers.DownloadManager;
 import com.brassbeluga.observer.DownloadsObserver;

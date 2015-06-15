@@ -12,12 +12,10 @@ import java.io.InputStream;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
-import net.technicpack.ui.lang.ResourceLoader;
-
 public class ResourceManager {
 	
 	// True if launching soundcloud from the IDE, false if packaging into jar
-	public static final boolean IS_DEVBUILD = true;
+	public static final boolean IS_DEVBUILD = false;
 	public static final String FONT_RALEWAY = "fonts/Raleway-Light.ttf";
 	public static final String FONT_OPENSANS = "fonts/OpenSans-Regular.ttf";
 	
@@ -68,7 +66,7 @@ public class ResourceManager {
 	}
 	
 	private static BufferedImage getJarImage(String imageName) {
-		ClassLoader cl = ResourceLoader.class.getClassLoader();
+		ClassLoader cl = ResourceManager.class.getClassLoader();
 		try {
 			InputStream stream = cl.getResourceAsStream(RESOURCE_JAR_URL + imageName);
 			return ImageIO.read(stream);
@@ -97,7 +95,7 @@ public class ResourceManager {
 	}
 	
 	private static Font getJarFont(String fontName, int fontSize) {
-		ClassLoader cl = ResourceLoader.class.getClassLoader();
+		ClassLoader cl = ResourceManager.class.getClassLoader();
 		try {
 			return Font.createFont(Font.TRUETYPE_FONT, cl.getResourceAsStream(RESOURCE_JAR_URL + fontName))
 				.deriveFont(Font.PLAIN, fontSize);
@@ -128,7 +126,7 @@ public class ResourceManager {
 	}
 	
 	private static InputStream getJarResourceAsStream(String resourceName) {
-		ClassLoader cl = ResourceLoader.class.getClassLoader();
+		ClassLoader cl = ResourceManager.class.getClassLoader();
 		return cl.getResourceAsStream(RESOURCE_JAR_URL + resourceName);
 	}
 	

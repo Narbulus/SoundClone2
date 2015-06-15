@@ -3,7 +3,6 @@ package com.brassbeluga.launcher.ui.components.download;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
-import java.awt.Image;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.BufferedReader;
@@ -13,14 +12,10 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -30,11 +25,10 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingWorker;
 import javax.swing.border.Border;
 
-import net.technicpack.ui.controls.list.SimpleScrollbarUI;
-
 import com.brassbeluga.database.SoundCloneDB;
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.LauncherFrame;
+import com.brassbeluga.launcher.ui.controls.SimpleScrollbarUI;
 import com.brassbeluga.managers.ConfigurationManager;
 import com.brassbeluga.managers.DownloadAction;
 import com.brassbeluga.managers.DownloadManager;

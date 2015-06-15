@@ -299,7 +299,7 @@ public class DownloadLikes {
 
 		ID3Wrapper newId3Wrapper = new ID3Wrapper(new ID3v1Tag(), new ID3v23Tag());
 		newId3Wrapper.setAlbumImage(bytes, "image/jpeg");
-		tag.setAlbumImage(bytes, 2, "image/jpeg");
+		tag.setAlbumImage(bytes, "image/jpeg");
 		
 		// Embed track id for directory scanning
 		tag.setPaymentUrl("" + t.getId());

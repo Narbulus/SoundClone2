@@ -4,7 +4,7 @@
 
 	<!-- Project information -->
 	<name>ZipDog</name>
-	<groupId>net.brassbeluga</groupId>
+	<groupId>com.brassbeluga</groupId>
 	<artifactId>dog</artifactId>
 	<version>1.0-${buildNumber}</version>
 	<url>http://www.technicpack.net</url>
@@ -14,7 +14,7 @@
 	<!-- Build properties -->
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<mainClass>${project.groupId}.${project.artifactId}.LauncherMain</mainClass>
+		<mainClass>${project.groupId}.launcher.LauncherMain</mainClass>
 		<buildNumber>0</buildNumber>
 	</properties>
 
@@ -46,27 +46,6 @@
 		</dependency>
 		<!-- Included in final JAR -->
 		<dependency>
-			<groupId>net.technicpack</groupId>
-			<artifactId>launchercore</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/launchercore-2.0.0-SNAPSHOT.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>net.technicpack</groupId>
-			<artifactId>launcheruicore</artifactId>
-			<version>1.0-SNAPSHOT</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/launcheruicore-1.0-SNAPSHOT.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>net.technicpack</groupId>
-			<artifactId>minecraftcore</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/minecraftcore-1.0.0-SNAPSHOT.jar</systemPath>
-		</dependency>
-		<dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
 			<version>2.4</version>
@@ -76,8 +55,6 @@
 			<groupId>com.mpatric</groupId>
 			<artifactId>mp3agic</artifactId>
 			<version>0.8.3</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/mp3agic-0.8.3-SNAPSHOT.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>com.beust</groupId>
@@ -256,7 +233,7 @@
 									</includes>
 								</filter>
 								<filter>
-									<artifact>net.technicpack:*</artifact>
+									<artifact>com.brassbeluga:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>
@@ -297,6 +274,7 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!-- 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jarsigner-plugin</artifactId>
@@ -324,6 +302,7 @@
 					</execution>
 				</executions>
 			</plugin>
+			 -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>

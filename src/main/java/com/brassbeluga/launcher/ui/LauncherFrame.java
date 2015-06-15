@@ -40,22 +40,19 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
-import net.technicpack.ui.controls.DraggableFrame;
-import net.technicpack.ui.controls.TintablePanel;
-import net.technicpack.ui.controls.installation.ProgressBar;
-import net.technicpack.utilslib.DesktopUtils;
-
 import com.brassbeluga.database.SoundCloneDB;
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.components.download.DownloadPanel;
 import com.brassbeluga.launcher.ui.components.songs.SongsInfoPanel;
 import com.brassbeluga.launcher.ui.components.songs.TracksListPanel;
 import com.brassbeluga.launcher.ui.controls.DownloadHeaderTab;
+import com.brassbeluga.launcher.ui.controls.DraggableFrame;
 import com.brassbeluga.launcher.ui.controls.HeaderTab;
+import com.brassbeluga.launcher.ui.controls.ProgressBar;
+import com.brassbeluga.launcher.ui.controls.TintablePanel;
 import com.brassbeluga.managers.DownloadManager;
 import com.brassbeluga.observer.DownloadsObserver;
 import com.brassbeluga.sound.gson.TrackInfo;
-import com.google.gson.JsonSyntaxException;
 
 public class LauncherFrame extends DraggableFrame {
 	private static final long serialVersionUID = -5667136239041080648L;
@@ -181,13 +178,6 @@ public class LauncherFrame extends DraggableFrame {
 		headerLabel.setBorder(BorderFactory.createEmptyBorder(5, 8, 5, 0));
 		headerLabel.setContentAreaFilled(false);
 		headerLabel.setFocusPainted(false);
-		headerLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		headerLabel.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				DesktopUtils.browseUrl("http://www.soundcloud.com/");
-			}
-		});
 		header.add(headerLabel);
 
 		header.add(Box.createRigidArea(new Dimension(6, 0)));
