@@ -37,6 +37,7 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 	private List<TrackInfo> tracks;
 	private List<TrackEntry> entries;
 	private boolean isLocked;
+	private Component trackGlue;
 
 	private LauncherFrame parent;
 	private DownloadManager dm;
@@ -46,6 +47,7 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 		this.dm = dm;
 		this.isLocked = false;
 
+		trackGlue = Box.createGlue();
 		initComponents();
 	}
 
@@ -203,9 +205,7 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 	}
 
 	public void addNewTracks(List<TrackInfo> newTracks) {
-		if (trackList.getComponentCount() > 0)
-			// Remove glue
-			trackList.remove(trackList.getComponentCount() - 1);
+		trackList.remove(trackGlue);
 
 		tracks.addAll(newTracks);
 
@@ -219,7 +219,7 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 			i++;
 		}
 
-		trackList.add(Box.createGlue());
+		trackList.add(trackGlue);
 
 		repaint();
 		revalidate();
