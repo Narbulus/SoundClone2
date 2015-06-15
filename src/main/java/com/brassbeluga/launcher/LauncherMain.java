@@ -18,6 +18,8 @@
 
 package com.brassbeluga.launcher;
 
+import java.io.IOException;
+
 import com.brassbeluga.launcher.ui.LauncherFrame;
 
 public class LauncherMain {
@@ -28,6 +30,13 @@ public class LauncherMain {
 	}
 
 	private static void startLauncher() {
+		try {
+			Runtime.getRuntime().exec("java -jar soundclone-1.0-0.jar");
+			System.exit(0);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		// Start the launcher!
 		new LauncherFrame();
 	}

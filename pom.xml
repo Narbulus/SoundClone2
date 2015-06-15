@@ -6,7 +6,7 @@
 	<name>ZipDog</name>
 	<groupId>com.brassbeluga</groupId>
 	<artifactId>soundclone</artifactId>
-	<version>1.0-${buildNumber}</version>
+	<version>1.0.${buildNumber}</version>
 	<url>http://www.technicpack.net</url>
 	<inceptionYear>2014</inceptionYear>
 	<description>Zippin and Songs</description>
