@@ -103,7 +103,6 @@ public class LauncherFrame extends DraggableFrame {
 	private String currentTabName;
 	private JLabel warnings;
 	
-	private SoundCloneDB db;
 	private DownloadManager dm;
 
 	public LauncherFrame() {
@@ -113,7 +112,6 @@ public class LauncherFrame extends DraggableFrame {
 		//this.downloader = downloader;
 		
 		this.downloadSize = 0;
-		this.db = new SoundCloneDB();
 		this.dm = new DownloadManager();
 		
 		// Handles rebuilding the frame, so use it to build the frame in the
@@ -283,7 +281,7 @@ public class LauncherFrame extends DraggableFrame {
 
 		JPanel downloadHost = new JPanel();
 		downloadHost.setBackground(COLOR_CENTRAL_BACK_OPAQUE);
-		downloadPanel = new DownloadPanel(db, this.dm);
+		downloadPanel = new DownloadPanel(this.dm);
 		dm.addObserver(downloadPanel);
 
 		infoSwap.add(downloadPanel, TAB_DOWNLOAD);

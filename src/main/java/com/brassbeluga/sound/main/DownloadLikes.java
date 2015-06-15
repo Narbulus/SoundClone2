@@ -20,6 +20,7 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.SwingWorker;
 
+import com.brassbeluga.database.SoundCloneDB;
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.managers.DownloadManager;
 import com.brassbeluga.sound.gson.Configuration;
@@ -42,12 +43,14 @@ public class DownloadLikes {
 	private ID3v2 template;
 
 	private DownloadManager dm;
+	private SoundCloneDB db;
 
 	private static final int TRACK_INFO_REQUEST_SIZE = 50;
 	protected static final long CHUNK_SIZE = 1000;
 	
 	public DownloadLikes(DownloadManager dm) throws Exception {
 		this.dm = dm;
+		this.db = new SoundCloneDB();
 
 		// Load the template id3 tag from resource file
 		InputStream is = ResourceManager.getResourceAsStream("tagdata");
@@ -88,7 +91,7 @@ public class DownloadLikes {
 	public SwingWorker<List<TrackInfo>, List<TrackInfo>> updateUserLikes(final Configuration currentConfig, final String clientID) throws JsonSyntaxException  {
 		// Dispatch worker to download songs in background and update status
 		SwingWorker<List<TrackInfo>, List<TrackInfo>> worker = new SwingWorker<List<TrackInfo>, List<TrackInfo>>() {
-
+			
 			@Override
 			protected List<TrackInfo> doInBackground()
 					throws JsonSyntaxException, Exception {
@@ -158,11 +161,14 @@ public class DownloadLikes {
 		// SoundCloneGUI.StatusType.PROCESS);
 		// Dispatch worker to download songs in background and update status
 		SwingWorker<Void, TrackInfo> worker = new SwingWorker<Void, TrackInfo>() {
+			private int tracksDownloaded  = 0;
+			private int totalDownloadSize = 0;
 
 			@Override
 			protected Void doInBackground() throws Exception {
 				Gson gson = new Gson();
 				TrackStreams tStream;
+				long total = 0;
 				while (dm.getDownloadsSize() > 0 && !isCancelled()) {
 					TrackInfo t = dm.getNextTrack();
 					
@@ -203,7 +209,7 @@ public class DownloadLikes {
 						}
 						
 						// Get the total length of the file
-						long total = connect.getContentLengthLong();
+						total = connect.getContentLengthLong();
 						//downloadPanel.downloadSize += connect.getContentLengthLong();
 						ReadableByteChannel rbc = null;
 						rbc = Channels.newChannel(website.openStream());
@@ -248,10 +254,12 @@ public class DownloadLikes {
 						// Delete the temporary file
 						f.delete();
 					}
-					
+				// Update tracks downloaded and total download size info for db.
+				tracksDownloaded++;
+				totalDownloadSize += total;
+				
 				dm.trackDownloaded(t);
 				dm.removeTrack(t);
-				
 				}
 
 				return null;
@@ -260,6 +268,7 @@ public class DownloadLikes {
 			@Override
 			protected void done() {
 				dm.onDownloadsFinished();
+				db.submitDownload(dm.getConfig().getCurrentUser(), totalDownloadSize, tracksDownloaded);
 			}
 
 		};
