@@ -90,7 +90,6 @@ public class ConfigurationManager {
 		// Load past configurations from config file's json
 		while (configScanner.hasNext()) {
 			String nextConfig = configScanner.nextLine();
-			System.out.println("loaded config: " + nextConfig);
 			Configuration newConfig = new Gson().fromJson(nextConfig,
 					Configuration.class);
 			configs.add(newConfig);

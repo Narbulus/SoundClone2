@@ -5,13 +5,10 @@ import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -25,7 +22,6 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingWorker;
 import javax.swing.border.Border;
 
-import com.brassbeluga.database.SoundCloneDB;
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.LauncherFrame;
 import com.brassbeluga.launcher.ui.controls.SimpleScrollbarUI;
@@ -63,6 +59,8 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 	private String ipAddr;
 	private String currentUser;
 	public long downloadSize;
+	
+	private List<TrackInfo> panelTracks;
 
 	private DownloadManager dm;
 	private ConfigurationManager config;
@@ -73,6 +71,8 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 		this.dm = dm;
 		this.dp = this;
 		this.config = dm.getConfig();
+		
+		panelTracks = new ArrayList<TrackInfo>();
 
 		initComponents();
 	}
@@ -307,14 +307,6 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 		infoPanel.add(loadInfo);
 		infoPanel.add(Box.createHorizontalGlue());
 		infoPanel.add(infoButtons);
-		
-		trackProgress = new LabelProgressBar(0, 100, 400);
-		trackProgress.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 26));
-		trackProgress.setLoadColor(LauncherFrame.COLOR_GREEN);
-		trackProgress.setBackground(LauncherFrame.COLOR_GREY_TEXT);
-		trackProgress.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-		trackProgress.setBorder(trackBorder);
-		trackProgress.setOpaque(false);
 
 		add(infoPanel);
 		
@@ -337,46 +329,59 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 			public String doInBackground() {
 				
 				synchronized(trackList) {
-					trackList.removeAll();
 					
-					for (TrackInfo t : dm.getDownloadedTracks()) {
-						JLabel label = new JLabel(t.getTitle());
-						label.setBorder(trackBorder);
-						label.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 16));
-						label.setForeground(LauncherFrame.COLOR_GREY_TEXT);
-						trackList.add(label);
-					}
-					
-					// Rebuild the remaining tracks queued for download
-					if (dm.getDownloadsSize() > 0) {
-						TrackInfo curTrack = dm.getNextTrack();
-						trackProgress.setText(curTrack.getTitle());
-						trackProgress.setProgress(0);
-						trackList.add(trackProgress);
-						for (int i = 1; i < dm.getTracks().size(); i++) {
-							JLabel label = new JLabel(dm.getTracks().get(i).getTitle());
-							label.setBorder(trackBorder);
-							label.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 16));
-							label.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-							trackList.add(label);
+					// If we aren't downloading, remove any undownloaded tracks we might have deselected
+					if (!dm.downloadInProgress()) {
+						for (int i = 0; i < panelTracks.size(); i++) {
+							TrackInfo t = panelTracks.get(i);
+							if (!dm.getTracks().contains(t) && !dm.getDownloadedTracks().contains(t)) {
+								panelTracks.remove(i);
+								trackList.remove(i);
+								i--;
+							}
 						}
 					}
 					
+					// If there's a track in the download queue that isn't on our list, make a new row for it
+					for (TrackInfo t : dm.getTracks()) {
+						if (!panelTracks.contains(t)) {
+							LabelProgressBar newRow = new LabelProgressBar(0, 100, 400, false);
+							newRow.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 16));
+							newRow.setLoadColor(LauncherFrame.COLOR_GREEN);
+							newRow.setBackground(LauncherFrame.COLOR_GREY_TEXT);
+							newRow.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+							newRow.setBorder(trackBorder);
+							newRow.setOpaque(false);
+							newRow.setText(t.getTitle());
+							panelTracks.add(t);
+							trackList.add(newRow, trackList.getComponentCount() - 1);
+						} else {
+							trackList.getComponent(panelTracks.indexOf(t)).setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+						}
+					}
+					
+					// Make all the downloaded tracks grey
+					int i;
+					for (i = 0; i < dm.getDownloadedSize(); i++) {
+						LabelProgressBar bar = ((LabelProgressBar)trackList.getComponent(i));
+						bar.setForeground(LauncherFrame.COLOR_GREY_TEXT);
+						bar.setBarVisible(false);
+					}
+					
+					// Make the progress bar visible on the current row
+					trackProgress = ((LabelProgressBar)trackList.getComponent(i));
+					trackProgress.setBarVisible(true);				
 					
 					overallInfo.setText(dm.getNextTrack().getTitle());
 					progressInfo.setText("Downloading track " + (dm.getDownloadedSize() + 1) + " of " + 
 							(dm.getDownloadsSize() + dm.getDownloadedSize()));
 					
 					//trackProgress.scrollRectToVisible(trackProgress.getBounds());
-			
-					trackList.add(Box.createGlue());
 				
-				
-				updateInfo();
-				
-				//trackProgress.scrollRectToVisible(trackProgress.getBounds());
+					updateInfo();
+					
+					//trackProgress.scrollRectToVisible(trackProgress.getBounds());
 		
-				trackList.add(Box.createGlue());
 				}
 
 				return "Information";
@@ -404,13 +409,15 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 		if (dm.getDownloadsSize() > 0) {
 			rebuildUI();
 		}else{
+			trackList.removeAll();
+			panelTracks.clear();
+			trackList.add(Box.createVerticalGlue());
 			progressInfo.setText(dm.getDownloadedSize() + " tracks successfully downloaded!");
 		}
 		
 		overallInfo.setText(" ");
 		progress.setValue(0);
-		
-		repaint();
+		trackProgress.setProgress(0);
 	}
 	
 	private void updateInfo() {
