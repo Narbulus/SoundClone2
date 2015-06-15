@@ -153,19 +153,10 @@
 
 		<!-- Resources to include -->
 		<resources>
-			<!-- Static resources -->
-			<resource>
-				<directory>${project.basedir}</directory>
-				<targetPath>.</targetPath>
-				<filtering>false</filtering>
-				<includes>
-					<include>LICENSE.txt</include>
-				</includes>
-			</resource>
 			<!-- Filtered resources -->
 			<resource>
 				<directory>${project.basedir}/src/main/resources</directory>
-				<targetPath>net/technicpack/launcher/resources</targetPath>
+				<targetPath>resources/</targetPath>
 				<filtering>false</filtering>
 				<includes>
 					<include>**/*</include>
@@ -177,7 +168,7 @@
 			</resource>
 			<resource>
 				<directory>${project.basedir}/src/main/resources</directory>
-				<targetPath>net/technicpack/launcher/resources</targetPath>
+				<targetPath>resources/</targetPath>
 				<filtering>true</filtering>
 				<includes>
 					<include>version</include>
