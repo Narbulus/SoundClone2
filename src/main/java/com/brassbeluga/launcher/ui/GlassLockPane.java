@@ -1,6 +1,7 @@
 package com.brassbeluga.launcher.ui;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 
@@ -14,11 +15,11 @@ public class GlassLockPane extends JPanel {
 	private Rectangle bounds;
 	private Color color;
 	
-	public GlassLockPane(Rectangle bounds, Color color) {
+	public GlassLockPane(Rectangle bounds, Component redirect, Color color) {
 		this.bounds = bounds;
 		this.color = color;
 		
-		this.addMouseListener(new LockScreenMouseListener());
+		this.addMouseListener(new LockScreenMouseListener(redirect));
 		
 	}
 	

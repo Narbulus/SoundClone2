@@ -344,7 +344,7 @@ public class LauncherFrame extends DraggableFrame implements DownloadsObserver {
 	private void showLock() {
 		Rectangle bounds = infoSwap.getBounds();
 		bounds.y += downloadTab.getHeight();
-		pane = new GlassLockPane(bounds, new Color(20, 20, 20, 120));
+		pane = new GlassLockPane(bounds, downloadTab, new Color(20, 20, 20, 120));
 		this.setGlassPane(pane);
 		pane.setVisible(true);
 		pane.setOpaque(false);
@@ -353,7 +353,7 @@ public class LauncherFrame extends DraggableFrame implements DownloadsObserver {
 	private void hideLock() {
 		Rectangle bounds = infoSwap.getBounds();
 		bounds.y += downloadTab.getHeight();
-		pane = new GlassLockPane(bounds, new Color(20, 20, 20, 120));
+		pane = new GlassLockPane(bounds, downloadTab, new Color(20, 20, 20, 120));
 		this.setGlassPane(pane);
 		pane.setVisible(false);
 		pane.setOpaque(false);

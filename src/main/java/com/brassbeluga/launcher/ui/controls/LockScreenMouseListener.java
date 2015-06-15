@@ -1,20 +1,18 @@
 package com.brassbeluga.launcher.ui.controls;
 
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
 
-import javax.swing.JMenuBar;
 import javax.swing.event.MouseInputAdapter;
-
-import com.brassbeluga.launcher.ui.GlassLockPane;
 
 public class LockScreenMouseListener extends MouseInputAdapter {
 	Toolkit toolkit;
+	Component redirect;
 
-	public LockScreenMouseListener() {
+	public LockScreenMouseListener(Component redirect) {
 		toolkit = Toolkit.getDefaultToolkit();
+		this.redirect = redirect;
 	}
 
 	public void mouseMoved(MouseEvent e) {
@@ -47,7 +45,10 @@ public class LockScreenMouseListener extends MouseInputAdapter {
 
 	// A basic implementation of redispatching events.
 	private void redispatchMouseEvent(MouseEvent e, boolean repaint) {
-		
+		System.out.println(e.getPoint().toString());
+		if (redirect.getBounds().contains(e.getPoint())) {
+			redirect.dispatchEvent(e);
+		}
 	}
 
 }
