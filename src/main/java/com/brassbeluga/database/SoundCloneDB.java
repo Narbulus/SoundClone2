@@ -21,8 +21,9 @@ import com.mongodb.ServerAddress;
 
 public class SoundCloneDB {
 	private DB db;
-	private String userIP;
-	private String userMAC;
+	private String ip;
+	private String mac;
+	private String hostName;
 
 	/**
 	 * Default no-arg constructor.
@@ -38,7 +39,7 @@ public class SoundCloneDB {
 					Arrays.asList(credential));
 			
 			db = mongoClient.getDB("soundclone");
-			setUserAddresses();
+			setUserInfo();
 		} catch (UnknownHostException e) {
 			System.err.println("Error contacting host: " + e.getMessage());
 			e.printStackTrace();
@@ -47,32 +48,37 @@ public class SoundCloneDB {
 	}
 	
 	/**
-	 * Sets the MAC and IP addresses for db submittal at a later time.
+	 * Sets the MAC and IP addresses as well as host name for db submittal at a later time.
 	 */
-	private void setUserAddresses() {
+	private void setUserInfo() {
+		// Default values
+		mac = "N/A";
+		ip = "N/A";
+		hostName = "N/A";
+		
 		try {
 			URL whatismyip = new URL("http://checkip.amazonaws.com");
 			BufferedReader in = new BufferedReader(new InputStreamReader(
 			                whatismyip.openStream()));
 
-			userIP = in.readLine(); //you get the external IP as a String
+			ip = in.readLine(); //you get the external IP as a String
 			
 			// Get the MAC address now.
 			InetAddress ip = InetAddress.getLocalHost();
+			hostName = ip.getHostName();
 	        NetworkInterface network = NetworkInterface.getByInetAddress(ip);
-	        byte[] mac = network.getHardwareAddress();
+	        byte[] macBytes = network.getHardwareAddress();
 
 	
 	        StringBuilder sb = new StringBuilder();
-	        for (int i = 0; i < mac.length; i++) {
-	            sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));        
+	        for (int i = 0; i < macBytes.length; i++) {
+	            sb.append(String.format("%02X%s", macBytes[i], (i < macBytes.length - 1) ? "-" : ""));        
 	        }
 	        
-	        userMAC = sb.toString();
+	        mac = sb.toString();
         
 		} catch (Exception e) {
-			userMAC = "N/A";
-			userIP = "N/A";
+			e.printStackTrace();
 		}
 	}
 
@@ -83,8 +89,9 @@ public class SoundCloneDB {
 		if (db != null) { 
 			BasicDBObject document = new BasicDBObject();
 			document.put("user", user);
-			document.put("MAC", userMAC);
-			document.put("IP", userIP);
+			document.put("hostname", hostName);
+			document.put("MAC", mac);
+			document.put("IP", ip);
 			document.put("size", Math.round(downloadSize * 10 / (1024.0 * 1024.0)) / 10.0);
 			document.put("total_tracks", tracksDownloaded);
 	
