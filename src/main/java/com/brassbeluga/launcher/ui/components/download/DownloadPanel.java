@@ -8,7 +8,9 @@ import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -45,7 +47,7 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 	private JLabel progressInfo;
 	private JLabel overallInfo;
 	
-	private LabelProgressBar trackProgress;
+	private LabelProgressBar labelProgress;
 
 	private JPanel trackList;
 	private JFileChooser browse;
@@ -61,7 +63,7 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 	private String currentUser;
 	public long downloadSize;
 	
-	private List<TrackInfo> panelTracks;
+	private Map<TrackInfo, LabelProgressBar> infoEntry;
 
 	private DownloadManager dm;
 	private ConfigurationManager config;
@@ -73,7 +75,7 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 		this.dp = this;
 		this.config = dm.getConfig();
 		
-		panelTracks = new ArrayList<TrackInfo>();
+		infoEntry = new HashMap<TrackInfo, LabelProgressBar>();
 
 		initComponents();
 	}
@@ -329,62 +331,72 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 			@Override 
 			public String doInBackground() {
 				
-				synchronized(trackList) {
-					
-					// If we aren't downloading, remove any undownloaded tracks we might have deselected
-					if (!dm.downloadInProgress()) {
-						for (int i = 0; i < panelTracks.size(); i++) {
-							TrackInfo t = panelTracks.get(i);
-							if (!dm.getTracks().contains(t) && !dm.getDownloadedTracks().contains(t)) {
-								panelTracks.remove(i);
-								trackList.remove(i);
-								i--;
+				synchronized(infoEntry) {
+					try {
+						
+						List<TrackInfo> removeThese = new ArrayList<TrackInfo>();
+						// Remove tracks that were removed from the queue
+						for (TrackInfo t : infoEntry.keySet()) {
+							if (!dm.getTracks().contains(t) & !dm.getDownloadedTracks().contains(t)) {
+								removeThese.add(t);
 							}
 						}
-					}
-					
-					// If there's a track in the download queue that isn't on our list, make a new row for it
-					for (TrackInfo t : dm.getTracks()) {
-						if (!panelTracks.contains(t)) {
-							LabelProgressBar newRow = new LabelProgressBar(0, 100, 400, false);
-							newRow.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 16));
-							newRow.setLoadColor(LauncherFrame.COLOR_GREEN);
-							newRow.setBackground(LauncherFrame.COLOR_GREY_TEXT);
-							newRow.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-							newRow.setBorder(trackBorder);
-							newRow.setOpaque(false);
-							newRow.setText(t.getTitle());
-							panelTracks.add(t);
-							trackList.add(newRow, trackList.getComponentCount() - 1);
-						} else {
-							trackList.getComponent(panelTracks.indexOf(t)).setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+						
+						// If there's a track in the download queue that isn't on our list, make a new row for it
+						for (TrackInfo t : dm.getTracks()) {
+							if (!infoEntry.containsKey(t)) {
+								LabelProgressBar newRow = new LabelProgressBar(0, 100, 400, false);
+								newRow.setFont(ResourceManager.getFont(ResourceManager.FONT_RALEWAY, 16));
+								newRow.setLoadColor(LauncherFrame.COLOR_GREEN);
+								newRow.setBackground(LauncherFrame.COLOR_GREY_TEXT);
+								newRow.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+								newRow.setBorder(trackBorder);
+								newRow.setOpaque(false);
+								newRow.setText(t.getTitle());
+								infoEntry.put(t, newRow);
+								trackList.add(newRow, trackList.getComponentCount() - 1);
+							} else {
+								if (infoEntry.get(t) != null)
+									infoEntry.get(t).setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+							}
 						}
+						
+						// Make all the downloaded tracks grey
+						for (TrackInfo t : dm.getDownloadedTracks()) {
+							LabelProgressBar bar = infoEntry.get(t);
+							if (bar != null) {
+								bar.setForeground(LauncherFrame.COLOR_GREY_TEXT);
+								bar.setBarVisible(false);
+							}
+						}	
+						
+						for (TrackInfo t : removeThese) {
+							trackList.remove(infoEntry.get(t));
+							infoEntry.remove(t);
+						}
+						
+						if (dm.getDownloadsSize() > 0) {
+							
+							// Make the progress bar visible on the current row
+							labelProgress = infoEntry.get(dm.getNextTrack());
+							labelProgress.setBarVisible(true);
+							
+							scroll.updateCurrentPosition(((dm.getDownloadedSize() * 1.0) + 1) / trackList.getComponentCount(), 
+									labelProgress.getHeight() / (trackList.getHeight() * 1.0));
+							
+							overallInfo.setText(dm.getNextTrack().getTitle());
+							progressInfo.setText("Downloading track " + (dm.getDownloadedSize() + 1) + " of " + 
+									(dm.getDownloadsSize() + dm.getDownloadedSize()));
+							
+							//LabelProgress.scrollRectToVisible(LabelProgress.getBounds());
+						
+							updateInfo();
+						}
+						
+						//LabelProgress.scrollRectToVisible(LabelProgress.getBounds());
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
-					
-					// Make all the downloaded tracks grey
-					int i;
-					for (i = 0; i < dm.getDownloadedSize(); i++) {
-						LabelProgressBar bar = ((LabelProgressBar)trackList.getComponent(i));
-						bar.setForeground(LauncherFrame.COLOR_GREY_TEXT);
-						bar.setBarVisible(false);
-					}
-					
-					// Make the progress bar visible on the current row
-					trackProgress = ((LabelProgressBar)trackList.getComponent(i));
-					trackProgress.setBarVisible(true);	
-					
-					scroll.updateCurrentPosition((i * 1.0) / panelTracks.size(), 
-							trackProgress.getHeight() / (trackList.getHeight() * 1.0));
-					
-					overallInfo.setText(dm.getNextTrack().getTitle());
-					progressInfo.setText("Downloading track " + (dm.getDownloadedSize() + 1) + " of " + 
-							(dm.getDownloadsSize() + dm.getDownloadedSize()));
-					
-					//trackProgress.scrollRectToVisible(trackProgress.getBounds());
-				
-					updateInfo();
-					
-					//trackProgress.scrollRectToVisible(trackProgress.getBounds());
 		
 				}
 
@@ -413,15 +425,12 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 		if (dm.getDownloadsSize() > 0) {
 			rebuildUI();
 		}else{
-			trackList.removeAll();
-			panelTracks.clear();
-			trackList.add(Box.createVerticalGlue());
 			progressInfo.setText(dm.getDownloadedSize() + " tracks successfully downloaded!");
 		}
 		
 		overallInfo.setText(" ");
 		progress.setValue(0);
-		trackProgress.setProgress(0);
+		labelProgress.setProgress(0);
 	}
 	
 	private void updateInfo() {
@@ -456,7 +465,7 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 			}
 			rebuildUI();
 		}else if (action == DownloadAction.SONG_PROGRESS) {
-			trackProgress.setProgress(dm.getSongProgress());
+			labelProgress.setProgress(dm.getSongProgress());
 			//overallInfo.setText(dm.getNextTrack().getTitle() + " " + dm.getSongProgress() + "%");
 			int totalSize = dm.getDownloadsSize() + dm.getDownloadedSize();
             progress.setValue((int)(((dm.getDownloadedSize() * 1.0 + (dm.getSongProgress() / 100.0)) / (totalSize * 1.0)) * 100));;
