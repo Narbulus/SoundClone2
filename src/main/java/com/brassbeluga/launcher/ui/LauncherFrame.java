@@ -114,7 +114,7 @@ public class LauncherFrame extends DraggableFrame implements DownloadsObserver {
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
 		//this.downloader = downloader;
-		
+		this.setTitle("SoundClone");
 		this.downloadSize = 0;
 		this.dm = new DownloadManager();
 		dm.addObserver(this);
