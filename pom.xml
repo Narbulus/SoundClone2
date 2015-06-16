@@ -6,8 +6,8 @@
 	<name>ZipDog</name>
 	<groupId>com.brassbeluga</groupId>
 	<artifactId>soundclone</artifactId>
-	<version>1.0-${buildNumber}</version>
-	<url>http://www.technicpack.net</url>
+	<version>1.0.${buildNumber}</version>
+	<url>http://www.brassbeluga.com</url>
 	<inceptionYear>2014</inceptionYear>
 	<description>Zippin and Songs</description>
 
@@ -20,22 +20,9 @@
 
 	<!-- Company information -->
 	<organization>
-		<url>http://www.technicpack.net</url>
-		<name>Syndicate, LLC</name>
+		<url>http://www.brassbeluga.com</url>
+		<name>Brass Beluga</name>
 	</organization>
-
-	<!-- Source code access -->
-	<scm>
-		<developerConnection>scm:git:git@github.com:TechnicPack/LauncherV3.git</developerConnection>
-		<connection>scm:git:git://github.com/TechnicPack/LauncherV3.git</connection>
-		<url>https://github.com/TechnicPack/LauncherV3/tree/dev</url>
-	</scm>
-
-	<!-- Build server -->
-	<ciManagement>
-		<system>jenkins</system>
-		<url>http://jenkins.technicpack.net/job/LauncherV3/</url>
-	</ciManagement>
 
 	<!-- Project dependencies -->
 	<dependencies>
@@ -174,6 +161,22 @@
 					<include>version</include>
 				</includes>
 			</resource>
+			
+			<!-- To generate version -->
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/version.txt</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+				<excludes>
+					<exclude>**/version.txt</exclude>
+				</excludes>
+			</resource>
 		</resources>
 
 		<!-- Build plugins -->
@@ -265,35 +268,13 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jarsigner-plugin</artifactId>
-				<version>1.3.2</version>
-				<executions>
-					<execution>
-						<id>sign</id>
-						<configuration>
-							<storetype>pkcs12</storetype>
-							<keystore>${env.CERT_KEYSTORE}</keystore>
-							<alias>${env.CERT_ALIAS}</alias>
-							<storepass>${env.CERT_STOREPASS}</storepass>
-							<keypass>${env.CERT_KEYPASS}</keypass>
-							<verbose>true</verbose>
-						</configuration>
-						<goals>
-							<goal>sign</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>verify</id>
-						<goals>
-							<goal>verify</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			 -->
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-jarsigner-plugin</artifactId> 
+				<version>1.3.2</version> <executions> <execution> <id>sign</id> <configuration> 
+				<storetype>pkcs12</storetype> <keystore>${env.CERT_KEYSTORE}</keystore> <alias>${env.CERT_ALIAS}</alias> 
+				<storepass>${env.CERT_STOREPASS}</storepass> <keypass>${env.CERT_KEYPASS}</keypass> 
+				<verbose>true</verbose> </configuration> <goals> <goal>sign</goal> </goals> 
+				</execution> <execution> <id>verify</id> <goals> <goal>verify</goal> </goals> 
+				</execution> </executions> </plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -317,28 +298,6 @@
 	</build>
 	<!-- Build profiles -->
 	<profiles>
-		<profile>
-			<id>static_build_number</id>
-			<activation>
-				<property>
-					<name>!env.BUILD_NUMBER</name>
-				</property>
-			</activation>
-			<properties>
-				<buildNumber>0</buildNumber>
-			</properties>
-		</profile>
-		<profile>
-			<id>dynamic_build_number</id>
-			<activation>
-				<property>
-					<name>env.BUILD_NUMBER</name>
-				</property>
-			</activation>
-			<properties>
-				<buildNumber>${env.BUILD_NUMBER}</buildNumber>
-			</properties>
-		</profile>
 		<!-- Package for Windows -->
 		<profile>
 			<id>package-win</id>
