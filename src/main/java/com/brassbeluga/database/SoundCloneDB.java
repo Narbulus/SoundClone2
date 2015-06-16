@@ -1,5 +1,6 @@
 package com.brassbeluga.database;
 
+import java.awt.EventQueue;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
@@ -85,18 +86,23 @@ public class SoundCloneDB {
 	/**
 	 * Submits download statistics.
 	 */
-	public void submitDownload(String user, long downloadSize, int tracksDownloaded) {
+	public void submitDownload(final String user, final long downloadSize, final int tracksDownloaded) {
 		if (db != null) { 
-			BasicDBObject document = new BasicDBObject();
-			document.put("user", user);
-			document.put("hostname", hostName);
-			document.put("MAC", mac);
-			document.put("IP", ip);
-			document.put("size", Math.round(downloadSize * 10 / (1024.0 * 1024.0)) / 10.0);
-			document.put("total_tracks", tracksDownloaded);
-	
-			DBCollection collection = db.getCollection("downloads");
-			collection.insert(document);
+			EventQueue.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					BasicDBObject document = new BasicDBObject();
+					document.put("user", user);
+					document.put("hostname", hostName);
+					document.put("MAC", mac);
+					document.put("IP", ip);
+					document.put("size", Math.round(downloadSize * 10 / (1024.0 * 1024.0)) / 10.0);
+					document.put("total_tracks", tracksDownloaded);
+			
+					DBCollection collection = db.getCollection("downloads");
+					collection.insert(document);
+				}
+			});
 		}
 	}
 

@@ -3,6 +3,8 @@ package com.brassbeluga.launcher.ui.components.download;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.EventQueue;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
@@ -26,6 +28,7 @@ import javax.swing.border.Border;
 
 import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.LauncherFrame;
+import com.brassbeluga.launcher.ui.components.songs.TrackEntry;
 import com.brassbeluga.launcher.ui.controls.SimpleScrollbarUI;
 import com.brassbeluga.managers.ConfigurationManager;
 import com.brassbeluga.managers.DownloadAction;
@@ -242,11 +245,17 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				try {
-					Desktop.getDesktop().open(new File(dm.getConfig().getDownloadPath()));
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
+				EventQueue.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							Desktop.getDesktop().open(new File(dm.getConfig().getDownloadPath()));
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						}
+					}
+				});
+				
 			}
 
 			@Override
