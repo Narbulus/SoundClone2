@@ -18,14 +18,17 @@
 
 package com.brassbeluga.launcher;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import com.brassbeluga.launcher.resources.ResourceManager;
 import com.brassbeluga.launcher.ui.LauncherFrame;
 import com.brassbeluga.managers.ConfigurationManager;
 
@@ -37,11 +40,14 @@ public class LauncherMain {
 		new LauncherFrame();
 	}
 
+	/*
+	 * Attemps an update. If update is needed this method will not return.
+	 */
 	private static void attemptUpdate() {
-		boolean update = false;
-		
-		try {
-			String version = new String(Files.readAllBytes(Paths.get("version")), "UTF-8").trim();
+
+		try {	
+			InputStream in = ResourceManager.getResourceAsStream("version.txt");
+			String version = new BufferedReader(new InputStreamReader(in)).readLine().trim();
 			
 			String url = BASE_URL + "update.php?version=" + version;
 				
@@ -52,7 +58,7 @@ public class LauncherMain {
 			int responseCode = con.getResponseCode();
 			
 			if (con.getHeaderField("Update-Needed").equals("1")) {
-				String updaterPath = ConfigurationManager.getTempDirectory() + "updater.jar";
+				String updaterPath = ConfigurationManager.getTempDirectory() + "/updater.jar";
 				File updater = new File(updaterPath);
 				updater.delete();
 				FileOutputStream fos = new FileOutputStream(updater);
@@ -66,7 +72,9 @@ public class LauncherMain {
 				fos.close();
 				is.close();
 				
-				Runtime.getRuntime().exec("java -jar " + updaterPath);
+				// Launch the updater and then hasta la vista.
+				Runtime.getRuntime().exec("java -jar " + updaterPath + " " + System.getProperty("user.dir") + "/");
+				System.exit(0);
 			}
 		
 		} catch (Exception e) {

@@ -55,7 +55,7 @@ public class ConfigurationManager {
 			workingDirectory += "/.config/";
 		} 
 		
-		return workingDirectory += "/SoundClone";
+		return workingDirectory += "/SoundClone/";
 	}
 	
 	/**
