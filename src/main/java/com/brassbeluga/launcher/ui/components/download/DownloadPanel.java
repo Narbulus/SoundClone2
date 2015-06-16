@@ -331,15 +331,20 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 			@Override 
 			public String doInBackground() {
 				
-				synchronized(infoEntry) {
+				synchronized(trackList) {
 					try {
 						
 						List<TrackInfo> removeThese = new ArrayList<TrackInfo>();
 						// Remove tracks that were removed from the queue
 						for (TrackInfo t : infoEntry.keySet()) {
-							if (!dm.getTracks().contains(t) & !dm.getDownloadedTracks().contains(t)) {
+							if (!dm.getTracks().contains(t) && !dm.getDownloadedTracks().contains(t)) {
 								removeThese.add(t);
 							}
+						}
+						
+						for (TrackInfo t : removeThese) {
+							trackList.remove(infoEntry.get(t));
+							infoEntry.remove(t);
 						}
 						
 						// If there's a track in the download queue that isn't on our list, make a new row for it
@@ -356,8 +361,12 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 								infoEntry.put(t, newRow);
 								trackList.add(newRow, trackList.getComponentCount() - 1);
 							} else {
-								if (infoEntry.get(t) != null)
+								LabelProgressBar bar = infoEntry.get(t);
+								if (bar != null && bar.getForeground() != LauncherFrame.COLOR_WHITE_TEXT) {
+									trackList.remove(bar);
 									infoEntry.get(t).setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+									trackList.add(bar, trackList.getComponentCount() - 1);
+								}
 							}
 						}
 						
@@ -369,11 +378,6 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 								bar.setBarVisible(false);
 							}
 						}	
-						
-						for (TrackInfo t : removeThese) {
-							trackList.remove(infoEntry.get(t));
-							infoEntry.remove(t);
-						}
 						
 						if (dm.getDownloadsSize() > 0) {
 							
