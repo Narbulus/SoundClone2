@@ -18,25 +18,26 @@
 
 package com.brassbeluga.launcher;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import com.brassbeluga.launcher.ui.LauncherFrame;
+import com.brassbeluga.managers.ConfigurationManager;
 
 public class LauncherMain {
 	private static final String BASE_URL = "http://www.brassbeluga.com/soundclone/";
 
 	public static void main(String[] args) throws Exception {
-		if (checkUpdate()) {
-			Runtime.getRuntime().exec("java -jar updater.jar");
-			System.exit(0);
-		}
+		attemptUpdate();
 		new LauncherFrame();
 	}
 
-	private static boolean checkUpdate() {
+	private static void attemptUpdate() {
 		boolean update = false;
 		
 		try {
@@ -51,13 +52,25 @@ public class LauncherMain {
 			int responseCode = con.getResponseCode();
 			
 			if (con.getHeaderField("Update-Needed").equals("1")) {
-				update = true;
+				String updaterPath = ConfigurationManager.getTempDirectory() + "updater.jar";
+				File updater = new File(updaterPath);
+				updater.delete();
+				FileOutputStream fos = new FileOutputStream(updater);
+		 
+				InputStream is = con.getInputStream();
+				int bytesRead = -1;
+				byte[] buffer = new byte[16384];
+				while ((bytesRead = is.read(buffer)) != -1) {
+					fos.write(buffer, 0, bytesRead);
+				}
+				fos.close();
+				is.close();
+				
+				Runtime.getRuntime().exec("java -jar " + updaterPath);
 			}
 		
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		return update;
 	}
 }
