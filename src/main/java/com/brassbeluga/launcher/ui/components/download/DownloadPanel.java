@@ -370,14 +370,27 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 								newRow.setText(t.getTitle());
 								infoEntry.put(t, newRow);
 								trackList.add(newRow, trackList.getComponentCount() - 1);
+								if (t == dm.getNextTrack()) {
+									newRow.setBarVisible(true);
+									newRow.setProgress(0);
+									newRow.repaint();
+									labelProgress = newRow;
+								}
 							} else {
 								LabelProgressBar bar = infoEntry.get(t);
-								if (bar != null && bar.getForeground() != LauncherFrame.COLOR_WHITE_TEXT) {
-									trackList.remove(bar);
-									bar.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
-									bar.setBarVisible(false);
-									bar.setProgress(0);
-									trackList.add(bar, trackList.getComponentCount() - 1);
+								if (bar != null) {
+									if (bar.getForeground() != LauncherFrame.COLOR_WHITE_TEXT) {
+										trackList.remove(bar);
+										bar.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+										bar.setBarVisible(false);
+										bar.setProgress(0);
+										trackList.add(bar, trackList.getComponentCount() - 1);
+									}else if (t == dm.getNextTrack()) {
+										bar.setBarVisible(true);
+										bar.setProgress(0);
+										bar.repaint();
+										labelProgress = bar;
+									}
 								}
 							}
 						}
@@ -392,10 +405,6 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 						}	
 						
 						if (dm.getDownloadsSize() > 0) {
-							
-							// Make the progress bar visible on the current row
-							labelProgress = infoEntry.get(dm.getNextTrack());
-							labelProgress.setBarVisible(true);
 							
 							scroll.updateCurrentPosition(((dm.getDownloadedSize() * 1.0) + 1) / trackList.getComponentCount(), 
 									labelProgress.getHeight() / (trackList.getHeight() * 1.0));
