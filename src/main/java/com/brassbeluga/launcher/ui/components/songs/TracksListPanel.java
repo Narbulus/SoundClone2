@@ -113,10 +113,12 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 					@Override
 					public void run() {
 						List<TrackInfo> selectTracks = new ArrayList<TrackInfo>();
-						for (TrackEntry t : entries) {
-							if (!t.getInfo().getDownload()) {
-								selectTracks.add(t.getInfo());
-								t.setDownloadFlag(true);
+						synchronized(entries) {
+							for (TrackEntry t : entries) {
+								if (!t.getInfo().getDownload()) {
+									selectTracks.add(t.getInfo());
+									t.setDownloadFlag(true);
+								}
 							}
 						}
 						
@@ -160,8 +162,10 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 				EventQueue.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						for (int i = 0; i < entries.size(); i++) {
-							entries.get(i).setDownloadFlag(false);
+						synchronized(entries) {
+							for (int i = 0; i < entries.size(); i++) {
+								entries.get(i).setDownloadFlag(false);
+							}
 						}
 						dm.removeAllTracks();
 					}
@@ -197,7 +201,9 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 	public void startUpdateTracks() {
 		trackList.removeAll();
 		tracks.clear();
-		entries.clear();
+		synchronized(entries) {
+			entries.clear();
+		}
 		
 		trackList.add(loading);
 		trackList.add(trackGlue);
@@ -215,7 +221,9 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 				dm.selectTrack(t);
 			TrackEntry track = new TrackEntry(t, i, this, dm);
 			trackList.add(track, trackList.getComponentCount() - 1);
-			entries.add(track);
+			synchronized(entries) {
+				entries.add(track);
+			}
 			i++;
 		}
 
@@ -228,12 +236,14 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 		switch (action) {
 			case TRACKS_CHANGED:
 				List<TrackInfo> infos = dm.getTracks();
-				for (int i = 0 ; i < entries.size(); i++) {
-					TrackEntry entry = entries.get(i);
-					if (infos.contains(entry.getInfo())) {
-						entry.setDownloadFlag(true);
-					} else {
-						entry.setDownloadFlag(false);
+				synchronized(entries) {
+					for (int i = 0 ; i < entries.size(); i++) {
+						TrackEntry entry = entries.get(i);
+						if (infos.contains(entry.getInfo())) {
+							entry.setDownloadFlag(true);
+						} else {
+							entry.setDownloadFlag(false);
+						}
 					}
 				}
 				break;

@@ -339,7 +339,8 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 			
 			@Override 
 			public String doInBackground() {
-				
+			
+			synchronized(infoEntry) {
 				synchronized(trackList) {
 					try {
 						
@@ -373,7 +374,9 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 								LabelProgressBar bar = infoEntry.get(t);
 								if (bar != null && bar.getForeground() != LauncherFrame.COLOR_WHITE_TEXT) {
 									trackList.remove(bar);
-									infoEntry.get(t).setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+									bar.setForeground(LauncherFrame.COLOR_WHITE_TEXT);
+									bar.setBarVisible(false);
+									bar.setProgress(0);
 									trackList.add(bar, trackList.getComponentCount() - 1);
 								}
 							}
@@ -405,12 +408,13 @@ public class DownloadPanel extends JPanel implements DownloadsObserver {
 						
 							updateInfo();
 						}
-						
-						//LabelProgress.scrollRectToVisible(LabelProgress.getBounds());
-					} catch (Exception e) {
-						e.printStackTrace();
+							
+							//LabelProgress.scrollRectToVisible(LabelProgress.getBounds());
+						} catch (Exception e) {
+							//e.printStackTrace();
+						}
 					}
-		
+	
 				}
 
 				return "Information";
