@@ -40,10 +40,9 @@ public class ConfigurationManager {
 	}
 	
 	/**
-	 * Load up configuration data from local file.
+	 * Gets native temp directory path.
 	 */
-	private void loadConfigurationFiles() {
-		// Create download locations if nonexistent
+	public static String getTempDirectory() {
 		String workingDirectory;
 		String OS = (System.getProperty("os.name")).toUpperCase();
 		if (OS.contains("WIN")) {
@@ -51,15 +50,21 @@ public class ConfigurationManager {
 		} else if (OS.contains("MAC")) {
 			workingDirectory = System.getProperty("user.home");
 			workingDirectory += "/Library/Application Support";
-		} else if (OS.contains("NIX") || OS.contains("NUX") || OS.contains("AIX")) {
+		} else {
 			workingDirectory = System.getProperty("user.home");
 			workingDirectory += "/.config/";
-		} else {
-			System.out.println("Warning: OS not recognized!");
-			workingDirectory = "";
-		}
+		} 
+		
+		return workingDirectory += "/SoundClone";
+	}
+	
+	/**
+	 * Load up configuration data from local file.
+	 */
+	private void loadConfigurationFiles() {
+		// Create download locations if nonexistent
 
-		appDataDir = workingDirectory + "/SoundClone";
+		appDataDir = getTempDirectory();
 
 		File tempFile = new File(appDataDir);
 		tempFile.mkdirs();
