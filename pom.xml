@@ -145,9 +145,6 @@
 				<directory>${project.basedir}/src/main/resources</directory>
 				<targetPath>resources/</targetPath>
 				<filtering>false</filtering>
-				<includes>
-					<include>**/*</include>
-				</includes>
 				<excludes>
 					<exclude>app/*</exclude>
 					<exclude>exe/*</exclude>
@@ -177,7 +174,7 @@
 			<!-- Source compiler plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-			s	<artifactId>maven-compiler-plugin</artifactId>
+				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.0</version>
 				<configuration>
 					<source>1.6</source>
@@ -375,7 +372,7 @@
 						</executions>
 						<configuration>
 							<mainClass>com.brassbeluga.launcher.LauncherMain</mainClass>
-   							<iconFile>macIcon.icns</iconFile>
+   							<iconFile>/resources/macIcon.icns</iconFile>
 						</configuration>
 					</plugin>
 
