@@ -2,6 +2,7 @@ package com.brassbeluga.launcher.ui.components.songs;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -70,6 +71,10 @@ public class TrackEntry extends JPanel {
 		downloadFlag = flagValue;
 	}
 	
+	public boolean isFlaggedForDownload() {
+		return downloadFlag;
+	}
+	
 	public void updateWarningStatus() {
 		warning.setVisible(info.getDownload());
 	}
@@ -86,7 +91,7 @@ public class TrackEntry extends JPanel {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				dm.selectTrack(info);
+					dm.selectTrack(info);
 			}
 
 			@Override
@@ -130,11 +135,15 @@ public class TrackEntry extends JPanel {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				((TrackEntry)flag.getParent()).setDownloadFlag(!downloadFlag);
-				if (downloadFlag) {
-					dm.addTrack(info);
+				if (e.isShiftDown()) {
+					dm.addTrackRange(getInfo());
 				} else {
-					dm.removeTrack(info);
+					((TrackEntry)flag.getParent()).setDownloadFlag(!downloadFlag);
+					if (downloadFlag) {
+						dm.addTrack(info);
+					} else {
+						dm.removeTrack(info);
+					}
 				}
 				repaint();
 			}

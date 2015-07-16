@@ -275,6 +275,31 @@ public class TracksListPanel extends TintablePanel implements DownloadsObserver{
 				dm.setWarningMessage("Cannot select tracks while downloading");
 				isLocked = true;
 				break;
+			case ADD_TRACK_RANGE:
+				synchronized(entries) {
+					if (dm.getFlaggedTrack() != null && dm.getLastFlaggedTrack() != null) {
+						int lastIndex = tracks.indexOf(dm.getLastFlaggedTrack());
+						int curIndex = tracks.indexOf(dm.getFlaggedTrack());
+						// Swap them so we can iterate forward over the range
+						if (lastIndex > curIndex) {
+							int tempIndex = lastIndex;
+							lastIndex = curIndex;
+							curIndex = tempIndex;
+						}
+						// Iterate over all tracks in the range, 
+						List<TrackInfo> selectTracks = new ArrayList<TrackInfo>();
+						for (int i = lastIndex; i <= curIndex; i++) {
+							TrackEntry entry = entries.get(i);
+							if (!entry.isFlaggedForDownload()) {
+								TrackInfo track = entry.getInfo();
+								selectTracks.add(track);
+								entry.setDownloadFlag(true);
+							}
+						}
+						dm.addAllTracks(selectTracks);
+					}
+				}
+				break;
 			default:
 				break;
 		}

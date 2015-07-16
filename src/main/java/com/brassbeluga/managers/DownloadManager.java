@@ -28,6 +28,12 @@ public class DownloadManager {
 	// Currently selected track in the likes panel
 	private TrackInfo selectedTrack;
 	
+	// Currently flagged track in the likes panel
+	private TrackInfo flaggedTrack;
+	
+	// Previously selected track in likes panel (For shift-clicking a range of tracks)
+	private TrackInfo lastFlaggedTrack;
+	
 	// Text for the warnings bar on the bottom of the screen
 	private String warningMessage;
 	
@@ -84,6 +90,7 @@ public class DownloadManager {
 		boolean added = false;
 		synchronized(tracks) {
 			if (!tracks.contains(trackInfo)) {
+				flaggedTrack = trackInfo;
 				tracks.add(trackInfo);
 				downloadedTracks.clear();
 				added = true;
@@ -192,6 +199,23 @@ public class DownloadManager {
 	}
 	
 	/**
+	 * Adds a range of tracks, from the last flagged track to the
+	 * newly selected one. For shift-clicking selection.
+	 * @param The track that was just clicked
+	 */
+	public void addTrackRange(TrackInfo info) {
+		if (this.flaggedTrack != null) {
+			// If there exists a previously flagged track, selected range
+			this.lastFlaggedTrack = this.flaggedTrack;
+			this.flaggedTrack = info;
+			notifyObservers(DownloadAction.ADD_TRACK_RANGE);
+		} else {
+			// Otherwise just select the new track
+			addTrack(info);
+		}
+	}
+	
+	/**
 	 * Removes all tracks from the likes.
 	 */
 	public void removeAllLikes() {
@@ -284,6 +308,9 @@ public class DownloadManager {
 		cm.updateUser(user);
 		
 		// Download the users likes
+		flaggedTrack = null;
+		lastFlaggedTrack = null;
+		selectedTrack = null;
 		removeAllLikes();
 		likesWorker = downloader.updateUserLikes(cm.getCurrentConfig(), cm.getClientID());
 		
@@ -464,4 +491,13 @@ public class DownloadManager {
 	public TrackInfo getSelectedTrack() {
 		return selectedTrack;
 	}
+	
+	public TrackInfo getFlaggedTrack() {
+		return flaggedTrack;
+	}
+	
+	public TrackInfo getLastFlaggedTrack() {
+		return lastFlaggedTrack;
+	}
+	
 }
