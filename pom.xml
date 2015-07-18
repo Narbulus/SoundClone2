@@ -18,7 +18,7 @@
 		<buildNumber>1</buildNumber>
 		<uploadAddress>52.26.192.189</uploadAddress>
 		<uploadUsername>ec2-user</uploadUsername>
-		<uploadDestination>/var/www/html/soundclone/resources</uploadDestination>
+		<uploadDestination>/var/www/html/soundclone/resources/</uploadDestination>
 		<uploadKeyPath>${project.basedir}/uploadKey</uploadKeyPath>
 	</properties>
 
@@ -264,6 +264,7 @@
 				</executions>
 			</plugin>
 
+			
 		</plugins>
 	</build>
 
@@ -357,6 +358,23 @@
 						</configuration>
 					</plugin>
 
+					<plugin>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<version>2.5.5</version>
+						<configuration>
+							<descriptor>/src/main/assembly/app.xml</descriptor>
+							<finalName>${project.name}</finalName>
+						</configuration>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+
 				</plugins>
 			</build>
 		</profile>
@@ -370,13 +388,12 @@
 						<configuration>
 							<tasks>
 								<scp todir="${uploadUsername}@${uploadAddress}:/${uploadDestination}"
-									keyfile="${uploadKeyPath}"
-									passphrase="boobs"
-									trust="true"
+									keyfile="${uploadKeyPath}" passphrase="boobs" trust="true"
 									failonerror="false">
 									<fileset dir="${project.basedir}/target/">
-										<include name="**/SoundClone.jar"/>
-										<include name="**/SoundClone.exe"/>
+										<include name="**/${project.name}.jar" />
+										<include name="**/${project.name}.exe" />
+										<include name="**/${project.name}-OSX.zip" />
 										<include name="version.txt" />
 									</fileset>
 								</scp>
@@ -403,6 +420,7 @@
 							</execution>
 						</executions>
 					</plugin>
+
 				</plugins>
 			</build>
 		</profile>

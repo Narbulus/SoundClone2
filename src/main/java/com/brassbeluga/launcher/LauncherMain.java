@@ -73,7 +73,10 @@ public class LauncherMain {
 				is.close();
 				
 				// Launch the updater and then hasta la vista.
-				Runtime.getRuntime().exec("java -jar " + updaterPath + " " + System.getProperty("user.dir") + "/");
+				// Reflection black magic to find running path 'because user.dir gives you home directory on UNIX'
+				File runningPath = new File(LauncherMain.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+				ProcessBuilder pb = new ProcessBuilder("java", "-jar", updaterPath, runningPath.getParent() + "/");
+				pb.start();
 				System.exit(0);
 			}
 		
